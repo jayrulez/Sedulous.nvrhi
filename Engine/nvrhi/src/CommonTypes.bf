@@ -834,6 +834,12 @@ namespace nvrhi
 
 		public this() { }
 
+		public this(BufferRange other)
+		{
+			byteOffset = other.byteOffset;
+			byteSize = other.byteSize;
+		}
+
 		public this(uint64 _byteOffset, uint64 _byteSize)
 		{
 			byteOffset = (_byteOffset);

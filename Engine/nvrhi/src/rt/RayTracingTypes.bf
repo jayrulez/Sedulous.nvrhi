@@ -96,7 +96,7 @@ namespace nvrhi
 				geometryData = .();
 			}
 
-		    public ref GeometryDesc setTransform(AffineTransform value) mut { Internal.MemCpy(&transform, &value, sizeof(AffineTransform)); useTransform = true; return ref this; }
+		    public ref GeometryDesc setTransform(AffineTransform value) mut { var value; Internal.MemCpy(&transform, &value, sizeof(AffineTransform)); useTransform = true; return ref this; }
 		    public ref GeometryDesc setFlags(GeometryFlags value) mut { flags = value; return ref this; }
 		    public ref GeometryDesc setTriangles(GeometryTriangles value) mut { geometryData.triangles = value; geometryType = GeometryType.Triangles; return ref this; }
 		    public ref GeometryDesc setAABBs(GeometryAABBs value) mut { geometryData.aabbs = value; geometryType = GeometryType.AABBs; return ref this; }
@@ -147,7 +147,7 @@ namespace nvrhi
 		    public ref InstanceDesc setInstanceID(uint32 value) mut { instanceID = value; return ref this; }
 		    public ref InstanceDesc setInstanceContributionToHitGroupIndex(uint32 value) mut { instanceContributionToHitGroupIndex = value; return ref this; }
 		    public ref InstanceDesc setInstanceMask(uint32 value) mut { instanceMask = value; return ref this; }
-		    public ref InstanceDesc setTransform(AffineTransform value) mut { Internal.MemCpy(&transform, &value, sizeof(AffineTransform)); return ref this; }
+		    public ref InstanceDesc setTransform(AffineTransform value) mut { var value; Internal.MemCpy(&transform, &value, sizeof(AffineTransform)); return ref this; }
 		    public ref InstanceDesc setFlags(InstanceFlags value) mut { flags = value; return ref this; }
 		    public ref InstanceDesc setBLAS(IAccelStruct value) mut { bottomLevelAS = value; return ref this; }
 		}

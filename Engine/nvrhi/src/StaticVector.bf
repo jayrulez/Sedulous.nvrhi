@@ -1,5 +1,6 @@
 using System.Collections;
 using System;
+using nvrhi;
 namespace nvrhi
 {
 	struct StaticVector<T, CSize> : IEnumerable<T> where CSize : const int
@@ -24,9 +25,9 @@ namespace nvrhi
 			}
 		}
 
-		public ref T this[int index]
+		public T this[int index]
 		{
-			get { return ref mVal[index]; }
+			get { return mVal[index]; }
 			set mut { mVal[index] = value; }
 		}
 

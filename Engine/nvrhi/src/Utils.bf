@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Threading;
+using nvrhi.rt;
 namespace nvrhi.utils
 {
 	public static
@@ -92,7 +93,7 @@ namespace nvrhi.utils
 
 		public static void ClearColorAttachment(ICommandList commandList, IFramebuffer framebuffer, uint32 attachmentIndex, Color color)
 		{
-			readonly ref FramebufferAttachment att = ref framebuffer.getDesc().colorAttachments[attachmentIndex];
+			readonly /*ref*/ FramebufferAttachment att = /*ref*/ framebuffer.getDesc().colorAttachments[attachmentIndex];
 			if (att.texture != null)
 			{
 				commandList.clearTextureFloat(att.texture, att.subresources, color);
