@@ -1,0 +1,7 @@
+FileVersion = 1
+Dependencies = {corlib = "*", Bulkan = "*", nvrhi = "*"}
+
+[Project]
+Name = "nvrhi.vulkan"
+TargetType = "BeefLib"
+StartupObject = "nvrhi.vulkan.Program"

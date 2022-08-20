@@ -1,0 +1,9 @@
+FileVersion = 1
+Projects = {nvrhi = {Path = "Engine/nvrhi"}, "nvrhi.vulkan" = {Path = "Engine/nvrhi.vulkan"}, Bulkan = {Path = "Dependencies/Bulkan"}}
+WorkspaceFolders = {Engine = ["nvrhi", "nvrhi.vulkan"], Dependencies = ["corlib", "Bulkan"]}
+
+[Configs.Test.Win32]
+ConfigSelections = {corlib = {Config = "Debug"}}
+
+[Configs.Test.Win64]
+ConfigSelections = {corlib = {Config = "Debug"}}
