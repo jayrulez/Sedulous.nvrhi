@@ -1,0 +1,6 @@
+FileVersion = 1
+Dependencies = {corlib = "*", nvrhi = "*"}
+
+[Project]
+Name = "nvrhi.test"
+StartupObject = "nvrhi.test.Program"

@@ -1,6 +1,9 @@
 FileVersion = 1
-Projects = {nvrhi = {Path = "Engine/nvrhi"}, "nvrhi.vulkan" = {Path = "Engine/nvrhi.vulkan"}, Bulkan = {Path = "Dependencies/Bulkan"}}
-WorkspaceFolders = {Engine = ["nvrhi", "nvrhi.vulkan"], Dependencies = ["corlib", "Bulkan"]}
+Projects = {nvrhi = {Path = "Engine/nvrhi"}, "nvrhi.vulkan" = {Path = "Engine/nvrhi.vulkan"}, Bulkan = {Path = "Dependencies/Bulkan"}, "nvrhi.test" = {Path = "Samples/nvrhi.test"}, "nvrhi.d3d11" = {Path = "Engine/nvrhi.d3d11"}, "nvrhi.d3d12" = {Path = "Engine/nvrhi.d3d12"}}
+WorkspaceFolders = {Engine = ["nvrhi", "nvrhi.vulkan", "nvrhi.d3d11", "nvrhi.d3d12"], Dependencies = ["corlib", "Bulkan"], Samples = ["nvrhi.test"]}
+
+[Workspace]
+StartupProject = "nvrhi.test"
 
 [Configs.Test.Win32]
 ConfigSelections = {corlib = {Config = "Debug"}}

@@ -1,0 +1,7 @@
+FileVersion = 1
+Dependencies = {corlib = "*", nvrhi = "*"}
+
+[Project]
+Name = "nvrhi.d3d12"
+TargetType = "BeefLib"
+StartupObject = "nvrhi.d3d12.Program"
