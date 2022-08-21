@@ -17,6 +17,13 @@ namespace System.Collections
 				}
 			}
 		}
+		public void Fill(T fillValue)
+		{
+			for (int i = 0; i < Count; i++)
+			{
+				this[i] = fillValue;
+			}
+		}
 	}
 }
 

@@ -412,7 +412,7 @@ namespace nvrhi.vulkan
 
 				size *= desc.maxVersions;
 
-				buffer.versionTracking.Resize(desc.maxVersions)..Fill(0);
+				buffer.versionTracking.Resize(desc.maxVersions, default);//..Fill(0);
 				//std::fill(buffer.versionTracking.begin(), buffer.versionTracking.end(), 0);
 
 				buffer.desc.cpuAccess = CpuAccessMode.Write; // to get the right memory type allocated
@@ -2181,11 +2181,11 @@ namespace nvrhi.vulkan
 								.setImageView(view.view)
 								.setImageLayout(VkImageLayout.eShaderReadOnlyOptimal);
 
-							descriptorImageInfo.PushBack(imageInfo);
-
 							generateWriteDescriptorData(layoutBinding.binding,
 								layoutBinding.descriptorType,
 								&imageInfo, null, null);
+
+							descriptorImageInfo.PushBack(imageInfo);
 						}
 
 						break;
