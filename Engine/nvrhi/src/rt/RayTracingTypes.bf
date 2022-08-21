@@ -43,15 +43,15 @@ namespace nvrhi
 
 		struct GeometryTriangles
 		{
-		    IBuffer indexBuffer = null;   // make sure the first fields in both Triangles 
-		    IBuffer vertexBuffer = null;  // and AABBs are IBuffer for easier debugging
-		    Format indexFormat = Format.UNKNOWN;
-		    Format vertexFormat = Format.UNKNOWN;
-		    uint64 indexOffset = 0;
-		    uint64 vertexOffset = 0;
-		    uint32 indexCount = 0;
-		    uint32 vertexCount = 0;
-		    uint32 vertexStride = 0;
+		    public IBuffer indexBuffer = null;   // make sure the first fields in both Triangles 
+		    public IBuffer vertexBuffer = null;  // and AABBs are IBuffer for easier debugging
+		    public Format indexFormat = Format.UNKNOWN;
+		    public Format vertexFormat = Format.UNKNOWN;
+		    public uint64 indexOffset = 0;
+		    public uint64 vertexOffset = 0;
+		    public uint32 indexCount = 0;
+		    public uint32 vertexCount = 0;
+		    public uint32 vertexStride = 0;
 
 		    public ref GeometryTriangles setIndexBuffer(IBuffer value) mut { indexBuffer = value; return ref this; }
 		    public ref GeometryTriangles setVertexBuffer(IBuffer value) mut { vertexBuffer = value; return ref this; }
@@ -66,11 +66,11 @@ namespace nvrhi
 
 		struct GeometryAABBs
 		{
-		    IBuffer buffer = null;
-		    IBuffer unused = null;
-		    uint64 offset = 0;
-		    uint32 count = 0;
-		    uint32 stride = 0;
+		    public IBuffer buffer = null;
+		    public IBuffer unused = null;
+		    public uint64 offset = 0;
+		    public uint32 count = 0;
+		    public uint32 stride = 0;
 
 		    public ref GeometryAABBs setBuffer(IBuffer value) mut { buffer = value; return ref this; }
 		    public ref GeometryAABBs setOffset(uint64 value) mut { offset = value; return ref this; }
@@ -85,12 +85,12 @@ namespace nvrhi
 		        public GeometryTriangles triangles;
 		        public GeometryAABBs aabbs;
 		    }
-		    public using private GeomTypeUnion geometryData;
+		    public using public GeomTypeUnion geometryData;
 
-		    bool useTransform = false;
-		    AffineTransform transform = .();
-		    GeometryFlags flags = GeometryFlags.None;
-		    GeometryType geometryType = GeometryType.Triangles;
+		    public bool useTransform = false;
+		    public AffineTransform transform = .();
+		    public GeometryFlags flags = GeometryFlags.None;
+		    public GeometryType geometryType = GeometryType.Triangles;
 
 		    public this() {
 				geometryData = .();

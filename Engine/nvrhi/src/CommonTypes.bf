@@ -1904,7 +1904,7 @@ namespace nvrhi
 		// Enables automatic liveness tracking of this binding set by nvrhi command lists.
 		// By setting trackLiveness to false, you take the responsibility of not releasing it 
 		// until all rendering commands using the binding set are finished.
-		bool trackLiveness = true;
+		public bool trackLiveness = true;
 
 		public static bool operator ==(BindingSetDesc a, BindingSetDesc b)
 		{
