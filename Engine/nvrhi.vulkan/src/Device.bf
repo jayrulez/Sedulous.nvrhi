@@ -301,7 +301,7 @@ namespace nvrhi.vulkan
 			bufDesc.cpuAccess = cpuAccess;
 
 			BufferHandle internalBuffer = createBuffer(bufDesc);
-			tex.buffer = checked_cast<Buffer, IBuffer>(internalBuffer.Value);
+			tex.buffer = checked_cast<Buffer, IBuffer>(internalBuffer.Get<IBuffer>());
 
 			if (tex.buffer == null)
 			{
@@ -1025,7 +1025,7 @@ namespace nvrhi.vulkan
 
 			Framebuffer fb = checked_cast<Framebuffer, IFramebuffer>(_fb);
 
-			InputLayout inputLayout = checked_cast<InputLayout, IInputLayout>(desc.inputLayout.Value);
+			InputLayout inputLayout = checked_cast<InputLayout, IInputLayout>(desc.inputLayout.Get<IInputLayout>());
 
 			GraphicsPipeline pso = new GraphicsPipeline(m_Context);
 			pso.desc = desc;
@@ -1033,15 +1033,15 @@ namespace nvrhi.vulkan
 
 			for (readonly ref BindingLayoutHandle _layout in ref desc.bindingLayouts)
 			{
-				BindingLayout layout = checked_cast<BindingLayout, IBindingLayout>(_layout.Value);
+				BindingLayout layout = checked_cast<BindingLayout, IBindingLayout>(_layout.Get<IBindingLayout>());
 				pso.pipelineBindingLayouts.PushBack(layout);
 			}
 
-			Shader VS = checked_cast<Shader, IShader>(desc.VS.Value);
-			Shader HS = checked_cast<Shader, IShader>(desc.HS.Value);
-			Shader DS = checked_cast<Shader, IShader>(desc.DS.Value);
-			Shader GS = checked_cast<Shader, IShader>(desc.GS.Value);
-			Shader PS = checked_cast<Shader, IShader>(desc.PS.Value);
+			Shader VS = checked_cast<Shader, IShader>(desc.VS.Get<IShader>());
+			Shader HS = checked_cast<Shader, IShader>(desc.HS.Get<IShader>());
+			Shader DS = checked_cast<Shader, IShader>(desc.DS.Get<IShader>());
+			Shader GS = checked_cast<Shader, IShader>(desc.GS.Get<IShader>());
+			Shader PS = checked_cast<Shader, IShader>(desc.PS.Get<IShader>());
 
 			int numShaders = 0;
 			int numShadersWithSpecializations = 0;
@@ -1159,7 +1159,7 @@ namespace nvrhi.vulkan
 			uint32 pushConstantSize = 0;
 			for (readonly ref BindingLayoutHandle _layout in ref desc.bindingLayouts)
 			{
-				BindingLayout layout = checked_cast<BindingLayout, IBindingLayout>(_layout.Value);
+				BindingLayout layout = checked_cast<BindingLayout, IBindingLayout>(_layout.Get<IBindingLayout>());
 				descriptorSetLayouts.PushBack(layout.descriptorSetLayout);
 
 				if (!layout.isBindless)
@@ -1264,7 +1264,7 @@ namespace nvrhi.vulkan
 
 			for (readonly ref BindingLayoutHandle _layout in ref desc.bindingLayouts)
 			{
-				BindingLayout layout = checked_cast<BindingLayout, IBindingLayout>(_layout.Value);
+				BindingLayout layout = checked_cast<BindingLayout, IBindingLayout>(_layout.Get<IBindingLayout>());
 				pso.pipelineBindingLayouts.PushBack(layout);
 			}
 
@@ -1272,7 +1272,7 @@ namespace nvrhi.vulkan
 			uint32 pushConstantSize = 0;
 			for (readonly ref BindingLayoutHandle _layout in ref desc.bindingLayouts)
 			{
-				BindingLayout layout = checked_cast<BindingLayout, IBindingLayout>(_layout.Value);
+				BindingLayout layout = checked_cast<BindingLayout, IBindingLayout>(_layout.Get<IBindingLayout>());
 				descriptorSetLayouts.PushBack(layout.descriptorSetLayout);
 
 				if (!layout.isBindless)
@@ -1307,7 +1307,7 @@ namespace nvrhi.vulkan
 
 			CHECK_VK_FAIL!(res);
 
-			Shader CS = checked_cast<Shader, IShader>(desc.CS.Value);
+			Shader CS = checked_cast<Shader, IShader>(desc.CS.Get<IShader>());
 
 			// See createGraphicsPipeline() for a more expanded implementation
 			// of shader specializations with multiple shaders in the pipeline
@@ -1360,13 +1360,13 @@ namespace nvrhi.vulkan
 
 			for (readonly ref BindingLayoutHandle _layout in ref desc.bindingLayouts)
 			{
-				BindingLayout layout = checked_cast<BindingLayout, IBindingLayout>(_layout.Value);
+				BindingLayout layout = checked_cast<BindingLayout, IBindingLayout>(_layout.Get<IBindingLayout>());
 				pso.pipelineBindingLayouts.PushBack(layout);
 			}
 
-			Shader AS = checked_cast<Shader, IShader>(desc.AS.Value);
-			Shader MS = checked_cast<Shader, IShader>(desc.MS.Value);
-			Shader PS = checked_cast<Shader, IShader>(desc.PS.Value);
+			Shader AS = checked_cast<Shader, IShader>(desc.AS.Get<IShader>());
+			Shader MS = checked_cast<Shader, IShader>(desc.MS.Get<IShader>());
+			Shader PS = checked_cast<Shader, IShader>(desc.PS.Get<IShader>());
 
 			int numShaders = 0;
 			int numShadersWithSpecializations = 0;
@@ -1452,7 +1452,7 @@ namespace nvrhi.vulkan
 			uint32 pushConstantSize = 0;
 			for (readonly ref BindingLayoutHandle _layout in ref desc.bindingLayouts)
 			{
-				BindingLayout layout = checked_cast<BindingLayout, IBindingLayout>(_layout.Value);
+				BindingLayout layout = checked_cast<BindingLayout, IBindingLayout>(_layout.Get<IBindingLayout>());
 				descriptorSetLayouts.PushBack(layout.descriptorSetLayout);
 
 				if (!layout.isBindless)
@@ -1543,7 +1543,7 @@ namespace nvrhi.vulkan
 
 			for (readonly ref BindingLayoutHandle _layout in ref desc.globalBindingLayouts)
 			{
-				BindingLayout layout = checked_cast<BindingLayout, IBindingLayout>(_layout.Value);
+				BindingLayout layout = checked_cast<BindingLayout, IBindingLayout>(_layout.Get<IBindingLayout>());
 				pso.pipelineBindingLayouts.PushBack(layout);
 			}
 
@@ -1552,7 +1552,7 @@ namespace nvrhi.vulkan
 			ShaderType pushConstantVisibility = ShaderType.None;
 			for (readonly ref BindingLayoutHandle _layout in ref desc.globalBindingLayouts)
 			{
-				BindingLayout layout = checked_cast<BindingLayout, IBindingLayout>(_layout.Value);
+				BindingLayout layout = checked_cast<BindingLayout, IBindingLayout>(_layout.Get<IBindingLayout>());
 				descriptorSetLayouts.PushBack(layout.descriptorSetLayout);
 
 				if (!layout.isBindless)
@@ -1657,7 +1657,7 @@ namespace nvrhi.vulkan
 
 				if (shaderDesc.shader != null)
 				{
-					Shader shader = checked_cast<Shader, IShader>(shaderDesc.shader.Value);
+					Shader shader = checked_cast<Shader, IShader>(shaderDesc.shader.Get<IShader>());
 					uint32 shaderStageIndex = shaderStageIndices[shader];
 					shaderStages[shaderStageIndex] = makeShaderStageCreateInfo(shader, specInfos, specMapEntries, specData);
 
@@ -1689,21 +1689,21 @@ namespace nvrhi.vulkan
 
 				if (hitGroupDesc.closestHitShader != null)
 				{
-					Shader shader = checked_cast<Shader, IShader>(hitGroupDesc.closestHitShader.Value);
+					Shader shader = checked_cast<Shader, IShader>(hitGroupDesc.closestHitShader.Get<IShader>());
 					uint32 shaderStageIndex = shaderStageIndices[shader];
 					shaderStages[shaderStageIndex] = makeShaderStageCreateInfo(shader, specInfos, specMapEntries, specData);
 					shaderGroupCreateInfo.setClosestHitShader(shaderStageIndex);
 				}
 				if (hitGroupDesc.anyHitShader != null)
 				{
-					Shader shader = checked_cast<Shader, IShader>(hitGroupDesc.anyHitShader.Value);
+					Shader shader = checked_cast<Shader, IShader>(hitGroupDesc.anyHitShader.Get<IShader>());
 					uint32 shaderStageIndex = shaderStageIndices[shader];
 					shaderStages[shaderStageIndex] = makeShaderStageCreateInfo(shader, specInfos, specMapEntries, specData);
 					shaderGroupCreateInfo.setAnyHitShader(shaderStageIndex);
 				}
 				if (hitGroupDesc.intersectionShader != null)
 				{
-					Shader shader = checked_cast<Shader, IShader>(hitGroupDesc.intersectionShader.Value);
+					Shader shader = checked_cast<Shader, IShader>(hitGroupDesc.intersectionShader.Get<IShader>());
 					uint32 shaderStageIndex = shaderStageIndices[shader];
 					shaderStages[shaderStageIndex] = makeShaderStageCreateInfo(shader, specInfos, specMapEntries, specData);
 					shaderGroupCreateInfo.setIntersectionShader(shaderStageIndex);
@@ -2115,7 +2115,7 @@ namespace nvrhi.vulkan
 
 		public override void resizeDescriptorTable(IDescriptorTable _descriptorTable, uint32 newSize, bool keepContents)
 		{
-			Runtime.Assert(newSize <= checked_cast<DescriptorTable, IDescriptorTable>(_descriptorTable).layout->getBindlessDesc().maxCapacity);
+			Runtime.Assert(newSize <= checked_cast<DescriptorTable, IDescriptorTable>(_descriptorTable).layout.Get<IBindingLayout>().getBindlessDesc().maxCapacity);
 			(void)_descriptorTable;
 			(void)newSize;
 			(void)keepContents;
@@ -2124,7 +2124,7 @@ namespace nvrhi.vulkan
 		public override bool writeDescriptorTable(IDescriptorTable _descriptorTable, BindingSetItem binding)
 		{
 			DescriptorTable descriptorTable = checked_cast<DescriptorTable, IDescriptorTable>(_descriptorTable);
-			BindingLayout layout = checked_cast<BindingLayout, IBindingLayout>(descriptorTable.layout.Value);
+			BindingLayout layout = checked_cast<BindingLayout, IBindingLayout>(descriptorTable.layout.Get<IBindingLayout>());
 
 			if (binding.slot >= descriptorTable.capacity)
 				return false;
@@ -2373,7 +2373,7 @@ namespace nvrhi.vulkan
 				bufferDesc.isVirtual = desc.isVirtual;
 				@as.dataBuffer = createBuffer(bufferDesc);
 
-				Buffer dataBuffer = checked_cast<Buffer, IBuffer>(@as.dataBuffer.Value);
+				Buffer dataBuffer = checked_cast<Buffer, IBuffer>(@as.dataBuffer.Get<IBuffer>());
 
 				var createInfo = VkAccelerationStructureCreateInfoKHR()
 					.setType(desc.isTopLevel ? VkAccelerationStructureTypeKHR.eTopLevelKHR : VkAccelerationStructureTypeKHR.eBottomLevelKHR)

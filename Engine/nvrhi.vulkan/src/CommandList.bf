@@ -758,7 +758,7 @@ namespace nvrhi.vulkan
 			{
 				for (int i = 0; i < state.bindings.Count && i < pso.desc.bindingLayouts.Count; i++)
 				{
-					BindingLayout layout = pso.pipelineBindingLayouts[i].Value;
+					BindingLayout layout = pso.pipelineBindingLayouts[i].Get<BindingLayout>();
 
 					if ((layout.desc.visibility & ShaderType.Compute) == 0)
 						continue;
@@ -953,7 +953,7 @@ namespace nvrhi.vulkan
 			{
 				for (int i = 0; i < state.bindings.Count && i < pso.desc.globalBindingLayouts.Count; i++)
 				{
-					BindingLayout layout = pso.pipelineBindingLayouts[i].Value;
+					BindingLayout layout = pso.pipelineBindingLayouts[i].Get<BindingLayout>();
 
 					if ((layout.desc.visibility & ShaderType.AllRayTracing) == 0)
 						continue;
@@ -1215,9 +1215,9 @@ namespace nvrhi.vulkan
 			vkGetAccelerationStructureBuildSizesKHR(m_Context.device,
 				VkAccelerationStructureBuildTypeKHR.eDeviceKHR, &buildInfo, maxPrimitiveCounts.Ptr, &buildSizes);
 
-			if (buildSizes.accelerationStructureSize > @as.dataBuffer->getDesc().byteSize)
+			if (buildSizes.accelerationStructureSize > @as.dataBuffer.Get<IBuffer>().getDesc().byteSize)
 			{
-				String message = scope $"BLAS {utils.DebugNameToString(@as.desc.debugName)} build requires at least {buildSizes.accelerationStructureSize} bytes in the data buffer, while the allocated buffer is only {@as.dataBuffer->getDesc().byteSize} bytes";
+				String message = scope $"BLAS {utils.DebugNameToString(@as.desc.debugName)} build requires at least {buildSizes.accelerationStructureSize} bytes in the data buffer, while the allocated buffer is only {@as.dataBuffer.Get<IBuffer>().getDesc().byteSize} bytes";
 
 				m_Context.error(message);
 				return;
@@ -1508,7 +1508,7 @@ namespace nvrhi.vulkan
 
 			if (@as.dataBuffer != null)
 			{
-				Buffer buffer = checked_cast<Buffer, IBuffer>(@as.dataBuffer.Value);
+				Buffer buffer = checked_cast<Buffer, IBuffer>(@as.dataBuffer.Get<IBuffer>());
 				m_StateTracker.endTrackingBufferState(buffer, stateBits, false);
 			}
 		}
@@ -2133,9 +2133,9 @@ namespace nvrhi.vulkan
 			vkGetAccelerationStructureBuildSizesKHR(m_Context.device,
 				VkAccelerationStructureBuildTypeKHR.eDeviceKHR, &buildInfo, &maxPrimitiveCounts, &buildSizes);
 
-			if (buildSizes.accelerationStructureSize > @as.dataBuffer->getDesc().byteSize)
+			if (buildSizes.accelerationStructureSize > @as.dataBuffer.Get<IBuffer>().getDesc().byteSize)
 			{
-				String message = scope $"TLAS {utils.DebugNameToString(@as.desc.debugName)} build requires at least {buildSizes.accelerationStructureSize} bytes in the data buffer, while the allocated buffer is only {@as.dataBuffer->getDesc().byteSize} bytes";
+				String message = scope $"TLAS {utils.DebugNameToString(@as.desc.debugName)} build requires at least {buildSizes.accelerationStructureSize} bytes in the data buffer, while the allocated buffer is only {@as.dataBuffer.Get<IBuffer>().getDesc().byteSize} bytes";
 
 				m_Context.error(message);
 				return;

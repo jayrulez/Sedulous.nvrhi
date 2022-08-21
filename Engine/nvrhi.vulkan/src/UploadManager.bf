@@ -59,7 +59,7 @@ namespace nvrhi.vulkan
 				{
 					m_CurrentChunk.writePointer = endOfDataInChunk;
 
-					*pBuffer = checked_cast<Buffer, IBuffer>(m_CurrentChunk.buffer.Value);
+					*pBuffer = checked_cast<Buffer, IBuffer>(m_CurrentChunk.buffer.Get<IBuffer>());
 					*pOffset = alignedOffset;
 					if (pCpuVA != null && m_CurrentChunk.mappedMemory != null)
 						*pCpuVA = (char8*)m_CurrentChunk.mappedMemory + alignedOffset;
@@ -110,7 +110,7 @@ namespace nvrhi.vulkan
 			m_CurrentChunk.version = currentVersion;
 			m_CurrentChunk.writePointer = size;
 
-			*pBuffer = checked_cast<Buffer, IBuffer>(m_CurrentChunk.buffer.Value);
+			*pBuffer = checked_cast<Buffer, IBuffer>(m_CurrentChunk.buffer.Get<IBuffer>());
 			*pOffset = 0;
 			if (pCpuVA != null)
 				*pCpuVA = m_CurrentChunk.mappedMemory;

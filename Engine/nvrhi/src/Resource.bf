@@ -40,7 +40,19 @@ namespace nvrhi
 
 	abstract class IResource
 	{
-		/*private uint64 mRefCount = 1;
+		public virtual NativeObject getNativeObject(ObjectType objectType) { (void)objectType; return null; }
+	}
+
+	typealias ResourceHandle = RefCountPtr<IResource>;
+}
+
+namespace nvrhi
+{
+	typealias RefCountPtr<T> = T;
+
+	extension IResource
+	{
+		private uint64 mRefCount = 1;
 		private Monitor mRefCountMonitor = new .() ~ delete _;
 
 		public uint64 AddRef()
@@ -60,14 +72,34 @@ namespace nvrhi
 				}
 				return result;
 			}
-		}*/
+		}
 
-		public virtual NativeObject getNativeObject(ObjectType objectType) { (void)objectType; return null; }
+		public Self Value => this;
+
+		public T Get<T>() where T : IResource
+		{
+			return (T)this;
+		}
+
+		public static Self operator ->(Self self)
+		{
+			return self.Value;
+		}
+
+		public static RefCountPtr<T> Attach<T>(T value) where T : IResource
+		{
+			return value;
+		}
 	}
+}
+
+
+/*
+
+namespace nvrhi
+{
 
 	typealias RefCountPtr<T> = RefCounted<T>;
-
-	typealias ResourceHandle = RefCountPtr<IResource>;
 }
 
 namespace System
@@ -78,5 +110,12 @@ namespace System
 		{
 			return Self.Attach(resource);
 		}
+
+		public R Get<R>() where R : T
+		{
+			return Value;
+		}
 	}
 }
+
+*/
