@@ -92,7 +92,7 @@ namespace nvrhi
 
 		public abstract NativeObject getNativeQueue(ObjectType objectType, CommandQueue queue);
 
-		public abstract IMessageCallback* getMessageCallback();
+		public abstract IMessageCallback getMessageCallback();
 
 		// Front-end for executeCommandLists(..., 1) for compatibility and convenience
 		public uint64 executeCommandList(ICommandList commandList, CommandQueue executionQueue = CommandQueue.Graphics)

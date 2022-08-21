@@ -1410,4 +1410,31 @@ namespace nvrhi.vulkan
 		    return 0;
 		}
 	}
+
+	struct DeviceDesc
+	{
+	    public IMessageCallback errorCB = null;
+
+	    public VkInstance instance;
+	    public VkPhysicalDevice physicalDevice;
+	    public VkDevice device;
+
+	    // any of the queues can be null if this context doesn't intend to use them
+	    public VkQueue graphicsQueue;
+	    public int32 graphicsQueueIndex = -1;
+	    public VkQueue transferQueue;
+	    public int32 transferQueueIndex = -1;
+	    public VkQueue computeQueue;
+	    public int32 computeQueueIndex = -1;
+
+	    public VkAllocationCallbacks *allocationCallbacks = null;
+
+	    public char8**instanceExtensions = null;
+	    public int numInstanceExtensions = 0;
+	    
+	    public char8**deviceExtensions = null;
+	    public int numDeviceExtensions = 0;
+
+	    public uint32 maxTimerQueries = 256;
+	}
 }

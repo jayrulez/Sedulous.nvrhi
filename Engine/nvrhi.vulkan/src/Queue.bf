@@ -97,7 +97,7 @@ namespace nvrhi.vulkan
 		}
 
 		// submits a command buffer to this queue, returns submissionID
-		public uint64 submitsubmit(ICommandList* ppCmd, int numCmd)
+		public uint64 submit(ICommandList* ppCmd, int numCmd)
 		{
 			List<VkPipelineStageFlags> waitStageArray = scope .() { Count = m_WaitSemaphores.Count };
 			List<VkCommandBuffer> commandBuffers = scope .() { Count = numCmd };

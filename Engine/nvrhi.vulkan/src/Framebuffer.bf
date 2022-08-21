@@ -11,7 +11,7 @@ namespace nvrhi.vulkan
 		public VkRenderPass renderPass = .Null;
 		public VkFramebuffer framebuffer = .Null;
 
-		List<ResourceHandle> resources;
+		public List<ResourceHandle> resources;
 
 		public bool managed = true;
 

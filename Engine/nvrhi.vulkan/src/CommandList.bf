@@ -68,6 +68,7 @@ namespace nvrhi.vulkan
 				.setFlags(VkCommandBufferUsageFlags.eOneTimeSubmitBit);
 
 			VkResult result = vkBeginCommandBuffer(m_CurrentCmdBuf.cmdBuf, &beginInfo);
+			ASSERT_VK_OK!(result);
 			m_CurrentCmdBuf.referencedResources.Add(this); // prevent deletion of e.g. UploadManager
 
 			clearState();
@@ -89,6 +90,7 @@ namespace nvrhi.vulkan
 #endif
 
 			VkResult result = vkEndCommandBuffer(m_CurrentCmdBuf.cmdBuf);
+			ASSERT_VK_OK!(result);
 
 			clearState();
 
@@ -1315,7 +1317,7 @@ namespace nvrhi.vulkan
 			Buffer uploadBuffer = null;
 			uint64 uploadOffset = 0;
 			void* uploadCpuVA = null;
-			m_UploadManager.suballocateBuffer(@as.instances.Count * sizeof(VkAccelerationStructureInstanceKHR),
+			m_UploadManager.suballocateBuffer((uint64)@as.instances.Count * sizeof(VkAccelerationStructureInstanceKHR),
 				&uploadBuffer, &uploadOffset, &uploadCpuVA, currentVersion);
 
 			// Copy the instance data to GPU-visible memory.

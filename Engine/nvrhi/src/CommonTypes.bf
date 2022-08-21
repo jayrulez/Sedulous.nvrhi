@@ -846,7 +846,7 @@ namespace nvrhi
 			byteSize = (_byteSize);
 		}
 
-		[NoDiscard] BufferRange resolve(BufferDesc desc)
+		[NoDiscard] public BufferRange resolve(BufferDesc desc)
 		{
 			BufferRange result = .();
 			result.byteOffset = Math.Min(byteOffset, desc.byteSize);
@@ -1107,15 +1107,15 @@ namespace nvrhi
 			}
 		};
 
-		RenderTarget[c_MaxRenderTargets] targets = .();
-		bool alphaToCoverageEnable = false;
+		public RenderTarget[c_MaxRenderTargets] targets = .();
+		public bool alphaToCoverageEnable = false;
 
 		public readonly ref BlendState setRenderTarget(uint32 index, RenderTarget target) mut { targets[index] = target; return ref this; }
 		public readonly ref BlendState setAlphaToCoverageEnable(bool enable) mut { alphaToCoverageEnable = enable; return ref this; }
 		public readonly ref BlendState enableAlphaToCoverage() mut { alphaToCoverageEnable = true; return ref this; }
 		public readonly ref BlendState disableAlphaToCoverage() mut { alphaToCoverageEnable = false; return ref this; }
 
-		[NoDiscard] bool usesConstantColor(uint32 numTargets)
+		[NoDiscard] public bool usesConstantColor(uint32 numTargets)
 		{
 			for (uint32 rt = 0; rt < numTargets; rt++)
 			{
