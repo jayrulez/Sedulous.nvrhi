@@ -983,7 +983,7 @@ namespace nvrhi.vulkan
 		}
 
 		// fills out all info fields in Texture based on a TextureDesc
-		static void fillTextureInfo(Texture texture, TextureDesc desc)
+		public static void fillTextureInfo(Texture texture, TextureDesc desc)
 		{
 			texture.desc = desc;
 

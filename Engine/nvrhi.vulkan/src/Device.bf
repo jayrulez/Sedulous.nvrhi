@@ -412,7 +412,7 @@ namespace nvrhi.vulkan
 
 				size *= desc.maxVersions;
 
-				buffer.versionTracking.Resize(desc.maxVersions, default);//..Fill(0);
+				buffer.versionTracking.Resize(desc.maxVersions, default); //..Fill(0);
 				//std::fill(buffer.versionTracking.begin(), buffer.versionTracking.end(), 0);
 
 				buffer.desc.cpuAccess = CpuAccessMode.Write; // to get the right memory type allocated
@@ -564,7 +564,7 @@ namespace nvrhi.vulkan
 			newShader.desc = baseShader.desc;
 			newShader.shaderModule = baseShader.shaderModule;
 			newShader.stageFlagBits = baseShader.stageFlagBits;
-			newShader.specializationConstants.assign(constants, constants + numConstants);
+			newShader.specializationConstants.Assign(constants, numConstants);
 
 			return ShaderHandle.Attach(newShader);
 		}
