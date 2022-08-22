@@ -1,5 +1,5 @@
 using System;
-namespace nvrhi.device_manager
+namespace nvrhi.deviceManager
 {
 	class DefaultMessageCallback : IMessageCallback
 	{

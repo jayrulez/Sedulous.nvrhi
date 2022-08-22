@@ -1,6 +1,6 @@
 using System;
 using System.Collections;
-namespace nvrhi.device_manager
+namespace nvrhi.deviceManager
 {
 	enum WindowType{
 		Windows
@@ -43,8 +43,9 @@ namespace nvrhi.device_manager
 		protected List<nvrhi.FramebufferHandle> m_SwapChainFramebuffers;
 		bool m_RequestedVSync = false;
 
-		public this()
+		public this(DeviceCreationParameters @params)
 		{
+			m_DeviceParams = @params;
 		}
 
 		public ~this()

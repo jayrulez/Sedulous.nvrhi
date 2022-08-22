@@ -1,0 +1,7 @@
+FileVersion = 1
+Dependencies = {corlib = "*", nvrhi = "*", "nvrhi.d3d11" = "*", "nvrhi.d3d12" = "*", "nvrhi.validation" = "*", "nvrhi.vulkan" = "*"}
+
+[Project]
+Name = "nvrhi.deviceManager"
+TargetType = "BeefLib"
+StartupObject = "nvrhi.deviceManager.Program"

@@ -1,5 +1,5 @@
 FileVersion = 1
-Dependencies = {corlib = "*", nvrhi = "*", "nvrhi.validation" = "*", "nvrhi.vulkan" = "*"}
+Dependencies = {corlib = "*", nvrhi = "*", "nvrhi.validation" = "*", "nvrhi.vulkan" = "*", SDL2 = "*", "nvrhi.deviceManager" = "*"}
 
 [Project]
 Name = "nvrhi.test"

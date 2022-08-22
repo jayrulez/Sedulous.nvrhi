@@ -1,11 +1,11 @@
-using nvrhi.device_manager;
+using nvrhi.deviceManager;
 using Bulkan;
 using System.Collections;
 using System;
 using System.Diagnostics;
 using static Bulkan.VulkanNative;
 
-namespace nvrhi.device_manager
+namespace nvrhi.deviceManager
 {
 	extension DeviceCreationParameters
 	{
@@ -20,7 +20,7 @@ namespace nvrhi.device_manager
 	}
 }
 
-namespace nvrhi.vulkan.device_manager
+namespace nvrhi.deviceManager.vulkan
 {
 	public static
 	{
@@ -120,6 +120,10 @@ namespace nvrhi.vulkan.device_manager
 
 			private System.Collections.Queue<nvrhi.EventQueryHandle> m_FramesInFlight;
 			private List<nvrhi.EventQueryHandle> m_QueryPool;
+
+			public this(DeviceCreationParameters @params): base(@params){
+
+			}
 
 			protected override void ResizeSwapChain()
 			{
@@ -1066,10 +1070,10 @@ namespace nvrhi.vulkan.device_manager
 
 				m_NvrhiDevice = nvrhi.vulkan.createDevice(deviceDesc);
 
-				/*if (m_DeviceParams.enableNvrhiValidationLayer)
+				if (m_DeviceParams.enableNvrhiValidationLayer)
 				{
 					m_ValidationLayer = nvrhi.validation.createValidationLayer(m_NvrhiDevice);
-				}*/
+				}
 
 				CHECK!(createSwapChain());
 
