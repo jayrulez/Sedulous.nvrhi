@@ -5,10 +5,6 @@ namespace nvrhi.vulkan
 	{
 		public static nvrhi.vulkan.DeviceHandle createDevice(DeviceDesc desc)
 		{
-			// todo: initialization stuff
-			// instance
-			// device
-
 			Device device = new Device(desc);
 			return nvrhi.vulkan.DeviceHandle.Attach(device);
 		}

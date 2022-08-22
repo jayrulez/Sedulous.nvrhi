@@ -36,6 +36,18 @@ namespace nvrhi.deviceManager.vulkan
 				public HashSet<String> instance;
 				public HashSet<String> layers;
 				public HashSet<String> device;
+
+				public void Dispose()
+				{
+					if (instance != null)
+						DeleteContainerAndItems!(instance);
+
+					if (layers != null)
+						DeleteContainerAndItems!(layers);
+
+					if (device != null)
+						DeleteContainerAndItems!(device);
+				}
 			}
 
 			// minimal set of required extensions
@@ -51,7 +63,7 @@ namespace nvrhi.deviceManager.vulkan
 							new .(VulkanNative.VK_KHR_SWAPCHAIN_EXTENSION_NAME),
 							new .(VulkanNative.VK_KHR_MAINTENANCE1_EXTENSION_NAME)
 						}
-				};
+				} ~ _.Dispose();
 
 			// optional extensions
 			private VulkanExtensionSet optionalExtensions = .()
@@ -70,7 +82,7 @@ namespace nvrhi.deviceManager.vulkan
 							new .(VulkanNative.VK_NV_MESH_SHADER_EXTENSION_NAME),
 							new .(VulkanNative.VK_KHR_FRAGMENT_SHADING_RATE_EXTENSION_NAME)
 						}
-				};
+				} ~ _.Dispose();
 
 			private HashSet<String> m_RayTracingExtensions = new .()
 				{
@@ -1002,7 +1014,6 @@ namespace nvrhi.deviceManager.vulkan
 				for (var scImage in m_SwapChainImages)
 				{
 					scImage.rhiHandle.Release();
-					scImage.rhiHandle = null;
 				}
 
 				m_SwapChainImages.Clear();
