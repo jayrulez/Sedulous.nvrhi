@@ -2,7 +2,7 @@ using Bulkan;
 using static Bulkan.VulkanNative;
 namespace nvrhi.vulkan
 {
-	class Sampler : /*RefCounter<ISampler>*/ ISampler
+	class Sampler : RefCounter<ISampler>
 	{
 		public SamplerDesc desc;
 

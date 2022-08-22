@@ -3,6 +3,16 @@ namespace nvrhi.vulkan
 {
 	public static
 	{
+		public static nvrhi.vulkan.DeviceHandle createDevice(DeviceDesc desc)
+		{
+			// todo: initialization stuff
+			// instance
+			// device
+
+			Device device = new Device(desc);
+			return nvrhi.vulkan.DeviceHandle.Attach(device);
+		}
+
 		public static VkMemoryPropertyFlags pickBufferMemoryProperties(BufferDesc d)
 		{
 			VkMemoryPropertyFlags flags = .None;

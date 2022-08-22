@@ -3,7 +3,7 @@ using Bulkan;
 using static Bulkan.VulkanNative;
 namespace nvrhi.vulkan
 {
-	class AccelStruct : /*RefCounter<nvrhi.rt.IAccelStruct>*/ nvrhi.rt.IAccelStruct
+	class AccelStruct : RefCounter<nvrhi.rt.IAccelStruct>
 	{
 		public BufferHandle dataBuffer;
 		public List<VkAccelerationStructureInstanceKHR> instances;

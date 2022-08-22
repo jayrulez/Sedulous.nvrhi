@@ -1422,7 +1422,7 @@ namespace nvrhi
 		{
 			for (int i = 0; i < desc.colorAttachments.Count; i++)
 			{
-				readonly FramebufferAttachment attachment = desc.colorAttachments[i];
+				readonly /*ref*/ FramebufferAttachment attachment = /*ref*/ desc.colorAttachments[i];
 				colorFormats.PushBack(attachment.format == Format.UNKNOWN && attachment.texture != null ? attachment.texture.getDesc().format : attachment.format);
 			}
 

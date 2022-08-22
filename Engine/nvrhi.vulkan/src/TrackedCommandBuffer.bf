@@ -10,8 +10,8 @@ namespace nvrhi.vulkan
 		public VkCommandBuffer cmdBuf = .Null;
 		public VkCommandPool cmdPool = .Null;
 
-		public List<IResource> referencedResources; // to keep them alive
-		public List<Buffer> referencedStagingBuffers; // to allow synchronous mapBuffer
+		public List<RefCountPtr<IResource>> referencedResources; // to keep them alive
+		public List<RefCountPtr<Buffer>> referencedStagingBuffers; // to allow synchronous mapBuffer
 
 		public uint64 recordingID = 0;
 		public uint64 submissionID = 0;

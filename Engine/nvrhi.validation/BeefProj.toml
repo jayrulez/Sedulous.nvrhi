@@ -1,0 +1,7 @@
+FileVersion = 1
+Dependencies = {corlib = "*", nvrhi = "*"}
+
+[Project]
+Name = "nvrhi.validation"
+TargetType = "BeefLib"
+StartupObject = "nvrhi.validation.Program"

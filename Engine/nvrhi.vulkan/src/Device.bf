@@ -5,7 +5,7 @@ using System.Threading;
 using static Bulkan.VulkanNative;
 namespace nvrhi.vulkan
 {
-	class Device : /*RefCounter<nvrhi.vulkan.IDevice>*/ nvrhi.vulkan.IDevice
+	class Device : RefCounter<nvrhi.vulkan.IDevice>
 	{
 		// Internal backend methods
 
@@ -1831,7 +1831,7 @@ namespace nvrhi.vulkan
 
 			for (int bindingIndex = 0; bindingIndex < desc.bindings.Count; bindingIndex++)
 			{
-				/*readonly ref*/ BindingSetItem binding = /*ref*/ desc.bindings[bindingIndex];
+				readonly /*ref*/ BindingSetItem binding = /*ref*/ desc.bindings[bindingIndex];
 				readonly ref VkDescriptorSetLayoutBinding layoutBinding = ref layout.vulkanLayoutBindings[bindingIndex];
 
 				if (binding.resourceHandle == null)

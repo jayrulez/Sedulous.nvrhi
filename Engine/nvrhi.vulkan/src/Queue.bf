@@ -117,7 +117,8 @@ namespace nvrhi.vulkan
 				commandBuffers[i] = commandBuffer.cmdBuf;
 				m_CommandBuffersInFlight.Add(commandBuffer);
 
-				for ( /*readonly ref*/var buffer in ref commandBuffer.referencedStagingBuffers)
+				// beef error here
+				for (Buffer buffer in commandBuffer.referencedStagingBuffers)
 				{
 					buffer.lastUseQueue = m_QueueID;
 					buffer.lastUseCommandListID = m_LastSubmittedID;

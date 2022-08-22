@@ -20,5 +20,5 @@ namespace nvrhi.vulkan
 			VkFramebuffer framebuffer, FramebufferDesc desc, bool transferOwnership);
 	}
 
-	typealias DeviceHandle = RefCountPtr<nvrhi.vulkan.IDevice>;
+	typealias DeviceHandle = RefCounter<nvrhi.vulkan.IDevice>;
 }

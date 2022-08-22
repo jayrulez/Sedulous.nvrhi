@@ -2,9 +2,9 @@ using System.Collections;
 using System;
 namespace nvrhi.vulkan
 {
-	class ShaderTable : /*RefCounter<nvrhi.rt.IShaderTable>*/ nvrhi.rt.IShaderTable
+	class ShaderTable : RefCounter<nvrhi.rt.IShaderTable>
 	{
-		public RayTracingPipeline pipeline;
+		public RefCountPtr<RayTracingPipeline> pipeline;
 
 		public int32 rayGenerationShader = -1;
 		public List<uint32> missShaders;

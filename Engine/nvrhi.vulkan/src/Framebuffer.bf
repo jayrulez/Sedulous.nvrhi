@@ -3,7 +3,7 @@ using System.Collections;
 using static Bulkan.VulkanNative;
 namespace nvrhi.vulkan
 {
-	class Framebuffer : /*RefCounter<IFramebuffer>*/ IFramebuffer
+	class Framebuffer : RefCounter<IFramebuffer>
 	{
 		public FramebufferDesc desc;
 		public FramebufferInfo framebufferInfo;

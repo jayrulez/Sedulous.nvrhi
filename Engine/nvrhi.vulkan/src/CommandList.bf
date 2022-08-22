@@ -5,7 +5,7 @@ using static Bulkan.VulkanNative;
 using nvrhi.rt;
 namespace nvrhi.vulkan
 {
-	class CommandList :  ICommandList
+	class CommandList :  RefCounter<ICommandList>
 	{
 		// Internal backend methods
 

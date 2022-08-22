@@ -1,6 +1,6 @@
 namespace nvrhi.vulkan
 {
-	class TimerQuery : /*RefCounter<ITimerQuery>*/ ITimerQuery
+	class TimerQuery : RefCounter<ITimerQuery>
 	{
 		public int32 beginQueryIndex = -1;
 		public int32 endQueryIndex = -1;

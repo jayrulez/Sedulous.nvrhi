@@ -43,12 +43,13 @@ namespace nvrhi
 		public virtual NativeObject getNativeObject(ObjectType objectType) { (void)objectType; return null; }
 	}
 
-	typealias ResourceHandle = RefCountPtr<IResource>;
+	typealias ResourceHandle = RefCounter<IResource>;
 }
 
 namespace nvrhi
 {
-	typealias RefCountPtr<T> = T;
+	typealias RefCounter<T> = T;
+	typealias RefCountPtr<T> = T;//RefCounter<T>; // beef error caused here with uncommented version
 
 	extension IResource
 	{
@@ -86,7 +87,7 @@ namespace nvrhi
 			return self.Value;
 		}
 
-		public static RefCountPtr<T> Attach<T>(T value) where T : IResource
+		public static RefCounter<T> Attach<T>(T value) where T : IResource
 		{
 			return value;
 		}
@@ -99,14 +100,14 @@ namespace nvrhi
 namespace nvrhi
 {
 
-	typealias RefCountPtr<T> = RefCounted<T>;
+	typealias RefCounter<T> = RefCounted<T>;
 }
 
 namespace System
 {
 	extension RefCounted<T> where T : nvrhi.IResource
 	{
-		public static implicit operator nvrhi.RefCountPtr<T>(T resource)
+		public static implicit operator nvrhi.RefCounter<T>(T resource)
 		{
 			return Self.Attach(resource);
 		}

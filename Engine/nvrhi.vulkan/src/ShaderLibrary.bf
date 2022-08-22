@@ -3,7 +3,7 @@ using System;
 using static Bulkan.VulkanNative;
 namespace nvrhi.vulkan
 {
-	class ShaderLibrary :  /*RefCounter<IShaderLibrary>*/IShaderLibrary
+	class ShaderLibrary :  RefCounter<IShaderLibrary>
 	{
 	    public VkShaderModule shaderModule;
 

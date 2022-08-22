@@ -1,6 +1,6 @@
 namespace nvrhi.vulkan
 {
-	class Heap : MemoryResource, /*nvrhi.RefCountPtr<IHeap>*/ IHeap
+	class Heap : MemoryResource, nvrhi.RefCounter<IHeap>
 	{
 		public this(VulkanContext* context, VulkanAllocator allocator)
 		{

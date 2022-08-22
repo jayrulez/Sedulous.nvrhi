@@ -3,7 +3,7 @@ using Bulkan;
 using static Bulkan.VulkanNative;
 namespace nvrhi.vulkan
 {
-	class BindingLayout : /*RefCounter<IBindingLayout>*/ IBindingLayout
+	class BindingLayout : RefCounter<IBindingLayout>
 	{
 		public BindingLayoutDesc desc;
 		public BindlessLayoutDesc bindlessDesc;

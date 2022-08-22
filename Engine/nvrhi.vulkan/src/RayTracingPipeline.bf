@@ -4,7 +4,7 @@ using System;
 using static Bulkan.VulkanNative;
 namespace nvrhi.vulkan
 {
-	class RayTracingPipeline : /* RefCounter<nvrhi.rt.IPipeline>*/ nvrhi.rt.IPipeline
+	class RayTracingPipeline : RefCounter<nvrhi.rt.IPipeline>
 	{
 		public nvrhi.rt.PipelineDesc desc;
 		public BindingVector<RefCountPtr<BindingLayout>> pipelineBindingLayouts;

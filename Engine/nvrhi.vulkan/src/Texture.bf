@@ -5,7 +5,7 @@ using System.Threading;
 using static Bulkan.VulkanNative;
 namespace nvrhi.vulkan
 {
-	class Texture :  MemoryResource, ITexture /*RefCounter<ITexture>*/, TextureStateExtension
+	class Texture :  MemoryResource, RefCounter<ITexture>, TextureStateExtension
 	{
 	    public enum TextureSubresourceViewType // see getSubresourceView()
 	    {

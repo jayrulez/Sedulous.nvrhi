@@ -4,7 +4,7 @@ using static Bulkan.VulkanNative;
 namespace nvrhi.vulkan
 {
 	// contains a VkDescriptorSet
-	class BindingSet : /*RefCounter<IBindingSet>*/ IBindingSet
+	class BindingSet : RefCounter<IBindingSet>
 	{
 		public BindingSetDesc desc;
 		public BindingLayoutHandle layout;

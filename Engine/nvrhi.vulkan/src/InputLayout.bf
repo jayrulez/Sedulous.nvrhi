@@ -2,7 +2,7 @@ using System.Collections;
 using Bulkan;
 namespace nvrhi.vulkan
 {
-	class InputLayout : /*RefCounter<IInputLayout>*/ IInputLayout
+	class InputLayout : RefCounter<IInputLayout>
 	{
 		public List<VertexAttributeDesc> inputDesc;
 

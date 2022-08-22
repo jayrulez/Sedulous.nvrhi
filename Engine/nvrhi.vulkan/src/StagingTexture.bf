@@ -2,11 +2,11 @@ using System.Collections;
 using System;
 namespace nvrhi.vulkan
 {
-	class StagingTexture :  IStagingTexture
+	class StagingTexture : RefCounter<IStagingTexture>
 	{
 		public TextureDesc desc;
 		// backing store for staging texture is a buffer
-		public Buffer buffer;
+		public RefCountPtr<Buffer> buffer;
 		// per-mip, per-slice regions
 		// offset = mipLevel * numDepthSlices + depthSlice
 		public List<StagingTextureRegion> sliceRegions;

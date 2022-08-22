@@ -2,7 +2,7 @@ using Bulkan;
 using static Bulkan.VulkanNative;
 namespace nvrhi.vulkan
 {
-	class DescriptorTable : /* RefCounter<IDescriptorTable>*/ IDescriptorTable
+	class DescriptorTable : RefCounter<IDescriptorTable>
 	{
 		public BindingLayoutHandle layout;
 		public uint32 capacity = 0;

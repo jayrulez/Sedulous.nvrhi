@@ -4,7 +4,7 @@ using System;
 using static Bulkan.VulkanNative;
 namespace nvrhi.vulkan
 {
-	class Buffer : MemoryResource, /*RefCounter<IBuffer>*/ IBuffer, BufferStateExtension
+	class Buffer : MemoryResource, RefCounter<IBuffer>, BufferStateExtension
 	{
 		public BufferDesc desc;
 

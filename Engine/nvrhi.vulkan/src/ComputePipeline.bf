@@ -2,7 +2,7 @@ using Bulkan;
 using static Bulkan.VulkanNative;
 namespace nvrhi.vulkan
 {
-	class ComputePipeline : /*RefCounter<IComputePipeline>*/ IComputePipeline
+	class ComputePipeline : RefCounter<IComputePipeline>
 	{
 		public ComputePipelineDesc desc;
 

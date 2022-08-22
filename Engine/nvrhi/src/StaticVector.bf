@@ -15,7 +15,7 @@ namespace nvrhi
 				return &mVal;
 			}
 		}
-		
+
 		public int Count
 		{
 			[Inline]
@@ -29,6 +29,11 @@ namespace nvrhi
 		{
 			get { return mVal[index]; }
 			set mut { mVal[index] = value; }
+		}
+
+		public ref T GetValueAt(int index) mut
+		{
+			return ref mVal[index];
 		}
 
 		public const int MaxSize = CSize;
@@ -53,12 +58,12 @@ namespace nvrhi
 				PushBack(item);
 		}
 
-		public explicit static operator T[CSize] (Self val)
+		public explicit static operator T[CSize](Self val)
 		{
 			return val.mVal;
 		}
 
-		public implicit static operator Span<T> (in Self val)
+		public implicit static operator Span<T>(in Self val)
 		{
 #unwarn
 			return .(&val.mVal, CSize);
@@ -92,18 +97,22 @@ namespace nvrhi
 
 			if (CurrentSize > newSize)
 			{
-			    for (int i = newSize; i < CurrentSize; i++){
-			        //(data() + i)->~T();
-					if(!typeof(T).IsValueType){
+				for (int i = newSize; i < CurrentSize; i++)
+				{
+					//(data() + i)->~T();
+					if (!typeof(T).IsValueType)
+					{
 						Runtime.FatalError("Should we auto delete?");
 					}
 				}
 			}
 			else
 			{
-			    for (int i = CurrentSize; i < newSize; i++){
-			        //new (data() + i) T();
-					if(!typeof(T).IsValueType){
+				for (int i = CurrentSize; i < newSize; i++)
+				{
+					//new (data() + i) T();
+					if (!typeof(T).IsValueType)
+					{
 						Runtime.FatalError("Should we auto construct?");
 					}
 				}
@@ -112,7 +121,7 @@ namespace nvrhi
 			CurrentSize = newSize;
 		}
 
-		
+
 		public override void ToString(String strBuffer) mut
 		{
 			if (typeof(T) == typeof(char8))
@@ -142,60 +151,60 @@ namespace nvrhi
 			return .((T[CSize])this);
 		}
 
-		
+
 		public struct Enumerator : IRefEnumerator<T*>, IEnumerator<T>, IResettable
 		{
-		    private T[CSize] mList;
-		    private int mIndex;
-		    private T* mCurrent;
+			private T[CSize] mList;
+			private int mIndex;
+			private T* mCurrent;
 
-		    public this(T[CSize] list)
-		    {
-		        mList = list;
-		        mIndex = 0;
-		        mCurrent = null;
-		    }
+			public this(T[CSize] list)
+			{
+				mList = list;
+				mIndex = 0;
+				mCurrent = null;
+			}
 
-		    public bool MoveNext() mut
-		    {
-		        if ((uint(mIndex) < uint(CSize)))
-		        {
-		            mCurrent = &mList[mIndex];
-		            mIndex++;
-		            return true;
-		        }			   
-		        return MoveNextRare();
-		    }
+			public bool MoveNext() mut
+			{
+				if ((uint(mIndex) < uint(CSize)))
+				{
+					mCurrent = &mList[mIndex];
+					mIndex++;
+					return true;
+				}
+				return MoveNextRare();
+			}
 
-		    private bool MoveNextRare() mut
-		    {
-		    	mIndex = CSize + 1;
-		        mCurrent = null;
-		        return false;
-		    }
+			private bool MoveNextRare() mut
+			{
+				mIndex = CSize + 1;
+				mCurrent = null;
+				return false;
+			}
 
 			public int Count
 			{
 				get
 				{
 					return mList.Count;
-				}				
+				}
 			}
 
-		    public T Current
-		    {
-		        get
-		        {
-		            return *mCurrent;
-		        }
-		    }
+			public T Current
+			{
+				get
+				{
+					return *mCurrent;
+				}
+			}
 
 			public ref T CurrentRef
 			{
-			    get
-			    {
-			        return ref *mCurrent;
-			    }
+				get
+				{
+					return ref *mCurrent;
+				}
 			}
 
 			public int Index

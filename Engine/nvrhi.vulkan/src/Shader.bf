@@ -3,7 +3,7 @@ using System.Collections;
 using static Bulkan.VulkanNative;
 namespace nvrhi.vulkan
 {
-	class Shader : /*RefCounter<IShader>*/ IShader
+	class Shader : RefCounter<IShader>
 	{
 		public ShaderDesc desc;
 

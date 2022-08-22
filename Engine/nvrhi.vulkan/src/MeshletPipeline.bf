@@ -2,7 +2,7 @@ using Bulkan;
 using static Bulkan.VulkanNative;
 namespace nvrhi.vulkan
 {
-	class MeshletPipeline : /*RefCounter<IMeshletPipeline>*/ IMeshletPipeline
+	class MeshletPipeline : RefCounter<IMeshletPipeline>
 	{
 		public MeshletPipelineDesc desc;
 		public FramebufferInfo framebufferInfo;

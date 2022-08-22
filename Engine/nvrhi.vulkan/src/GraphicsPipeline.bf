@@ -2,7 +2,7 @@ using Bulkan;
 using static Bulkan.VulkanNative;
 namespace nvrhi.vulkan
 {
-	class GraphicsPipeline : /*RefCounter<IGraphicsPipeline>*/ IGraphicsPipeline
+	class GraphicsPipeline : RefCounter<IGraphicsPipeline>
 	{
 		public GraphicsPipelineDesc desc;
 		public FramebufferInfo framebufferInfo;
