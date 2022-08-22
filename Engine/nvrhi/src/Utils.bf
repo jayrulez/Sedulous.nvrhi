@@ -401,6 +401,6 @@ namespace nvrhi.utils
 		private int32 m_NextAvailable = 0;
 		private List<bool> m_Allocated = new .() ~ delete _;
 		private bool m_MultiThreaded;
-		private Monitor m_Mutex = new .();
+		private Monitor m_Mutex = new .() ~ delete _;
 	}
 }

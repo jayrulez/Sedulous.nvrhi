@@ -76,6 +76,7 @@ namespace nvrhi.test
 			defer delete deviceManager;
 
 			deviceManager.[Friend]CreateDeviceAndSwapChain();
+			deviceManager.[Friend]DestroyDeviceAndSwapChain();
 
 			Console.Read();
 

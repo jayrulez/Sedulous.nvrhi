@@ -19,6 +19,12 @@ namespace nvrhi.vulkan
 			m_ScratchManager = new UploadManager(device, (.)parameters.scratchChunkSize, (.)parameters.scratchMaxMemory, true);
 		}
 
+		public ~this(){
+			delete m_ScratchManager;
+			delete m_UploadManager;
+			delete m_StateTracker;
+		}
+
 		public void executed(Queue queue, uint64 submissionID)
 		{
 			Runtime.Assert(m_CurrentCmdBuf != null);

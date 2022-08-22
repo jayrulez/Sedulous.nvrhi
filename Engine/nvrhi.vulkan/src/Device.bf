@@ -139,6 +139,18 @@ namespace nvrhi.vulkan
 				vkDestroyPipelineCache(m_Context.device, m_Context.pipelineCache, m_Context.allocationCallbacks);
 				m_Context.pipelineCache = .Null;
 			}
+
+			for (var queue in m_Queues)
+			{
+				if (queue != null)
+				{
+					delete queue;
+				}
+			}
+
+			delete m_TimerQueryAllocator;
+			delete m_Allocator;
+			delete m_Context;
 		}
 
 		public Queue getQueue(CommandQueue queue) { return m_Queues[int32(queue)]; }

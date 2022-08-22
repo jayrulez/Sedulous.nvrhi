@@ -109,7 +109,7 @@ namespace nvrhi.deviceManager.vulkan
 				public nvrhi.TextureHandle rhiHandle;
 			}
 
-			private List<SwapChainImage> m_SwapChainImages;
+			private List<SwapChainImage> m_SwapChainImages = new .() ~ delete _;
 			private uint32 m_SwapChainIndex = uint32(-1);
 
 			private nvrhi.vulkan.DeviceHandle m_NvrhiDevice;
@@ -999,6 +999,12 @@ namespace nvrhi.deviceManager.vulkan
 					m_SwapChain = .Null;
 				}
 
+				for (var scImage in m_SwapChainImages)
+				{
+					scImage.rhiHandle.Release();
+					scImage.rhiHandle = null;
+				}
+
 				m_SwapChainImages.Clear();
 			}
 
@@ -1102,9 +1108,13 @@ namespace nvrhi.deviceManager.vulkan
 				vkDestroySemaphore(m_VulkanDevice, m_PresentSemaphore, null);
 				m_PresentSemaphore = .Null;
 
+				m_BarrierCommandList.Release();
 				m_BarrierCommandList = null;
 
+				m_NvrhiDevice.Release();
 				m_NvrhiDevice = null;
+
+				m_ValidationLayer?.Release();
 				m_ValidationLayer = null;
 				m_RendererString.Clear();
 

@@ -7,191 +7,191 @@ namespace nvrhi.vulkan
 {
 	class Texture :  MemoryResource, RefCounter<ITexture>, TextureStateExtension
 	{
-	    public enum TextureSubresourceViewType // see getSubresourceView()
-	    {
-	        AllAspects,
-	        DepthOnly,
-	        StencilOnly
-	    }
+		public enum TextureSubresourceViewType // see getSubresourceView()
+		{
+			AllAspects,
+			DepthOnly,
+			StencilOnly
+		}
 
-	    public struct TextureSubresourcesViewKey 
-	        : this(TextureSubresourceSet subresources, TextureSubresourceViewType viewType, TextureDimension dimension)
-	        , IHashable
-	    {
-	        public int GetHashCode ()
-	        {
-	            int hash = 0;
+		public struct TextureSubresourcesViewKey
+			: IHashable, this(TextureSubresourceSet subresources, TextureSubresourceViewType viewType, TextureDimension dimension)
+		{
+			public int GetHashCode()
+			{
+				int hash = 0;
 
-	            hash_combine(ref hash, subresources.baseMipLevel);
-	            hash_combine(ref hash, subresources.numMipLevels);
-	            hash_combine(ref hash, subresources.baseArraySlice);
-	            hash_combine(ref hash, subresources.numArraySlices);
-	            hash_combine(ref hash, viewType);
-	            hash_combine(ref hash, dimension);
+				hash_combine(ref hash, subresources.baseMipLevel);
+				hash_combine(ref hash, subresources.numMipLevels);
+				hash_combine(ref hash, subresources.baseArraySlice);
+				hash_combine(ref hash, subresources.numArraySlices);
+				hash_combine(ref hash, viewType);
+				hash_combine(ref hash, dimension);
 
-	            return hash;
-	        }
-	    }
+				return hash;
+			}
+		}
 
-	    
-	    public TextureDesc desc;
 
-	    public VkImageCreateInfo imageInfo;
-	    public VkImage image;
+		public TextureDesc desc;
 
-	    public HeapHandle heap;
-	    
-	    // contains subresource views for this texture
-	    // note that we only create the views that the app uses, and that multiple views may map to the same subresources
-	    public Dictionary<TextureSubresourcesViewKey, TextureSubresourceView> subresourceViews;
+		public VkImageCreateInfo imageInfo;
+		public VkImage image;
 
-	    public this(VulkanContext* context, VulkanAllocator allocator)
-	    {
-	        m_Context = context;
-	        m_Allocator = allocator;
-	    }
+		public HeapHandle heap;
 
-	    // returns a subresource view for an arbitrary range of mip levels and array layers.
-	    // 'viewtype' only matters when asking for a depthstencil view; in situations where only depth or stencil can be bound
-	    // (such as an SRV with ImageLayout::eShaderReadOnlyOptimal), but not both, then this specifies which of the two aspect bits is to be set.
-	    public ref TextureSubresourceView getSubresourceView(TextureSubresourceSet subresource, TextureDimension dimension, TextureSubresourceViewType viewtype = TextureSubresourceViewType.AllAspects)
-    {
-		var dimension;
-        // This function is called from createBindingSet etc. and therefore free-threaded.
-        // It modifies the subresourceViews map associated with the texture.
-        m_Mutex.Enter(); defer m_Mutex.Exit();
+		// contains subresource views for this texture
+		// note that we only create the views that the app uses, and that multiple views may map to the same subresources
+		public Dictionary<TextureSubresourcesViewKey, TextureSubresourceView> subresourceViews = new .() ~ delete _;
 
-        if (dimension == TextureDimension.Unknown)
-            dimension = desc.dimension;
+		public this(VulkanContext* context, VulkanAllocator allocator)
+		{
+			m_Context = context;
+			m_Allocator = allocator;
+		}
 
-        TextureSubresourcesViewKey cachekey = .(subresource,viewtype, dimension);
-        if (subresourceViews.ContainsKey(cachekey))
-        {
-            return ref subresourceViews[cachekey];
-        }
+		// returns a subresource view for an arbitrary range of mip levels and array layers.
+		// 'viewtype' only matters when asking for a depthstencil view; in situations where only depth or stencil can be bound
+		// (such as an SRV with ImageLayout::eShaderReadOnlyOptimal), but not both, then this specifies which of the two aspect bits is to be set.
+		public ref TextureSubresourceView getSubresourceView(TextureSubresourceSet subresource, TextureDimension dimension, TextureSubresourceViewType viewtype = TextureSubresourceViewType.AllAspects)
+		{
+			var dimension;
+			// This function is called from createBindingSet etc. and therefore free-threaded.
+			// It modifies the subresourceViews map associated with the texture.
+			m_Mutex.Enter(); defer m_Mutex.Exit();
 
-        subresourceViews.Add(cachekey, .(this));
-        var view = ref subresourceViews[cachekey];
+			if (dimension == TextureDimension.Unknown)
+				dimension = desc.dimension;
 
-        view.subresource = subresource;
+			TextureSubresourcesViewKey cachekey = .(subresource, viewtype, dimension);
+			if (subresourceViews.ContainsKey(cachekey))
+			{
+				return ref subresourceViews[cachekey];
+			}
 
-        var vkformat = nvrhi.vulkan.convertFormat(desc.format);
+			subresourceViews.Add(cachekey, .(this));
+			var view = ref subresourceViews[cachekey];
 
-        VkImageAspectFlags aspectflags = guessSubresourceImageAspectFlags(vkformat, viewtype);
-        view.subresourceRange = VkImageSubresourceRange()
-                                    .setAspectMask(aspectflags)
-                                    .setBaseMipLevel(subresource.baseMipLevel)
-                                    .setLevelCount(subresource.numMipLevels)
-                                    .setBaseArrayLayer(subresource.baseArraySlice)
-                                    .setLayerCount(subresource.numArraySlices);
+			view.subresource = subresource;
 
-        VkImageViewType imageViewType = textureDimensionToImageViewType(dimension);
+			var vkformat = nvrhi.vulkan.convertFormat(desc.format);
 
-        var viewInfo = VkImageViewCreateInfo()
-                            .setImage(image)
-                            .setViewType(imageViewType)
-                            .setFormat(vkformat)
-                            .setSubresourceRange(view.subresourceRange);
+			VkImageAspectFlags aspectflags = guessSubresourceImageAspectFlags(vkformat, viewtype);
+			view.subresourceRange = VkImageSubresourceRange()
+				.setAspectMask(aspectflags)
+				.setBaseMipLevel(subresource.baseMipLevel)
+				.setLevelCount(subresource.numMipLevels)
+				.setBaseArrayLayer(subresource.baseArraySlice)
+				.setLayerCount(subresource.numArraySlices);
 
-        if (viewtype == TextureSubresourceViewType.StencilOnly)
-        {
-            // D3D / HLSL puts stencil values in the second component to keep the illusion of combined depth/stencil.
-            // Set a component swizzle so we appear to do the same.
-            viewInfo.components.setG(VkComponentSwizzle.eR);
-        }
+			VkImageViewType imageViewType = textureDimensionToImageViewType(dimension);
 
-        readonly VkResult res = vkCreateImageView(m_Context.device, &viewInfo, m_Context.allocationCallbacks, &view.view);
-        ASSERT_VK_OK!(res);
+			var viewInfo = VkImageViewCreateInfo()
+				.setImage(image)
+				.setViewType(imageViewType)
+				.setFormat(vkformat)
+				.setSubresourceRange(view.subresourceRange);
 
-        readonly String debugName = scope $"ImageView for: {utils.DebugNameToString(desc.debugName)}";
-        m_Context.nameVKObject(VkImageView(view.view), VkDebugReportObjectTypeEXT.eImageViewExt, debugName);
+			if (viewtype == TextureSubresourceViewType.StencilOnly)
+			{
+				// D3D / HLSL puts stencil values in the second component to keep the illusion of combined depth/stencil.
+				// Set a component swizzle so we appear to do the same.
+				viewInfo.components.setG(VkComponentSwizzle.eR);
+			}
 
-        return ref view;
-    }
-	    
-	    public uint32 getNumSubresources()
-    {
-        return desc.mipLevels * desc.arraySize;
-    }
-	    public uint32 getSubresourceIndex(uint32 mipLevel, uint32 arrayLayer)
-    {
-        return mipLevel * desc.arraySize + arrayLayer;
-    }
+			readonly VkResult res = vkCreateImageView(m_Context.device, &viewInfo, m_Context.allocationCallbacks, &view.view);
+			ASSERT_VK_OK!(res);
 
-	    public ~this() {
+			readonly String debugName = scope $"ImageView for: {utils.DebugNameToString(desc.debugName)}";
+			m_Context.nameVKObject(VkImageView(view.view), VkDebugReportObjectTypeEXT.eImageViewExt, debugName);
+
+			return ref view;
+		}
+
+		public uint32 getNumSubresources()
+		{
+			return desc.mipLevels * desc.arraySize;
+		}
+		public uint32 getSubresourceIndex(uint32 mipLevel, uint32 arrayLayer)
+		{
+			return mipLevel * desc.arraySize + arrayLayer;
+		}
+
+		public ~this()
+		{
 			for (var viewIter in subresourceViews)
 			{
-			    var view = ref viewIter.value.view;
-			    vkDestroyImageView(m_Context.device, view, m_Context.allocationCallbacks);
-			    view = .Null;
+				var view = ref viewIter.value.view;
+				vkDestroyImageView(m_Context.device, view, m_Context.allocationCallbacks);
+				view = .Null;
 			}
 			subresourceViews.Clear();
 
 			if (managed)
 			{
-			    if (image != .Null)
-			    {
-			        vkDestroyImage(m_Context.device, image, m_Context.allocationCallbacks);
-			        image = .Null;
-			    }
+				if (image != .Null)
+				{
+					vkDestroyImage(m_Context.device, image, m_Context.allocationCallbacks);
+					image = .Null;
+				}
 
-			    if (memory != .Null)
-			    {
-			        m_Allocator.freeTextureMemory(this);
-			        memory = .Null;
-			    }
+				if (memory != .Null)
+				{
+					m_Allocator.freeTextureMemory(this);
+					memory = .Null;
+				}
 			}
-	    }
+		}
 
-	    public override readonly ref TextureDesc getDesc() { return ref desc; }
-	    public override NativeObject getNativeObject(ObjectType objectType)
-    {
-        switch (objectType)
-        {
-        case ObjectType.VK_Image:
-            return NativeObject(image);
-        case ObjectType.VK_DeviceMemory:
-            return NativeObject(memory);
-        default:
-            return null;
-        }
-    }
-	    public override NativeObject getNativeView(ObjectType objectType, Format format, TextureSubresourceSet subresources, TextureDimension dimension, bool isReadOnlyDSV = false)
-    {
-		var format;
-        switch (objectType)
-        {
-        case ObjectType.VK_ImageView: 
-        {
-            if (format == Format.UNKNOWN)
-                format = desc.format;
+		public override readonly ref TextureDesc getDesc() { return ref desc; }
+		public override NativeObject getNativeObject(ObjectType objectType)
+		{
+			switch (objectType)
+			{
+			case ObjectType.VK_Image:
+				return NativeObject(image);
+			case ObjectType.VK_DeviceMemory:
+				return NativeObject(memory);
+			default:
+				return null;
+			}
+		}
+		public override NativeObject getNativeView(ObjectType objectType, Format format, TextureSubresourceSet subresources, TextureDimension dimension, bool isReadOnlyDSV = false)
+		{
+			var format;
+			switch (objectType)
+			{
+			case ObjectType.VK_ImageView:
+				{
+					if (format == Format.UNKNOWN)
+						format = desc.format;
 
-            readonly ref FormatInfo formatInfo = ref getFormatInfo(format);
+					readonly ref FormatInfo formatInfo = ref getFormatInfo(format);
 
-            TextureSubresourceViewType viewType = TextureSubresourceViewType.AllAspects;
-            if (formatInfo.hasDepth && !formatInfo.hasStencil)
-                viewType = TextureSubresourceViewType.DepthOnly;
-            else if(!formatInfo.hasDepth && formatInfo.hasStencil)
-                viewType = TextureSubresourceViewType.StencilOnly;
+					TextureSubresourceViewType viewType = TextureSubresourceViewType.AllAspects;
+					if (formatInfo.hasDepth && !formatInfo.hasStencil)
+						viewType = TextureSubresourceViewType.DepthOnly;
+					else if (!formatInfo.hasDepth && formatInfo.hasStencil)
+						viewType = TextureSubresourceViewType.StencilOnly;
 
-            return NativeObject(getSubresourceView(subresources, dimension, viewType).view);
-        }
-        default:
-            return null;
-        }
-    }
+					return NativeObject(getSubresourceView(subresources, dimension, viewType).view);
+				}
+			default:
+				return null;
+			}
+		}
 
-	    private VulkanContext* m_Context;
-	    private VulkanAllocator m_Allocator;
-	    private Monitor m_Mutex = new .() ~ delete _;
+		private VulkanContext* m_Context;
+		private VulkanAllocator m_Allocator;
+		private Monitor m_Mutex = new .() ~ delete _;
 
-		public ResourceStates permanentState {get; set;} = .Unknown;
+		public ResourceStates permanentState { get; set; } = .Unknown;
 
-		public bool stateInitialized {get; set;} = false;
+		public bool stateInitialized { get; set; } = false;
 
-		public bool managed{get; set;} = true;
+		public bool managed { get; set; } = true;
 
-		public ref VkDeviceMemory memory{get; set;} = .Null;
+		public ref VkDeviceMemory memory { get; set; } = .Null;
 
 		public int GetHashCode()
 		{

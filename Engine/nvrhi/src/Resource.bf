@@ -49,30 +49,27 @@ namespace nvrhi
 namespace nvrhi
 {
 	typealias RefCounter<T> = T;
-	typealias RefCountPtr<T> = T;//RefCounter<T>; // beef error caused here with uncommented version
+	typealias RefCountPtr<T> = T; //RefCounter<T>; // beef error caused here with uncommented version
 
 	extension IResource
 	{
 		private uint64 mRefCount = 1;
-		private Monitor mRefCountMonitor = new .() ~ delete _;
 
 		public uint64 AddRef()
 		{
-			using (mRefCountMonitor.Enter())
-				return ++mRefCount;
+			Interlocked.Increment(ref mRefCount);
+
+			return mRefCount;
 		}
 
 		public uint64 Release()
 		{
-			using (mRefCountMonitor.Enter())
+			var refCount = Interlocked.Decrement(ref mRefCount);
+			if (refCount == 0)
 			{
-				uint64 result = --mRefCount;
-				if (result == 0)
-				{
-					delete this;
-				}
-				return result;
+				delete this;
 			}
+			return refCount;
 		}
 
 		public Self Value => this;
