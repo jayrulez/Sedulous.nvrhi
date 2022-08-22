@@ -1,4 +1,6 @@
 using System;
+using nvrhi.device_manager;
+using nvrhi.vulkan.device_manager;
 namespace nvrhi.test
 {
 	
@@ -21,6 +23,12 @@ namespace nvrhi.test
 			var textureHandle = TextureHandle.Attach(texture);
 
 			textureHandle.Release();*/
+
+			DeviceManager deviceManager = new VulkanDeviceManager();
+
+			defer delete deviceManager;
+
+			deviceManager.[Friend]CreateDeviceAndSwapChain();
 
 			Console.Read();
 		}

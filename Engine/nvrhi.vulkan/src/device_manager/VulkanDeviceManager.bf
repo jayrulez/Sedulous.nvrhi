@@ -41,34 +41,34 @@ namespace nvrhi.vulkan.device_manager
 			// minimal set of required extensions
 			private VulkanExtensionSet enabledExtensions = .()
 				{
-					instance = scope .()
+					instance = new .()
 						{
-							scope .(VulkanNative.VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME)
+							new .(VulkanNative.VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME)
 						},
-					layers = scope .() { },
-					device = scope .()
+					layers = new .() { },
+					device = new .()
 						{
-							scope .(VulkanNative.VK_KHR_SWAPCHAIN_EXTENSION_NAME),
-							scope .(VulkanNative.VK_KHR_MAINTENANCE1_EXTENSION_NAME)
+							new .(VulkanNative.VK_KHR_SWAPCHAIN_EXTENSION_NAME),
+							new .(VulkanNative.VK_KHR_MAINTENANCE1_EXTENSION_NAME)
 						}
 				};
 
 			// optional extensions
 			private VulkanExtensionSet optionalExtensions = .()
 				{
-					instance = scope .()
+					instance = new .()
 						{
-							scope .(VulkanNative.VK_EXT_SAMPLER_FILTER_MINMAX_EXTENSION_NAME),
-							scope .(VulkanNative.VK_EXT_DEBUG_UTILS_EXTENSION_NAME)
+							new .(VulkanNative.VK_EXT_SAMPLER_FILTER_MINMAX_EXTENSION_NAME),
+							new .(VulkanNative.VK_EXT_DEBUG_UTILS_EXTENSION_NAME)
 						},
-					layers = scope .() { },
-					device = scope .()
+					layers = new .() { },
+					device = new .()
 						{
-							scope .(VulkanNative.VK_EXT_DEBUG_MARKER_EXTENSION_NAME),
-							scope .(VulkanNative.VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME),
-							scope .(VulkanNative.VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME),
-							scope .(VulkanNative.VK_NV_MESH_SHADER_EXTENSION_NAME),
-							scope .(VulkanNative.VK_KHR_FRAGMENT_SHADING_RATE_EXTENSION_NAME)
+							new .(VulkanNative.VK_EXT_DEBUG_MARKER_EXTENSION_NAME),
+							new .(VulkanNative.VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME),
+							new .(VulkanNative.VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME),
+							new .(VulkanNative.VK_NV_MESH_SHADER_EXTENSION_NAME),
+							new .(VulkanNative.VK_KHR_FRAGMENT_SHADING_RATE_EXTENSION_NAME)
 						}
 				};
 
@@ -316,27 +316,47 @@ namespace nvrhi.vulkan.device_manager
 
 			private bool createInstance()
 			{
+				// add any required extensions
+#if BF_PLATFORM_WINDOWS
+				enabledExtensions.instance.Add(new .(VulkanNative.VK_KHR_WIN32_SURFACE_EXTENSION_NAME));
+#endif
+
 				// add instance extensions requested by the user
-				for (var name in m_DeviceParams.requiredVulkanInstanceExtensions)
+				if (m_DeviceParams.requiredVulkanInstanceExtensions != null)
 				{
-					enabledExtensions.instance.Add(name);
+					for (var name in m_DeviceParams.requiredVulkanInstanceExtensions)
+					{
+						enabledExtensions.instance.Add(name);
+					}
 				}
-				for (var name in m_DeviceParams.optionalVulkanInstanceExtensions)
+				if (m_DeviceParams.optionalVulkanInstanceExtensions != null)
 				{
-					optionalExtensions.instance.Add(name);
+					for (var name in m_DeviceParams.optionalVulkanInstanceExtensions)
+					{
+						optionalExtensions.instance.Add(name);
+					}
 				}
 
 				// add layers requested by the user
-				for (var name in m_DeviceParams.requiredVulkanLayers)
+				if (m_DeviceParams.requiredVulkanLayers != null)
 				{
-					enabledExtensions.layers.Add(name);
+					for (var name in m_DeviceParams.requiredVulkanLayers)
+					{
+						enabledExtensions.layers.Add(name);
+					}
 				}
-				for (var name in m_DeviceParams.optionalVulkanLayers)
+				if (m_DeviceParams.optionalVulkanLayers != null)
 				{
-					optionalExtensions.layers.Add(name);
+					for (var name in m_DeviceParams.optionalVulkanLayers)
+					{
+						optionalExtensions.layers.Add(name);
+					}
 				}
 
-				HashSet<String> requiredExtensions = enabledExtensions.instance;
+				HashSet<String> requiredExtensions = scope .();
+				for(var instanceExtension in enabledExtensions.instance){
+					requiredExtensions.Add(instanceExtension);
+				}
 
 				// figure out which optional extensions are supported
 				uint32 instanceExtensionCount = 0;
@@ -349,7 +369,7 @@ namespace nvrhi.vulkan.device_manager
 					String name = scope:: .(&instanceExt.extensionName);
 					if (optionalExtensions.instance.Contains(name))
 					{
-						enabledExtensions.instance.Add(name);
+						enabledExtensions.instance.Add(new .(name));
 					}
 
 					requiredExtensions.Remove(name);
@@ -372,7 +392,10 @@ namespace nvrhi.vulkan.device_manager
 					Debug.WriteLine("    {}", ext);
 				}
 
-				HashSet<String> requiredLayers = enabledExtensions.layers;
+				HashSet<String> requiredLayers = scope .();
+				for(var instanceLayer in enabledExtensions.layers){
+					requiredLayers.Add(instanceLayer);
+				}
 
 				uint32 instanceLayerCount = 0;
 				vkEnumerateInstanceLayerProperties(&instanceLayerCount, null);
@@ -384,7 +407,7 @@ namespace nvrhi.vulkan.device_manager
 					String name = scope:: .(&layer.layerName);
 					if (optionalExtensions.layers.Contains(name))
 					{
-						enabledExtensions.layers.Add(name);
+						enabledExtensions.layers.Add(new .(name));
 					}
 
 					requiredLayers.Remove(name);
@@ -671,7 +694,7 @@ namespace nvrhi.vulkan.device_manager
 				return true;
 			}
 
-			delegate void(HashSet<String>, List<char8*>) StringListToCStringList = scope (input, output) =>
+			private void StringListToCStringList (HashSet<String>input, List<char8*>output)
 				{
 					for (var item in input)
 					{
@@ -997,13 +1020,17 @@ namespace nvrhi.vulkan.device_manager
 					m_DeviceParams.swapChainFormat = nvrhi.Format.BGRA8_UNORM;
 
 				// add device extensions requested by the user
+				if(m_DeviceParams.requiredVulkanDeviceExtensions != null){
 				for (var name in m_DeviceParams.requiredVulkanDeviceExtensions)
 				{
 					enabledExtensions.device.Add(name);
 				}
+				}
+				if(m_DeviceParams.optionalVulkanDeviceExtensions != null){
 				for (var name in m_DeviceParams.optionalVulkanDeviceExtensions)
 				{
 					optionalExtensions.device.Add(name);
+				}
 				}
 
 				CHECK!(createWindowSurface());
