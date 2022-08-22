@@ -2,6 +2,10 @@ using System;
 using System.Collections;
 namespace nvrhi.device_manager
 {
+	enum WindowType{
+		Windows
+	}
+
 	struct DeviceCreationParameters
 	{
 		public bool startMaximized = false;
@@ -16,6 +20,8 @@ namespace nvrhi.device_manager
 		public nvrhi.Format swapChainFormat = nvrhi.Format.SRGBA8_UNORM;
 		public uint32 swapChainSampleCount = 1;
 		public uint32 swapChainSampleQuality = 0;
+		public WindowType windowType = .();
+		public void* windowHandle = null;
 		public uint32 maxFramesInFlight = 2;
 		public bool enableDebugRuntime = false;
 		public bool enableNvrhiValidationLayer = false;
@@ -26,7 +32,9 @@ namespace nvrhi.device_manager
 
 		// Severity of the information log messages from the device manager, like the device name or enabled extensions.
 		//log.Severity infoLogSeverity = log.Severity.Info;
+
 	}
+
 
 	abstract class DeviceManager
 	{
