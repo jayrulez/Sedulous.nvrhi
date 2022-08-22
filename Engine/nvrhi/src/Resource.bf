@@ -38,9 +38,14 @@ namespace nvrhi
 		public static implicit operator Self(void* pointer) => Self(pointer);
 	}
 
-	abstract class IResource
+	abstract class IResource : IHashable
 	{
 		public virtual NativeObject getNativeObject(ObjectType objectType) { (void)objectType; return null; }
+
+		public int GetHashCode()
+		{
+			return (.)Internal.UnsafeCastToPtr(this);
+		}
 	}
 
 	typealias ResourceHandle = RefCounter<IResource>;
@@ -50,6 +55,7 @@ namespace nvrhi
 {
 	typealias RefCounter<T> = T;
 	typealias RefCountPtr<T> = T; //RefCounter<T>; // beef error caused here with uncommented version
+	// RefCountPtr should be IHashable, satisfied by IResource since RefCountPtr is an IResource with this setup
 
 	extension IResource
 	{
