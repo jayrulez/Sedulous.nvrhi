@@ -96,7 +96,7 @@ namespace nvrhi.vulkan
 #endif
 
 			VkResult result = vkEndCommandBuffer(m_CurrentCmdBuf.cmdBuf);
-			ASSERT_VK_OK!(result);
+			/*ASSERT_VK_OK!(result);*/
 
 			clearState();
 

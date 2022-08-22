@@ -139,7 +139,7 @@ namespace nvrhi.test
 
 				var fb = deviceManager.GetCurrentFramebuffer();
 
-				nvrhi.utils.ClearColorAttachment(commandList, fb, 0, nvrhi.Color(0.f));
+				nvrhi.utils.ClearColorAttachment(commandList, fb, 0, nvrhi.Color(0.f, 0.5f, 0.2f, 1));
 
 				commandList.close();
 
