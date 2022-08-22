@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Threading;
+using System.IO;
 namespace nvrhi.shaderCompiler.App
 {
 	struct CompileTask
@@ -20,7 +21,7 @@ namespace nvrhi.shaderCompiler.App
 
 	class Program
 	{
-		private static CommandLineOptions g_Options;
+		private static CommandLineOptions g_Options = .();
 		private static String g_PlatformName;
 
 		private static List<CompileTask> g_CompileTasks;
@@ -39,8 +40,31 @@ namespace nvrhi.shaderCompiler.App
 
 		private static char8* g_SharedCompilerOptions = "-nologo ";
 
-		public static void Main(String[] args){
+		public static void Main(String[] args)
+		{
+			if (!g_Options.parse(args))
+			{
+				Console.WriteLine(g_Options.errorMessage);
+				return;
+			}
 
+			switch (g_Options.platform)
+			{
+			case CompilerPlatform.DXBC: g_PlatformName = "DXBC"; break;
+			case CompilerPlatform.DXIL: g_PlatformName = "DXIL"; break;
+			case CompilerPlatform.SPIRV: g_PlatformName = "SPIR-V"; break;
+			case CompilerPlatform.UNKNOWN: g_PlatformName = "UNKNOWN"; break; // never happens
+			}
+
+			for (/*readonly ref*/ var fileName in /*ref*/ g_Options.ignoreFileNames)
+			{
+				g_IgnoreIncludes.Add(fileName);
+			}
+
+			g_ConfigWriteTime = File.GetLastWriteTime(g_Options.inputFile);
+
+			// Updated shaderCompiler executable also means everything must be recompiled
+			//g_ConfigWriteTime = Math.Max(g_ConfigWriteTime, fs::last_write_time(argv[0]));
 		}
 	}
 }
