@@ -11,11 +11,11 @@ namespace nvrhi.vulkan
 			VkDevice device,
 			VkAllocationCallbacks* allocationCallbacks = null)
 		{
-			instance = instance;
-			physicalDevice = physicalDevice;
-			device = device;
-			allocationCallbacks = allocationCallbacks;
-			pipelineCache = null;
+			this.instance = instance;
+			this.physicalDevice = physicalDevice;
+			this.device = device;
+			this.allocationCallbacks = allocationCallbacks;
+			this.pipelineCache = null;
 		}
 
 		public VkInstance instance;

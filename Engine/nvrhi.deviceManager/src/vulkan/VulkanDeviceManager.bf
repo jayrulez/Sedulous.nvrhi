@@ -121,8 +121,8 @@ namespace nvrhi.deviceManager.vulkan
 			private System.Collections.Queue<nvrhi.EventQueryHandle> m_FramesInFlight;
 			private List<nvrhi.EventQueryHandle> m_QueryPool;
 
-			public this(DeviceCreationParameters @params): base(@params){
-
+			public this(DeviceCreationParameters @params) : base(@params)
+			{
 			}
 
 			protected override void ResizeSwapChain()
@@ -173,7 +173,7 @@ namespace nvrhi.deviceManager.vulkan
 				}
 				else
 				{
-#if !WIN32
+#if !BF_PLATFORM_WINDOWS
 					if (m_DeviceParams.vsyncEnabled)
 					{
 						vkQueueWaitIdle(m_PresentQueue);
@@ -321,6 +321,7 @@ namespace nvrhi.deviceManager.vulkan
 			private bool createInstance()
 			{
 				// add any required extensions
+				enabledExtensions.instance.Add(new .(VulkanNative.VK_KHR_SURFACE_EXTENSION_NAME));
 #if BF_PLATFORM_WINDOWS
 				enabledExtensions.instance.Add(new .(VulkanNative.VK_KHR_WIN32_SURFACE_EXTENSION_NAME));
 #endif
@@ -358,7 +359,8 @@ namespace nvrhi.deviceManager.vulkan
 				}
 
 				HashSet<String> requiredExtensions = scope .();
-				for(var instanceExtension in enabledExtensions.instance){
+				for (var instanceExtension in enabledExtensions.instance)
+				{
 					requiredExtensions.Add(instanceExtension);
 				}
 
@@ -397,7 +399,8 @@ namespace nvrhi.deviceManager.vulkan
 				}
 
 				HashSet<String> requiredLayers = scope .();
-				for(var instanceLayer in enabledExtensions.layers){
+				for (var instanceLayer in enabledExtensions.layers)
+				{
 					requiredLayers.Add(instanceLayer);
 				}
 
@@ -498,10 +501,15 @@ namespace nvrhi.deviceManager.vulkan
 					errorStream.AppendF("\n{}:", scope String(&prop.deviceName));
 
 					// check that all required device extensions are present
-					HashSet<String> requiredExtensions = enabledExtensions.device;
+					HashSet<String> requiredExtensions = scope .();
+					for (var requiredDeviceExtension in enabledExtensions.device)
+					{
+						requiredExtensions.Add(requiredDeviceExtension);
+					}
 					uint32 deviceExtensionCount = 0;
 					vkEnumerateDeviceExtensionProperties(dev, null, &deviceExtensionCount, null);
 					List<VkExtensionProperties> deviceExtensions = scope .() { Count = deviceExtensionCount };
+					vkEnumerateDeviceExtensionProperties(dev, null, &deviceExtensionCount, deviceExtensions.Ptr);
 					for (var ext in deviceExtensions)
 					{
 						requiredExtensions.Remove(scope String(&ext.extensionName));
@@ -561,7 +569,7 @@ namespace nvrhi.deviceManager.vulkan
 						surfaceCaps.maxImageExtent.height < requestedExtent.height)
 					{
 						errorStream.Append("\n  - cannot support the requested swap chain size:");
-						errorStream.AppendF(" requested {0}x{}, ", requestedExtent.width, requestedExtent.height);
+						errorStream.AppendF(" requested {}x{}, ", requestedExtent.width, requestedExtent.height);
 						errorStream.AppendF(" available {}x{}", surfaceCaps.minImageExtent.width, surfaceCaps.minImageExtent.height);
 						errorStream.AppendF(" - {}x{}", surfaceCaps.maxImageExtent.width,  surfaceCaps.maxImageExtent.height);
 						deviceIsGood = false;
@@ -698,13 +706,13 @@ namespace nvrhi.deviceManager.vulkan
 				return true;
 			}
 
-			private void StringListToCStringList (HashSet<String>input, List<char8*>output)
+			private void StringListToCStringList(HashSet<String> input, List<char8*> output)
+			{
+				for (var item in input)
 				{
-					for (var item in input)
-					{
-						output.Add(item);
-					}
-				};
+					output.Add(item);
+				}
+			};
 
 			private bool createDevice()
 			{
@@ -718,12 +726,12 @@ namespace nvrhi.deviceManager.vulkan
 					readonly String name = scope:: String(&ext.extensionName);
 					if (optionalExtensions.device.Contains(name))
 					{
-						enabledExtensions.device.Add(name);
+						enabledExtensions.device.Add(new .(name));
 					}
 
 					if (m_DeviceParams.enableRayTracingExtensions && m_RayTracingExtensions.Contains(name))
 					{
-						enabledExtensions.device.Add(name);
+						enabledExtensions.device.Add(new .(name));
 					}
 				}
 
@@ -1024,17 +1032,19 @@ namespace nvrhi.deviceManager.vulkan
 					m_DeviceParams.swapChainFormat = nvrhi.Format.BGRA8_UNORM;
 
 				// add device extensions requested by the user
-				if(m_DeviceParams.requiredVulkanDeviceExtensions != null){
-				for (var name in m_DeviceParams.requiredVulkanDeviceExtensions)
+				if (m_DeviceParams.requiredVulkanDeviceExtensions != null)
 				{
-					enabledExtensions.device.Add(name);
+					for (var name in m_DeviceParams.requiredVulkanDeviceExtensions)
+					{
+						enabledExtensions.device.Add(name);
+					}
 				}
-				}
-				if(m_DeviceParams.optionalVulkanDeviceExtensions != null){
-				for (var name in m_DeviceParams.optionalVulkanDeviceExtensions)
+				if (m_DeviceParams.optionalVulkanDeviceExtensions != null)
 				{
-					optionalExtensions.device.Add(name);
-				}
+					for (var name in m_DeviceParams.optionalVulkanDeviceExtensions)
+					{
+						optionalExtensions.device.Add(name);
+					}
 				}
 
 				CHECK!(createWindowSurface());
