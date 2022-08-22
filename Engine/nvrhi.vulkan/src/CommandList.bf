@@ -1717,6 +1717,7 @@ namespace nvrhi.vulkan
 		private void clearTexture(ITexture _texture, TextureSubresourceSet subresources, VkClearColorValue clearValue)
 		{
 			var subresources;
+			var clearValue;
 			endRenderPass();
 
 			Texture texture = checked_cast<Texture, ITexture>(_texture);

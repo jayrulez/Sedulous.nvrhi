@@ -1,0 +1,7 @@
+FileVersion = 1
+Dependencies = {corlib = "*", nvrhi = "*"}
+
+[Project]
+Name = "nvrhi.shaderCompiler"
+TargetType = "BeefLib"
+StartupObject = "nvrhi.shaderCompiler.Program"

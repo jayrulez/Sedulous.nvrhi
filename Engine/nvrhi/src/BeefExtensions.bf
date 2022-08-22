@@ -22,7 +22,7 @@ namespace System.Collections
 				this[i] = fillValue;
 			}
 		}
-		
+
 		public void Assign(T* ptr, int count)
 		{
 			Resize(count);
@@ -44,6 +44,14 @@ namespace System
 		{
 			if (!cond)
 				Runtime.FatalError(message);
+		}
+	}
+
+	extension String
+	{
+		public static bool Compare(char8* lhs, char8* rhs, int length)
+		{
+			return EqualsHelper(lhs, rhs, length);
 		}
 	}
 }

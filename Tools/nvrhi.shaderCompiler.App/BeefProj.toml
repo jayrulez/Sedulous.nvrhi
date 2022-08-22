@@ -1,0 +1,6 @@
+FileVersion = 1
+Dependencies = {corlib = "*", "nvrhi.shaderCompiler" = "*"}
+
+[Project]
+Name = "nvrhi.shaderCompiler.App"
+StartupObject = "nvrhi.shaderCompiler.App.Program"

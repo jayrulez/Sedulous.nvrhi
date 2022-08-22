@@ -1070,7 +1070,7 @@ namespace nvrhi.deviceManager.vulkan
 				CHECK!(createDevice());
 
 				var vecInstanceExt = StringListToCStringList(enabledExtensions.instance, .. scope .());
-				var vecLayers = StringListToCStringList(enabledExtensions.layers, .. scope .());
+				//var vecLayers = StringListToCStringList(enabledExtensions.layers, .. scope .()); // nvrhi doesn't make use of this
 				var vecDeviceExt = StringListToCStringList(enabledExtensions.device, .. scope .());
 
 				nvrhi.vulkan.DeviceDesc deviceDesc = .();
