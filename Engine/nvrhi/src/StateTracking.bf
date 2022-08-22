@@ -17,13 +17,18 @@ namespace nvrhi
 		public bool stateInitialized { get; set; }
 	}
 
-	struct TextureState
+	struct TextureState : IDisposable
 	{
-		public List<ResourceStates> subresourceStates;
+		public List<ResourceStates> subresourceStates = new .();
 		public ResourceStates state = ResourceStates.Unknown;
 		public bool enableUavBarriers = true;
 		public bool firstUavBarrierPlaced = false;
 		public bool permanentTransition = false;
+
+		public void Dispose()
+		{
+			delete subresourceStates;
+		}
 	}
 
 	struct BufferState
@@ -417,8 +422,18 @@ namespace nvrhi
 	            if (texture.getDesc().keepInitialState && !texture.stateInitialized)
 	                texture.stateInitialized = true;
 	        }
-	
+
+			for (var textureState in ref m_TextureStates){
+				(*textureState.valueRef).Dispose();
+				delete *textureState.valueRef;
+			}
+
 	        m_TextureStates.Clear();
+
+
+			for(var bufferState in ref m_BufferStates){
+				delete *bufferState.valueRef;
+			}
 	        m_BufferStates.Clear();
 	    }
 
@@ -429,16 +444,16 @@ namespace nvrhi
 
 	    private IMessageCallback m_MessageCallback;
 
-	    private Dictionary<TextureStateExtension, TextureState*> m_TextureStates;
-	    private Dictionary<BufferStateExtension, BufferState*> m_BufferStates;
+	    private Dictionary<TextureStateExtension, TextureState*> m_TextureStates = new .() ~ delete _;
+	    private Dictionary<BufferStateExtension, BufferState*> m_BufferStates = new .() ~ delete _;
 
 	    // Deferred transitions of textures and buffers to permanent states.
 	    // They are executed only when the command list is executed, not when the app calls endTrackingTextureState.
-	    private List<(TextureStateExtension texture, ResourceStates state)> m_PermanentTextureStates;
-	    private List<(BufferStateExtension buffer, ResourceStates state)> m_PermanentBufferStates;
+	    private List<(TextureStateExtension texture, ResourceStates state)> m_PermanentTextureStates = new .() ~ delete _;
+	    private List<(BufferStateExtension buffer, ResourceStates state)> m_PermanentBufferStates = new .() ~ delete _;
 
-	    private List<TextureBarrier> m_TextureBarriers;
-	    private List<BufferBarrier> m_BufferBarriers;
+	    private List<TextureBarrier> m_TextureBarriers = new .() ~ delete _;
+	    private List<BufferBarrier> m_BufferBarriers = new .() ~ delete _;
 
 	    private TextureState* getTextureStateTracking(TextureStateExtension texture, bool allowCreate)
 	    {

@@ -21,7 +21,7 @@ namespace nvrhi
 			[Inline]
 			get
 			{
-				return CSize;
+				return CurrentSize;
 			}
 		}
 
@@ -81,7 +81,7 @@ namespace nvrhi
 		public void PushBack(T value) mut
 		{
 			Runtime.Assert(CurrentSize < MaxSize);
-			mVal[CurrentSize - 1] = value;
+			mVal[CurrentSize] = value;
 			CurrentSize++;
 		}
 

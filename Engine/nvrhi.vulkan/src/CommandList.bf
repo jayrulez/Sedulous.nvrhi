@@ -1709,7 +1709,7 @@ namespace nvrhi.vulkan
 		}
 		ShaderTableState m_CurrentShaderTablePointers;
 
-		private Dictionary<Buffer, VolatileBufferState> m_VolatileBufferStates;
+		private Dictionary<Buffer, VolatileBufferState> m_VolatileBufferStates = new .() ~ delete _;
 
 		private UploadManager m_UploadManager;
 		private UploadManager m_ScratchManager;

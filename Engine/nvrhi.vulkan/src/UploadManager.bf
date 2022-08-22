@@ -138,7 +138,7 @@ namespace nvrhi.vulkan
 		private uint64 m_AllocatedMemory = 0;
 		private bool m_IsScratchBuffer = false;
 
-		private System.Collections.Queue<BufferChunk*> m_ChunkPool;
+		private System.Collections.Queue<BufferChunk*> m_ChunkPool = new .() ~ delete _;
 		private BufferChunk* m_CurrentChunk;
 	}
 }

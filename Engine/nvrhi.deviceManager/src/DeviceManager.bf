@@ -2,7 +2,8 @@ using System;
 using System.Collections;
 namespace nvrhi.deviceManager
 {
-	enum WindowType{
+	enum WindowType
+	{
 		Windows
 	}
 
@@ -40,7 +41,7 @@ namespace nvrhi.deviceManager
 	{
 		protected DeviceCreationParameters m_DeviceParams;
 		protected uint32 m_FrameIndex = 0;
-		protected List<nvrhi.FramebufferHandle> m_SwapChainFramebuffers;
+		protected List<nvrhi.FramebufferHandle> m_SwapChainFramebuffers = new .() ~ delete _;
 		bool m_RequestedVSync = false;
 
 		public this(DeviceCreationParameters @params)
@@ -50,13 +51,59 @@ namespace nvrhi.deviceManager
 
 		public ~this()
 		{
+
 		}
 
 		public void Shutdown()
 		{
+			for(var sfb in m_SwapChainFramebuffers){
+				sfb.Release();
+			}
+
 			m_SwapChainFramebuffers.Clear();
 
 			DestroyDeviceAndSwapChain();
+		}
+
+		protected void BackBufferResizing()
+		{
+			for (var sfb in m_SwapChainFramebuffers)
+			{
+				sfb.Release();
+			}
+			m_SwapChainFramebuffers.Clear();
+		}
+
+		protected void BackBufferResized()
+		{
+			uint32 backBufferCount = GetBackBufferCount();
+			m_SwapChainFramebuffers.Resize(backBufferCount);
+			for (uint32 index = 0; index < backBufferCount; index++)
+			{
+				m_SwapChainFramebuffers[index] = GetDevice().createFramebuffer(
+					nvrhi.FramebufferDesc().addColorAttachment(GetBackBuffer(index)));
+			}
+		}
+
+		public void OnWindowResized(uint32 width, uint32 height, bool forceResize = false)
+		{
+			if (forceResize || int(m_DeviceParams.backBufferWidth) != width ||
+				int(m_DeviceParams.backBufferHeight) != height ||
+				(m_DeviceParams.vsyncEnabled != m_RequestedVSync && GetGraphicsAPI() == nvrhi.GraphicsAPI.VULKAN))
+			{
+				// window is not minimized, and the size has changed
+
+				BackBufferResizing();
+
+				m_DeviceParams.backBufferWidth = width;
+				m_DeviceParams.backBufferHeight = height;
+				m_DeviceParams.vsyncEnabled = m_RequestedVSync;
+
+				ResizeSwapChain();
+				BackBufferResized();
+			}
+
+			m_DeviceParams.vsyncEnabled = m_RequestedVSync;
 		}
 
 		protected abstract bool CreateDeviceAndSwapChain();

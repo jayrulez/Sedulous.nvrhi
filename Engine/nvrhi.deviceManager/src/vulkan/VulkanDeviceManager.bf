@@ -130,8 +130,8 @@ namespace nvrhi.deviceManager.vulkan
 			private nvrhi.CommandListHandle m_BarrierCommandList;
 			private VkSemaphore m_PresentSemaphore;
 
-			private System.Collections.Queue<nvrhi.EventQueryHandle> m_FramesInFlight;
-			private List<nvrhi.EventQueryHandle> m_QueryPool;
+			private System.Collections.Queue<nvrhi.EventQueryHandle> m_FramesInFlight = new .()  ~ DeleteContainerAndItems!(_);
+			private List<nvrhi.EventQueryHandle> m_QueryPool = new .() ~ DeleteContainerAndItems!(_);
 
 			public this(DeviceCreationParameters @params) : base(@params)
 			{

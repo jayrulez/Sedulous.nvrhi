@@ -260,18 +260,18 @@ namespace nvrhi.vulkan
 		private CommandQueue m_QueueID;
 		private uint32 m_QueueFamilyIndex = uint32(-1);
 
-		private Monitor m_Mutex;
-		private List<VkSemaphore> m_WaitSemaphores;
-		private List<uint64> m_WaitSemaphoreValues;
-		private List<VkSemaphore> m_SignalSemaphores;
-		private List<uint64> m_SignalSemaphoreValues;
+		private Monitor m_Mutex = new .() ~ delete _;
+		private List<VkSemaphore> m_WaitSemaphores = new .() ~ delete _;
+		private List<uint64> m_WaitSemaphoreValues = new .() ~ delete _;
+		private List<VkSemaphore> m_SignalSemaphores = new .() ~ delete _;
+		private List<uint64> m_SignalSemaphoreValues = new .() ~ delete _;
 
 		private uint64 m_LastRecordingID = 0;
 		private uint64 m_LastSubmittedID = 0;
 		private uint64 m_LastFinishedID = 0;
 
 		// tracks the list of command buffers in flight on this queue
-		private Queue<TrackedCommandBufferPtr> m_CommandBuffersInFlight;
-		private Queue<TrackedCommandBufferPtr> m_CommandBuffersPool;
+		private Queue<TrackedCommandBufferPtr> m_CommandBuffersInFlight = new .() ~ DeleteContainerAndItems!(_);
+		private Queue<TrackedCommandBufferPtr> m_CommandBuffersPool = new .() ~ DeleteContainerAndItems!(_);
 	}
 }
