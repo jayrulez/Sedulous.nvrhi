@@ -25,6 +25,32 @@ namespace nvrhi.test
 			m_BytecodeCache.Clear();
 		}
 
+		public nvrhi.ShaderHandle CreateShader(StringView name, List<uint8> byteCode, char8* entryName, List<ShaderMacro> pDefines, nvrhi.ShaderType shaderType)
+		{
+			nvrhi.ShaderDesc desc = nvrhi.ShaderDesc(shaderType);
+			desc.debugName = scope .(name);
+			return CreateShader(byteCode, entryName, pDefines, desc);
+		}
+
+		public nvrhi.ShaderHandle CreateShader(List<uint8> byteCode, char8* entryName, List<ShaderMacro> pDefines, nvrhi.ShaderDesc desc)
+		{
+			if (byteCode.Count == 0)
+				return null;
+
+			List<nvrhi.ShaderConstant> constants = scope .();
+			if (pDefines != null)
+			{
+				for (readonly ref ShaderMacro define in ref pDefines)
+					constants.Add(nvrhi.ShaderConstant() { name = define.name, value = define.definition });
+			}
+
+			nvrhi.ShaderDesc descCopy = desc;
+			descCopy.entryName = scope .(entryName);
+
+			return nvrhi.createShaderPermutation(m_Device, descCopy, byteCode.Ptr, byteCode.Count,
+				constants.Ptr, uint32(constants.Count));
+		}
+
 		public nvrhi.ShaderHandle CreateShader(char8* fileName, char8* entryName, List<ShaderMacro> pDefines, nvrhi.ShaderType shaderType)
 		{
 			nvrhi.ShaderDesc desc = nvrhi.ShaderDesc(shaderType);

@@ -4,6 +4,7 @@ using nvrhi.deviceManager.vulkan;
 using nvrhi.deviceManager;
 using System.IO;
 using System.Diagnostics;
+using nvrhi.shaderCompiler.Dxc;
 namespace nvrhi.test
 {
 
@@ -82,11 +83,31 @@ namespace nvrhi.test
 
 			defer deviceManager.Shutdown();
 
+			DxcShaderCompiler shaderCompiler = scope .(Directory.GetCurrentDirectory(.. scope .()));
+
+			var vsByteCode = shaderCompiler.CompileShader(.()
+				{
+					ShaderPath = "shaders/shaders.hlsl",
+					ShaderType = .Vertex,
+					EntryPoint = "main_vs",
+					OutputType = deviceManager.GetGraphicsAPI() == .VULKAN ? .SPIRV : .DXIL
+				}, ..scope .());
+
+			var psByteCode = shaderCompiler.CompileShader(.()
+				{
+					ShaderPath = "shaders/shaders.hlsl",
+					ShaderType = .Pixel,
+					EntryPoint = "main_ps",
+					OutputType = deviceManager.GetGraphicsAPI() == .VULKAN ? .SPIRV : .DXIL
+				}, ..scope .());
+
 			ShaderFactory shaderFactory = scope .(deviceManager.GetDevice(), .. Path.InternalCombine(.. Directory.GetCurrentDirectory(.. scope .()), "shaders"));
-			nvrhi.ShaderHandle vertexShader = shaderFactory.CreateShader("shaders.hlsl", "main_vs", null, nvrhi.ShaderType.Vertex);
+			//nvrhi.ShaderHandle vertexShader = shaderFactory.CreateShader("shaders.hlsl", "main_vs", null, nvrhi.ShaderType.Vertex);
+			nvrhi.ShaderHandle vertexShader = shaderFactory.CreateShader("shaders.hlsl", vsByteCode, "main_vs", null, nvrhi.ShaderType.Vertex);
 			defer vertexShader.Release();
 
-			nvrhi.ShaderHandle pixelShader = shaderFactory.CreateShader("shaders.hlsl", "main_ps", null, nvrhi.ShaderType.Pixel);
+			//nvrhi.ShaderHandle pixelShader = shaderFactory.CreateShader("shaders.hlsl", "main_ps", null, nvrhi.ShaderType.Pixel);
+			nvrhi.ShaderHandle pixelShader = shaderFactory.CreateShader("shaders.hlsl", psByteCode, "main_ps", null, nvrhi.ShaderType.Pixel);
 			defer pixelShader.Release();
 
 			// force resize so back buffer resources get created

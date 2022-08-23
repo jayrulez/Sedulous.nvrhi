@@ -1,0 +1,8 @@
+FileVersion = 1
+Dependencies = {corlib = "*", Dxc-Beef = "*", nvrhi = "*"}
+
+[Project]
+Name = "nvrhi.shaderCompiler.HLSL"
+TargetType = "BeefLib"
+StartupObject = "nvrhi.shaderCompiler.Dxc.Program"
+DefaultNamespace = "nvrhi.shaderCompiler.Dxc"

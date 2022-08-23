@@ -1,6 +1,6 @@
 FileVersion = 1
-Projects = {nvrhi = {Path = "Engine/nvrhi"}, Bulkan = {Path = "Dependencies/Bulkan"}, "nvrhi.test" = {Path = "Samples/nvrhi.test"}, "nvrhi.d3d11" = {Path = "Engine/nvrhi.d3d11"}, "nvrhi.d3d12" = {Path = "Engine/nvrhi.d3d12"}, "nvrhi.vulkan" = {Path = "Engine/nvrhi.vulkan"}, "nvrhi.validation" = {Path = "Engine/nvrhi.validation"}, SDL2 = "*", "nvrhi.deviceManager" = {Path = "Engine/nvrhi.deviceManager"}, "nvrhi.shaderCompiler" = {Path = "Tools/nvrhi.shaderCompiler"}, "nvrhi.shaderCompiler.App" = {Path = "Tools/nvrhi.shaderCompiler.App"}}
-WorkspaceFolders = {Engine = ["nvrhi", "nvrhi.d3d11", "nvrhi.d3d12", "nvrhi.vulkan", "nvrhi.validation", "nvrhi.deviceManager"], Dependencies = ["corlib", "Bulkan", "SDL2"], Samples = ["nvrhi.test"], Tools = ["nvrhi.shaderCompiler", "nvrhi.shaderCompiler.App"]}
+Projects = {nvrhi = {Path = "Engine/nvrhi"}, Bulkan = {Path = "Dependencies/Bulkan"}, "nvrhi.test" = {Path = "Samples/nvrhi.test"}, "nvrhi.d3d11" = {Path = "Engine/nvrhi.d3d11"}, "nvrhi.d3d12" = {Path = "Engine/nvrhi.d3d12"}, "nvrhi.vulkan" = {Path = "Engine/nvrhi.vulkan"}, "nvrhi.validation" = {Path = "Engine/nvrhi.validation"}, SDL2 = "*", "nvrhi.deviceManager" = {Path = "Engine/nvrhi.deviceManager"}, Dxc-Beef = {Path = "Dependencies/Dxc-Beef"}, "nvrhi.shaderCompiler.HLSL" = {Path = "Tools/nvrhi.shaderCompiler.HLSL"}}
+WorkspaceFolders = {Engine = ["nvrhi", "nvrhi.d3d11", "nvrhi.d3d12", "nvrhi.vulkan", "nvrhi.validation", "nvrhi.deviceManager"], Dependencies = ["corlib", "Bulkan", "SDL2", "Dxc-Beef"], Samples = ["nvrhi.test"], Tools = ["nvrhi.shaderCompiler.HLSL"]}
 
 [Workspace]
 StartupProject = "nvrhi.test"
