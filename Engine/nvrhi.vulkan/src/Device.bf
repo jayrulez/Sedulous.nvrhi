@@ -2671,7 +2671,7 @@ namespace nvrhi.vulkan
 		private Monitor m_Mutex = new .() ~ delete _;
 
 		// array of submission queues
-		private Queue[(uint32)CommandQueue.Count] m_Queues;
+		private Queue[(uint32)CommandQueue.Count] m_Queues = .();
 
 		private void* mapBuffer(IBuffer _buffer, CpuAccessMode flags, uint64 offset, int size)
 		{

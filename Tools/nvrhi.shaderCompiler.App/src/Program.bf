@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Threading;
 using System.IO;
+using System.Diagnostics;
 namespace nvrhi.shaderCompiler.App
 {
 	struct CompileTask
@@ -45,7 +46,7 @@ namespace nvrhi.shaderCompiler.App
 			if (!g_Options.parse(args))
 			{
 				Console.WriteLine(g_Options.errorMessage);
-				return;
+				//return;
 			}
 
 			switch (g_Options.platform)
@@ -56,15 +57,31 @@ namespace nvrhi.shaderCompiler.App
 			case CompilerPlatform.UNKNOWN: g_PlatformName = "UNKNOWN"; break; // never happens
 			}
 
-			for (/*readonly ref*/ var fileName in /*ref*/ g_Options.ignoreFileNames)
+			if (g_Options.ignoreFileNames != null)
 			{
-				g_IgnoreIncludes.Add(fileName);
+				for ( /*readonly ref*/var fileName in /*ref*/ g_Options.ignoreFileNames)
+				{
+					g_IgnoreIncludes.Add(fileName);
+				}
 			}
 
-			g_ConfigWriteTime = File.GetLastWriteTime(g_Options.inputFile);
+			if (g_Options.inputFile != null)
+				g_ConfigWriteTime = File.GetLastWriteTime(g_Options.inputFile);
 
 			// Updated shaderCompiler executable also means everything must be recompiled
-			//g_ConfigWriteTime = Math.Max(g_ConfigWriteTime, fs::last_write_time(argv[0]));
+			g_ConfigWriteTime = Math.Max(g_ConfigWriteTime, File.GetLastWriteTime(Environment.GetExecutableFilePath(.. scope .())));
+
+			FileStream configFile = new .();
+			configFile.Open(g_Options.inputFile);
+
+			var text = File.ReadAllText(g_Options.inputFile, .. scope .());
+
+			var enumerator = text.Split("\n");
+
+			while (enumerator.MoveNext())
+			{
+
+			}
 		}
 	}
 }

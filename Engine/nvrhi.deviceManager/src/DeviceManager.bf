@@ -42,7 +42,7 @@ namespace nvrhi.deviceManager
 		protected DeviceCreationParameters m_DeviceParams;
 		protected uint32 m_FrameIndex = 0;
 		protected List<nvrhi.FramebufferHandle> m_SwapChainFramebuffers = new .() ~ delete _;
-		bool m_RequestedVSync = false;
+		protected bool m_RequestedVSync = false;
 
 		public this(DeviceCreationParameters @params)
 		{

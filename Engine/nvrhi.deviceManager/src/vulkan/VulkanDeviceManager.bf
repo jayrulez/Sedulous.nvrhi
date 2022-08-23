@@ -283,17 +283,15 @@ namespace nvrhi.deviceManager.vulkan
 			{
 				VulkanDeviceManager manager = (.)Internal.UnsafeCastToObject(userData);
 
-				/*if (manager != null)
+				if (manager != null)
 				{
-					const auto& ignored = manager.m_DeviceParams.ignoredVulkanValidationMessageLocations;
-					const auto found = std::find(ignored.begin(), ignored.end(), location);
-					if (found != ignored.end())
-						return VK_FALSE;
+					readonly var ignored = manager.m_DeviceParams.ignoredVulkanValidationMessageLocations;
+					if ( ignored != null && ignored.Contains((.)location))
+						return false;
 				}
 
-				log::warning("[Vulkan: location=0x%zx code=%d, layerPrefix='%s'] %s", location, code, layerPrefix, msg);
+				Debug.WriteLine("[Vulkan: location=0x{0} code={}, layerPrefix='{}'] {}", location, code, scope String(layerPrefix), scope String(msg));
 
-				return VK_FALSE;*/
 				return false;
 			}
 

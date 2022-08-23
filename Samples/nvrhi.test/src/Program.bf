@@ -3,6 +3,7 @@ using SDL2;
 using nvrhi.deviceManager.vulkan;
 using nvrhi.deviceManager;
 using System.IO;
+using System.Diagnostics;
 namespace nvrhi.test
 {
 
@@ -15,11 +16,6 @@ namespace nvrhi.test
 	class VKTexture : ITexture
 	{
 	}*/
-
-	struct MyStruct
-	{
-		public bool MyField = true;
-	}
 
 	class Program
 	{
