@@ -16,6 +16,11 @@ namespace nvrhi.test
 	{
 	}*/
 
+	struct MyStruct
+	{
+		public bool MyField = true;
+	}
+
 	class Program
 	{
 		private static bool mSDLInitialized = false;
@@ -25,7 +30,6 @@ namespace nvrhi.test
 
 		public static void Main()
 		{
-
 			/*var texture = new VKTexture();
 			var textureHandle = TextureHandle.Attach(texture);
 
@@ -36,8 +40,6 @@ namespace nvrhi.test
 				Runtime.FatalError(scope $"SDL initialization failed: {SDL.GetError()}");
 			}
 			mSDLInitialized = true;
-
-			//Window = new SDLWindow(windowTitle, (.)windowWidth, (.)windowHeight);
 
 			SDL.PumpEvents();
 
@@ -72,7 +74,8 @@ namespace nvrhi.test
 					windowType = .Windows,
 					windowHandle = NativeWindow,
 					backBufferWidth = width,
-					backBufferHeight = height
+					backBufferHeight = height,
+					enableNvrhiValidationLayer = true
 				};
 
 			DeviceManager deviceManager = new VulkanDeviceManager(@params);

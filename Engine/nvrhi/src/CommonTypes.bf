@@ -1096,7 +1096,7 @@ namespace nvrhi
 			}
 		};
 
-		public RenderTarget[c_MaxRenderTargets] targets /*= .()*/;
+		public RenderTarget[c_MaxRenderTargets] targets = .();
 		public bool alphaToCoverageEnable = false;
 
 		public readonly ref BlendState setRenderTarget(uint32 index, RenderTarget target) mut { targets[index] = target; return ref this; }

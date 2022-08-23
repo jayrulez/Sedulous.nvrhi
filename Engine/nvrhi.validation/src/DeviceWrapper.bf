@@ -194,7 +194,7 @@ namespace nvrhi.validation
 				}
 				break;
 
-			case ResourceType.Texture_SRV:
+			case ResourceType.Texture_SRV: fallthrough;
 			case ResourceType.Texture_UAV:
 				{
 					ITexture texture = checked_cast<ITexture, IResource>(binding.resourceHandle);

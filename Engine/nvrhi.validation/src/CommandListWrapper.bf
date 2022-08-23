@@ -14,6 +14,11 @@ namespace nvrhi.validation
 			m_type = queueType;
 		}
 
+		public ~this()
+		{
+			m_CommandList.Release();
+		}
+
 		private static char8* CommandListStateToString(CommandListState state)
 		{
 			switch (state)
