@@ -415,8 +415,8 @@ namespace nvrhi.validation
 							}
 
 							FillShaderBindingSetFromDesc(m_MessageCallback, layoutDesc.bindings,
-								ref bindingsPerLayout.GetValueAt(layoutIndex) /*bindingsPerLayout[layoutIndex]*/,
-								ref duplicatesPerLayout.GetValueAt(layoutIndex) /*duplicatesPerLayout[layoutIndex]*/);
+								/*ref bindingsPerLayout.GetValueAt(layoutIndex)*/ ref bindingsPerLayout[layoutIndex],
+								/*ref duplicatesPerLayout.GetValueAt(layoutIndex)*/ ref duplicatesPerLayout[layoutIndex]);
 
 							// Layouts with duplicates should not have passed validation in createBindingLayout
 							Runtime.Assert(!duplicatesPerLayout[layoutIndex].any());

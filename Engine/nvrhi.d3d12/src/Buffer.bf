@@ -6,7 +6,7 @@ namespace nvrhi.d3d12
 {
 	class Buffer : RefCounter<IBuffer>, BufferStateExtension
 	{
-		public BufferDesc desc;
+		public readonly BufferDesc desc;
 		public D3D12RefCountPtr<ID3D12Resource> resource;
 		public D3D12_GPU_VIRTUAL_ADDRESS gpuVA = .();
 		public D3D12_RESOURCE_DESC resourceDesc = .();
@@ -18,7 +18,7 @@ namespace nvrhi.d3d12
 
 		public this(Context* context, DeviceResources resources, BufferDesc desc)
 		{
-			desc = desc;
+			this.desc = desc;
 			m_Context = context;
 			m_Resources = resources;
 		}

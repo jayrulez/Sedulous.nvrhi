@@ -31,10 +31,15 @@ namespace nvrhi
 			set mut { mVal[index] = value; }
 		}
 
-		public ref T GetValueAt(int index) mut
+		public ref T this[int index]
+		{
+			get mut { return ref mVal[index]; }
+		}
+
+		/*public ref T GetValueAt(int index) mut
 		{
 			return ref mVal[index];
-		}
+		}*/
 
 		public const int MaxSize = CSize;
 
@@ -169,7 +174,7 @@ namespace nvrhi
 			{
 				if ((uint(mIndex) < uint(mList.Count)))
 				{
-					mCurrent = &mList.GetValueAt(mIndex);
+					mCurrent = &mList[mIndex];
 					mIndex++;
 					return true;
 				}

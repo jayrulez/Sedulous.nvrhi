@@ -1,5 +1,6 @@
 using Win32.Graphics.Direct3D12;
 using System;
+using Win32.Foundation;
 
 namespace nvrhi
 {
@@ -27,6 +28,9 @@ namespace nvrhi.d3d12
 {
 	typealias D3D12_GPU_VIRTUAL_ADDRESS = uint64;
 	typealias UINT = uint32;
+	typealias UINT64 = uint64;
+	typealias D3D12_RECT = RECT;
+
 	typealias D3D12RefCountPtr<T> = T*;
 
 	class IRootSignature : IResource
@@ -102,5 +106,13 @@ namespace nvrhi.d3d12
 	{
 		public const DescriptorIndex c_InvalidDescriptorIndex = ~0u;
 		public const D3D12_RESOURCE_STATES c_ResourceStateUnknown = (D3D12_RESOURCE_STATES)~0u;
+	}
+
+	struct DX12_ViewportState
+	{
+	    public UINT numViewports = 0;
+	    public D3D12_VIEWPORT[16] viewports = .();
+	    public UINT numScissorRects = 0;
+	    public D3D12_RECT[16] scissorRects = .();
 	}
 }

@@ -316,5 +316,111 @@ namespace nvrhi.d3d12
 				WaitForSingleObject(event, INFINITE);
 			}
 		}
+
+		// helper function for texture subresource calculations
+		// https://msdn.microsoft.com/en-us/library/windows/desktop/dn705766(v=vs.85).aspx
+		public static uint32 calcSubresource(uint32 MipSlice, uint32 ArraySlice, uint32 PlaneSlice, uint32 MipLevels, uint32 ArraySize)
+		{
+			return MipSlice + (ArraySlice * MipLevels) + (PlaneSlice * MipLevels * ArraySize);
+		}
+
+		public static ResourceType GetNormalizedResourceType(ResourceType type)
+		{
+		    switch (type)  // NOLINT(clang-diagnostic-switch-enum)
+		    {
+		    case ResourceType.StructuredBuffer_UAV: fallthrough;
+		    case ResourceType.RawBuffer_UAV:
+		        return ResourceType.TypedBuffer_UAV;
+		    case ResourceType.StructuredBuffer_SRV: fallthrough;
+		    case ResourceType.RawBuffer_SRV:
+		        return ResourceType.TypedBuffer_SRV;
+		    default:
+		        return type;
+		    }
+		}
+
+		public static bool AreResourceTypesCompatible(ResourceType a, ResourceType b)
+		{
+			var a;
+			var b;
+		    if (a == b)
+		        return true;
+
+		    a = GetNormalizedResourceType(a);
+		    b = GetNormalizedResourceType(b);
+
+		    if (a == ResourceType.TypedBuffer_SRV && b == ResourceType.Texture_SRV ||
+		        b == ResourceType.TypedBuffer_SRV && a == ResourceType.Texture_SRV ||
+		        a == ResourceType.TypedBuffer_SRV && b == ResourceType.RayTracingAccelStruct ||
+		        a == ResourceType.Texture_SRV && b == ResourceType.RayTracingAccelStruct ||
+		        b == ResourceType.TypedBuffer_SRV && a == ResourceType.RayTracingAccelStruct ||
+		        b == ResourceType.Texture_SRV && a == ResourceType.RayTracingAccelStruct)
+		        return true;
+
+		    if (a == ResourceType.TypedBuffer_UAV && b == ResourceType.Texture_UAV ||
+		        b == ResourceType.TypedBuffer_UAV && a == ResourceType.Texture_UAV)
+		        return true;
+
+		    return false;
+		}
+	}
+
+	public static
+	{
+		public static mixin D3D12_ENCODE_BASIC_FILTER(var min, var mag, var mip, UINT reduction)
+		{
+			(D3D12_FILTER)((uint32)(
+				((((uint32)min) & D3D12_FILTER_TYPE_MASK) << D3D12_MIN_FILTER_SHIFT) |
+				((((uint32)mag) & D3D12_FILTER_TYPE_MASK) << D3D12_MAG_FILTER_SHIFT) |
+				((((uint32)mip) & D3D12_FILTER_TYPE_MASK) << D3D12_MIP_FILTER_SHIFT) |
+				(((reduction) & D3D12_FILTER_REDUCTION_TYPE_MASK) << D3D12_FILTER_REDUCTION_TYPE_SHIFT)))
+		}
+
+		public static mixin D3D12_ENCODE_ANISOTROPIC_FILTER(var reduction)
+		{
+			((D3D12_FILTER)(
+				(D3D12_FILTER)D3D12_ANISOTROPIC_FILTERING_BIT |
+				D3D12_ENCODE_BASIC_FILTER!(
+				(uint32)D3D12_FILTER_TYPE.LINEAR,
+				(uint32)D3D12_FILTER_TYPE.LINEAR,
+				(uint32)D3D12_FILTER_TYPE.LINEAR,
+				reduction)))
+		}
+		public static mixin D3D12_DECODE_MIN_FILTER(var D3D12Filter)
+		{
+			(D3D12_FILTER_TYPE)((uint32)
+				(((D3D12Filter) >> D3D12_MIN_FILTER_SHIFT) & D3D12_FILTER_TYPE_MASK))
+		}
+
+		public static mixin D3D12_DECODE_MAG_FILTER(var D3D12Filter)
+		{
+			(D3D12_FILTER_TYPE)((uint32)
+				(((D3D12Filter) >> D3D12_MAG_FILTER_SHIFT) & D3D12_FILTER_TYPE_MASK))
+		}
+
+		public static mixin D3D12_DECODE_MIP_FILTER(var D3D12Filter)
+		{
+			(D3D12_FILTER_TYPE)((uint32)
+				(((D3D12Filter) >> D3D12_MIP_FILTER_SHIFT) & D3D12_FILTER_TYPE_MASK))
+		}
+
+		public static mixin D3D12_DECODE_FILTER_REDUCTION(var D3D12Filter)
+		{
+			(D3D12_FILTER_REDUCTION_TYPE)((uint32)
+				(((D3D12Filter) >> D3D12_FILTER_REDUCTION_TYPE_SHIFT) & D3D12_FILTER_REDUCTION_TYPE_MASK))
+		}
+
+		public static mixin D3D12_DECODE_IS_COMPARISON_FILTER(var D3D12Filter)
+		{
+			(D3D12_DECODE_FILTER_REDUCTION!(D3D12Filter) == D3D12_FILTER_REDUCTION_TYPE.COMPARISON)
+		}
+
+		public static mixin D3D12_DECODE_IS_ANISOTROPIC_FILTER(var D3D12Filter)
+		{
+			(((D3D12Filter) & D3D12_ANISOTROPIC_FILTERING_BIT) &&
+				(D3D12_FILTER_TYPE.LINEAR == D3D12_DECODE_MIN_FILTER!(D3D12Filter)) &&
+				(D3D12_FILTER_TYPE.LINEAR == D3D12_DECODE_MAG_FILTER!(D3D12Filter)) &&
+				(D3D12_FILTER_TYPE.LINEAR == D3D12_DECODE_MIP_FILTER!(D3D12Filter)))
+		}
 	}
 }
