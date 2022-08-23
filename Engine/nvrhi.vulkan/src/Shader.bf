@@ -13,7 +13,7 @@ namespace nvrhi.vulkan
 		// Shader specializations are just references to the original shader module
 		// plus the specialization constant array.
 		public ResourceHandle baseShader; // Could be a Shader or ShaderLibrary
-		public List<ShaderSpecialization> specializationConstants;
+		public List<ShaderSpecialization> specializationConstants = new .() ~ delete _;
 
 		public this(VulkanContext* context)
 		{
@@ -23,6 +23,8 @@ namespace nvrhi.vulkan
 
 		public ~this()
 		{
+			delete desc.entryName;
+
 			if (shaderModule != .Null && baseShader == null) // do not destroy the module if this is a derived specialization shader or a library entry
 			{
 				vkDestroyShaderModule(m_Context.device, shaderModule, m_Context.allocationCallbacks);

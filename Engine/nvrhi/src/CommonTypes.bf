@@ -1096,7 +1096,7 @@ namespace nvrhi
 			}
 		};
 
-		public RenderTarget[c_MaxRenderTargets] targets = .();
+		public RenderTarget[c_MaxRenderTargets] targets /*= .()*/;
 		public bool alphaToCoverageEnable = false;
 
 		public readonly ref BlendState setRenderTarget(uint32 index, RenderTarget target) mut { targets[index] = target; return ref this; }
@@ -1273,8 +1273,8 @@ namespace nvrhi
 		public uint8         stencilReadMask = 0xff;
 		public uint8         stencilWriteMask = 0xff;
 		public uint8         stencilRefValue = 0;
-		public StencilOpDesc   frontFaceStencil;
-		public StencilOpDesc   backFaceStencil;
+		public StencilOpDesc   frontFaceStencil = .();
+		public StencilOpDesc   backFaceStencil = .();
 
 		public readonly ref DepthStencilState setDepthTestEnable(bool value) mut { depthTestEnable = value; return ref this; }
 		public readonly ref DepthStencilState enableDepthTest() mut { depthTestEnable = true; return ref this; }
@@ -1963,10 +1963,10 @@ namespace nvrhi
 
 	struct RenderState
 	{
-		public BlendState blendState;
-		public DepthStencilState depthStencilState;
-		public RasterState rasterState;
-		public SinglePassStereoState singlePassStereo;
+		public BlendState blendState = .();
+		public DepthStencilState depthStencilState = .();
+		public RasterState rasterState = .();
+		public SinglePassStereoState singlePassStereo = .();
 
 		public ref RenderState setBlendState(BlendState value) mut { blendState = value; return ref this; }
 		public ref RenderState setDepthStencilState(DepthStencilState value) mut { depthStencilState = value; return ref this; }
@@ -2031,10 +2031,10 @@ namespace nvrhi
 		public ShaderHandle GS;
 		public ShaderHandle PS;
 
-		public RenderState renderState;
-		public VariableRateShadingState shadingRateState;
+		public RenderState renderState = .();
+		public VariableRateShadingState shadingRateState = .();
 
-		public BindingLayoutVector bindingLayouts;
+		public BindingLayoutVector bindingLayouts = .();
 
 		public ref GraphicsPipelineDesc setPrimType(PrimitiveType value) mut { primType = value; return ref this; }
 		public ref GraphicsPipelineDesc setPatchControlPoints(uint32 value) mut { patchControlPoints = value; return ref this; }

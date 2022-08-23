@@ -148,17 +148,17 @@ namespace nvrhi
 
 		public Enumerator GetEnumerator()
 		{
-			return .((T[CSize])this);
+			return .(this);
 		}
 
 
 		public struct Enumerator : IRefEnumerator<T*>, IEnumerator<T>, IResettable
 		{
-			private T[CSize] mList;
+			private StaticVector<T, CSize> mList;
 			private int mIndex;
 			private T* mCurrent;
 
-			public this(T[CSize] list)
+			public this(StaticVector<T, CSize> list)
 			{
 				mList = list;
 				mIndex = 0;
@@ -167,9 +167,9 @@ namespace nvrhi
 
 			public bool MoveNext() mut
 			{
-				if ((uint(mIndex) < uint(CSize)))
+				if ((uint(mIndex) < uint(mList.Count)))
 				{
-					mCurrent = &mList[mIndex];
+					mCurrent = &mList.GetValueAt(mIndex);
 					mIndex++;
 					return true;
 				}
@@ -178,7 +178,7 @@ namespace nvrhi
 
 			private bool MoveNextRare() mut
 			{
-				mIndex = CSize + 1;
+				mIndex = mList.Count + 1;
 				mCurrent = null;
 				return false;
 			}

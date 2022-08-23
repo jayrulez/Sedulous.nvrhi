@@ -2,6 +2,7 @@ using System;
 using SDL2;
 using nvrhi.deviceManager.vulkan;
 using nvrhi.deviceManager;
+using System.IO;
 namespace nvrhi.test
 {
 
@@ -80,11 +81,23 @@ namespace nvrhi.test
 
 			deviceManager.[Friend]CreateDeviceAndSwapChain();
 
+			defer deviceManager.Shutdown();
+
+			ShaderFactory shaderFactory = scope .(deviceManager.GetDevice(), .. Path.InternalCombine(.. Directory.GetCurrentDirectory(.. scope .()), "shaders"));
+			nvrhi.ShaderHandle vertexShader = shaderFactory.CreateShader("shaders.hlsl", "main_vs", null, nvrhi.ShaderType.Vertex);
+			defer vertexShader.Release();
+
+			nvrhi.ShaderHandle pixelShader = shaderFactory.CreateShader("shaders.hlsl", "main_ps", null, nvrhi.ShaderType.Pixel);
+			defer pixelShader.Release();
+
 			// force resize so back buffer resources get created
 			deviceManager.OnWindowResized((.)width, (.)height, true);
 
-			var commandList = deviceManager.GetDevice().createCommandList();
+			nvrhi.CommandListHandle commandList = deviceManager.GetDevice().createCommandList();
 			defer commandList.Release();
+
+
+			nvrhi.GraphicsPipelineHandle pipeline = null;
 
 			while (!mQuitRequested)
 			{
@@ -123,6 +136,9 @@ namespace nvrhi.test
 								height = (uint32)height;
 
 								deviceManager.OnWindowResized((.)newWidth, (.)newHeight);
+
+								pipeline?.Release();
+								pipeline = null;
 							}
 						}
 
@@ -133,13 +149,47 @@ namespace nvrhi.test
 					}
 				}
 
+				var framebuffer = deviceManager.GetCurrentFramebuffer();
+
+				// Pipeline
+				// only create if null
+				if (pipeline == null)
+				{
+					nvrhi.GraphicsPipelineDesc psoDesc = .();
+					psoDesc.VS = vertexShader;
+					psoDesc.PS = pixelShader;
+					psoDesc.primType = nvrhi.PrimitiveType.TriangleList;
+					psoDesc.renderState.depthStencilState.depthTestEnable = false;
+
+					//// None of this should be necessary. Perhaps there is a beef bug here. I need to ask in the discord.
+					//// I expect that all nested struct members should be initialzed automatically when nvrhi.GraphicsPipelineDesc psoDesc = .();
+					//// is called. For some reason, the members of the static array of render targets initializer fields are not called
+					psoDesc.renderState.blendState = .();
+					for (int i = 0; i < psoDesc.renderState.blendState.targets.Count; i++)
+					{
+						psoDesc.renderState.blendState.targets[i] = .();
+					}
+					////
+
+					pipeline = deviceManager.GetDevice().createGraphicsPipeline(psoDesc, framebuffer);
+				}
+
 				// Render
 
 				commandList.open();
 
-				var fb = deviceManager.GetCurrentFramebuffer();
+				nvrhi.utils.ClearColorAttachment(commandList, framebuffer, 0, nvrhi.Color(0.f, 0.5f, 0.2f, 1));
 
-				nvrhi.utils.ClearColorAttachment(commandList, fb, 0, nvrhi.Color(0.f, 0.5f, 0.2f, 1));
+				nvrhi.GraphicsState state = .();
+				state.pipeline = pipeline;
+				state.framebuffer = framebuffer;
+				state.viewport.addViewportAndScissorRect(framebuffer.getFramebufferInfo().getViewport());
+
+				commandList.setGraphicsState(state);
+
+				nvrhi.DrawArguments args = .();
+				args.vertexCount = 3;
+				commandList.draw(args);
 
 				commandList.close();
 
@@ -152,7 +202,7 @@ namespace nvrhi.test
 				deviceManager.GetDevice().waitForIdle();
 			}
 
-			deviceManager.Shutdown();
+			pipeline?.Release();
 
 			if (SDLNativeWindow != null)
 			{

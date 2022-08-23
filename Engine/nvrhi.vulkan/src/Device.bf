@@ -548,6 +548,7 @@ namespace nvrhi.vulkan
 			Shader shader = new Shader(m_Context);
 
 			shader.desc = desc;
+			shader.desc.entryName = new .(desc.entryName);
 			shader.stageFlagBits = convertShaderTypeToShaderStageFlagBits(desc.shaderType);
 
 			var shaderInfo = VkShaderModuleCreateInfo()
@@ -1037,7 +1038,7 @@ namespace nvrhi.vulkan
 
 			Framebuffer fb = checked_cast<Framebuffer, IFramebuffer>(_fb);
 
-			InputLayout inputLayout = checked_cast<InputLayout, IInputLayout>(desc.inputLayout.Get<IInputLayout>());
+			InputLayout inputLayout = checked_cast<InputLayout, IInputLayout>(desc.inputLayout?.Get<IInputLayout>());
 
 			GraphicsPipeline pso = new GraphicsPipeline(m_Context);
 			pso.desc = desc;
@@ -1045,15 +1046,15 @@ namespace nvrhi.vulkan
 
 			for (readonly ref BindingLayoutHandle _layout in ref desc.bindingLayouts)
 			{
-				BindingLayout layout = checked_cast<BindingLayout, IBindingLayout>(_layout.Get<IBindingLayout>());
+				BindingLayout layout = checked_cast<BindingLayout, IBindingLayout>(_layout?.Get<IBindingLayout>());
 				pso.pipelineBindingLayouts.PushBack(layout);
 			}
 
-			Shader VS = checked_cast<Shader, IShader>(desc.VS.Get<IShader>());
-			Shader HS = checked_cast<Shader, IShader>(desc.HS.Get<IShader>());
-			Shader DS = checked_cast<Shader, IShader>(desc.DS.Get<IShader>());
-			Shader GS = checked_cast<Shader, IShader>(desc.GS.Get<IShader>());
-			Shader PS = checked_cast<Shader, IShader>(desc.PS.Get<IShader>());
+			Shader VS = checked_cast<Shader, IShader>(desc.VS?.Get<IShader>());
+			Shader HS = checked_cast<Shader, IShader>(desc.HS?.Get<IShader>());
+			Shader DS = checked_cast<Shader, IShader>(desc.DS?.Get<IShader>());
+			Shader GS = checked_cast<Shader, IShader>(desc.GS?.Get<IShader>());
+			Shader PS = checked_cast<Shader, IShader>(desc.PS?.Get<IShader>());
 
 			int numShaders = 0;
 			int numShadersWithSpecializations = 0;
@@ -1171,7 +1172,7 @@ namespace nvrhi.vulkan
 			uint32 pushConstantSize = 0;
 			for (readonly ref BindingLayoutHandle _layout in ref desc.bindingLayouts)
 			{
-				BindingLayout layout = checked_cast<BindingLayout, IBindingLayout>(_layout.Get<IBindingLayout>());
+				BindingLayout layout = checked_cast<BindingLayout, IBindingLayout>(_layout?.Get<IBindingLayout>());
 				descriptorSetLayouts.PushBack(layout.descriptorSetLayout);
 
 				if (!layout.isBindless)
