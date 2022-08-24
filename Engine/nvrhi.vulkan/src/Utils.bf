@@ -1037,196 +1037,199 @@ namespace nvrhi.vulkan
 
 		public static VkDeviceOrHostAddressConstKHR getBufferAddress(IBuffer _buffer, uint64 offset)
 		{
-		    if (_buffer == null)
-		        return VkDeviceOrHostAddressConstKHR();
+			if (_buffer == null)
+				return VkDeviceOrHostAddressConstKHR();
 
-		    Buffer buffer = checked_cast<Buffer, IBuffer>(_buffer);
+			Buffer buffer = checked_cast<Buffer, IBuffer>(_buffer);
 
-		    return VkDeviceOrHostAddressConstKHR().setDeviceAddress(buffer.deviceAddress + int(offset));
+			return VkDeviceOrHostAddressConstKHR().setDeviceAddress(buffer.deviceAddress + int(offset));
 		}
 
 		public static void convertBottomLevelGeometry(nvrhi.rt.GeometryDesc src, ref VkAccelerationStructureGeometryKHR dst,
-		    ref uint32 maxPrimitiveCount, VkAccelerationStructureBuildRangeInfoKHR* pRange, VulkanContext* context)
+			ref uint32 maxPrimitiveCount, VkAccelerationStructureBuildRangeInfoKHR* pRange, VulkanContext* context)
 		{
-		    switch (src.geometryType)
-		    {
-		    case nvrhi.rt.GeometryType.Triangles: {
-		        readonly ref nvrhi.rt.GeometryTriangles srct = ref src.geometryData.triangles;
-		        VkAccelerationStructureGeometryTrianglesDataKHR dstt = .();
+			switch (src.geometryType)
+			{
+			case nvrhi.rt.GeometryType.Triangles:
+				{
+					readonly ref nvrhi.rt.GeometryTriangles srct = ref src.geometryData.triangles;
+					VkAccelerationStructureGeometryTrianglesDataKHR dstt = .();
 
-		        switch (srct.indexFormat)  // NOLINT(clang-diagnostic-switch-enum)
-		        {
-		        case Format.R8_UINT:
-		            dstt.setIndexType(VkIndexType.eUint8Ext);
-		            break;
+					switch (srct.indexFormat) // NOLINT(clang-diagnostic-switch-enum)
+					{
+					case Format.R8_UINT:
+						dstt.setIndexType(VkIndexType.eUint8Ext);
+						break;
 
-		        case Format.R16_UINT:
-		            dstt.setIndexType(VkIndexType.eUint16);
-		            break;
+					case Format.R16_UINT:
+						dstt.setIndexType(VkIndexType.eUint16);
+						break;
 
-		        case Format.R32_UINT:
-		            dstt.setIndexType(VkIndexType.eUint32);
-		            break;
+					case Format.R32_UINT:
+						dstt.setIndexType(VkIndexType.eUint32);
+						break;
 
-		        case Format.UNKNOWN:
-		            dstt.setIndexType(VkIndexType.eNoneKHR);
-		            break;
+					case Format.UNKNOWN:
+						dstt.setIndexType(VkIndexType.eNoneKHR);
+						break;
 
-		        default:
-		            context.error("Unsupported ray tracing geometry index type");
-		            dstt.setIndexType(VkIndexType.eNoneKHR);
-		            break;
-		        }
+					default:
+						context.error("Unsupported ray tracing geometry index type");
+						dstt.setIndexType(VkIndexType.eNoneKHR);
+						break;
+					}
 
-		        dstt.setVertexFormat(convertFormat(srct.vertexFormat));
-		        dstt.setVertexData(getBufferAddress(srct.vertexBuffer, srct.vertexOffset));
-		        dstt.setVertexStride(srct.vertexStride);
-		        dstt.setMaxVertex(Math.Max(srct.vertexCount, 1) - 1);
-		        dstt.setIndexData(getBufferAddress(srct.indexBuffer, srct.indexOffset));
+					dstt.setVertexFormat(convertFormat(srct.vertexFormat));
+					dstt.setVertexData(getBufferAddress(srct.vertexBuffer, srct.vertexOffset));
+					dstt.setVertexStride(srct.vertexStride);
+					dstt.setMaxVertex(Math.Max(srct.vertexCount, 1) - 1);
+					dstt.setIndexData(getBufferAddress(srct.indexBuffer, srct.indexOffset));
 
-		        if (src.useTransform)
-		        {
-		            dstt.setTransformData(VkDeviceOrHostAddressConstKHR().setHostAddress(&src.transform));
-		        }
+					if (src.useTransform)
+					{
+						var src;
+						dstt.setTransformData(VkDeviceOrHostAddressConstKHR().setHostAddress(&src.transform));
+					}
 
-		        maxPrimitiveCount = (srct.indexFormat == Format.UNKNOWN)
-		            ? (srct.vertexCount / 3)
-		            : (srct.indexCount / 3);
+					maxPrimitiveCount = (srct.indexFormat == Format.UNKNOWN)
+						? (srct.vertexCount / 3)
+						: (srct.indexCount / 3);
 
-		        dst.setGeometryType(VkGeometryTypeKHR.eTrianglesKHR);
-		        dst.geometry.setTriangles(dstt);
+					dst.setGeometryType(VkGeometryTypeKHR.eTrianglesKHR);
+					dst.geometry.setTriangles(dstt);
 
-		        break;
-		    }
-		    case nvrhi.rt.GeometryType.AABBs: {
-		        readonly ref nvrhi.rt.GeometryAABBs srca = ref src.geometryData.aabbs;
-		        VkAccelerationStructureGeometryAabbsDataKHR dsta = .();
+					break;
+				}
+			case nvrhi.rt.GeometryType.AABBs:
+				{
+					readonly ref nvrhi.rt.GeometryAABBs srca = ref src.geometryData.aabbs;
+					VkAccelerationStructureGeometryAabbsDataKHR dsta = .();
 
-		        dsta.setData(getBufferAddress(srca.buffer, srca.offset));
-		        dsta.setStride(srca.stride);
+					dsta.setData(getBufferAddress(srca.buffer, srca.offset));
+					dsta.setStride(srca.stride);
 
-		        maxPrimitiveCount = srca.count;
+					maxPrimitiveCount = srca.count;
 
-		        dst.setGeometryType(VkGeometryTypeKHR.eAabbsKHR);
-		        dst.geometry.setAabbs(dsta);
+					dst.setGeometryType(VkGeometryTypeKHR.eAabbsKHR);
+					dst.geometry.setAabbs(dsta);
 
-		        break;
-		    }
-		    }
+					break;
+				}
+			}
 
-		    if (pRange != null)
-		    {
-		        pRange.setPrimitiveCount(maxPrimitiveCount);
-		    }
+			if (pRange != null)
+			{
+				pRange.setPrimitiveCount(maxPrimitiveCount);
+			}
 
-		    VkGeometryFlagsKHR geometryFlags = (VkGeometryFlagsKHR)0;
-		    if ((src.flags & nvrhi.rt.GeometryFlags.Opaque) != 0)
-		        geometryFlags |= VkGeometryFlagsKHR.eOpaqueBitKHR;
-		    if ((src.flags & nvrhi.rt.GeometryFlags.NoDuplicateAnyHitInvocation) != 0)
-		        geometryFlags |= VkGeometryFlagsKHR.eNoDuplicateAnyHitInvocationBitKHR;
-		    dst.setFlags(geometryFlags);
+			VkGeometryFlagsKHR geometryFlags = (VkGeometryFlagsKHR)0;
+			if ((src.flags & nvrhi.rt.GeometryFlags.Opaque) != 0)
+				geometryFlags |= VkGeometryFlagsKHR.eOpaqueBitKHR;
+			if ((src.flags & nvrhi.rt.GeometryFlags.NoDuplicateAnyHitInvocation) != 0)
+				geometryFlags |= VkGeometryFlagsKHR.eNoDuplicateAnyHitInvocationBitKHR;
+			dst.setFlags(geometryFlags);
 		}
 
 		public static void computeMipLevelInformation(TextureDesc desc, uint32 mipLevel, uint32* widthOut, uint32* heightOut, uint32* depthOut)
 		{
-		    uint32 width = Math.Max(desc.width >> mipLevel, uint32(1));
-		    uint32 height = Math.Max(desc.height >> mipLevel, uint32(1));
-		    uint32 depth = Math.Max(desc.depth >> mipLevel, uint32(1));
+			uint32 width = Math.Max(desc.width >> mipLevel, uint32(1));
+			uint32 height = Math.Max(desc.height >> mipLevel, uint32(1));
+			uint32 depth = Math.Max(desc.depth >> mipLevel, uint32(1));
 
-		    if (widthOut != null)
-		        *widthOut = width;
-		    if (heightOut != null)
-		        *heightOut = height;
-		    if (depthOut != null)
-		        *depthOut = depth;
+			if (widthOut != null)
+				*widthOut = width;
+			if (heightOut != null)
+				*heightOut = height;
+			if (depthOut != null)
+				*depthOut = depth;
 		}
 
 		public static VkBorderColor pickSamplerBorderColor(SamplerDesc d)
 		{
-		    if (d.borderColor.r == 0.f && d.borderColor.g == 0.f && d.borderColor.b == 0.f)
-		    {
-		        if (d.borderColor.a == 0.f)
-		        {
-		            return VkBorderColor.eFloatTransparentBlack;
-		        }
+			if (d.borderColor.r == 0.f && d.borderColor.g == 0.f && d.borderColor.b == 0.f)
+			{
+				if (d.borderColor.a == 0.f)
+				{
+					return VkBorderColor.eFloatTransparentBlack;
+				}
 
-		        if (d.borderColor.a == 1.f)
-		        {
-		            return VkBorderColor.eFloatOpaqueBlack;
-		        }
-		    }
+				if (d.borderColor.a == 1.f)
+				{
+					return VkBorderColor.eFloatOpaqueBlack;
+				}
+			}
 
-		    if (d.borderColor.r == 1.f && d.borderColor.g == 1.f && d.borderColor.b == 1.f)
-		    {
-		        if (d.borderColor.a == 1.f)
-		        {
-		            return VkBorderColor.eFloatOpaqueWhite;
-		        }
-		    }
+			if (d.borderColor.r == 1.f && d.borderColor.g == 1.f && d.borderColor.b == 1.f)
+			{
+				if (d.borderColor.a == 1.f)
+				{
+					return VkBorderColor.eFloatOpaqueWhite;
+				}
+			}
 
-		    utils.NotSupported();
-		    return VkBorderColor.eFloatOpaqueBlack;
+			utils.NotSupported();
+			return VkBorderColor.eFloatOpaqueBlack;
 		}
 
 		public static Texture.TextureSubresourceViewType getTextureViewType(Format bindingFormat, Format textureFormat)
 		{
-		    Format format = (bindingFormat == Format.UNKNOWN) ? textureFormat : bindingFormat;
+			Format format = (bindingFormat == Format.UNKNOWN) ? textureFormat : bindingFormat;
 
-		    readonly ref FormatInfo formatInfo = ref getFormatInfo(format);
+			readonly ref FormatInfo formatInfo = ref getFormatInfo(format);
 
-		    if (formatInfo.hasDepth)
-		        return Texture.TextureSubresourceViewType.DepthOnly;
-		    else if (formatInfo.hasStencil)
-		        return Texture.TextureSubresourceViewType.StencilOnly;
-		    else
-		        return Texture.TextureSubresourceViewType.AllAspects;
+			if (formatInfo.hasDepth)
+				return Texture.TextureSubresourceViewType.DepthOnly;
+			else if (formatInfo.hasStencil)
+				return Texture.TextureSubresourceViewType.StencilOnly;
+			else
+				return Texture.TextureSubresourceViewType.AllAspects;
 		}
 
 		public static void registerShaderModule(
-		    IShader _shader,
-		    Dictionary<Shader, uint32> shaderStageIndices,
-		    ref int numShaders,
-		    ref int numShadersWithSpecializations,
-		    ref int numSpecializationConstants)
+			IShader _shader,
+			Dictionary<Shader, uint32> shaderStageIndices,
+			ref int numShaders,
+			ref int numShadersWithSpecializations,
+			ref int numSpecializationConstants)
 		{
-		    if (_shader == null)
-		        return;
-		    
-		    Shader shader = checked_cast<Shader, IShader>(_shader);
-		    if (!shaderStageIndices.ContainsKey(shader))
-		    {
-		        countSpecializationConstants(shader, ref numShaders, ref numShadersWithSpecializations, ref numSpecializationConstants);
-		        shaderStageIndices[shader] = uint32(shaderStageIndices.Count);
-		    }
+			if (_shader == null)
+				return;
+
+			Shader shader = checked_cast<Shader, IShader>(_shader);
+			if (!shaderStageIndices.ContainsKey(shader))
+			{
+				countSpecializationConstants(shader, ref numShaders, ref numShadersWithSpecializations, ref numSpecializationConstants);
+				shaderStageIndices[shader] = uint32(shaderStageIndices.Count);
+			}
 		}
 
 		public static TextureDimension getDimensionForFramebuffer(TextureDimension dimension, bool isArray)
 		{
 			var dimension;
-		    // Can't render into cubes and 3D textures directly, convert them to 2D arrays
-		    if (dimension == TextureDimension.TextureCube || dimension == TextureDimension.TextureCubeArray || dimension == TextureDimension.Texture3D)
-		        dimension = TextureDimension.Texture2DArray;
+			// Can't render into cubes and 3D textures directly, convert them to 2D arrays
+			if (dimension == TextureDimension.TextureCube || dimension == TextureDimension.TextureCubeArray || dimension == TextureDimension.Texture3D)
+				dimension = TextureDimension.Texture2DArray;
 
-		    if (!isArray)
-		    {
-		        // Demote arrays to single textures if we just need one layer
-		        switch(dimension)  // NOLINT(clang-diagnostic-switch-enum)
-		        {
-		        case TextureDimension.Texture1DArray:
-		            dimension = TextureDimension.Texture1D;
-		            break;
-		        case TextureDimension.Texture2DArray:
-		            dimension = TextureDimension.Texture2D;
-		            break;
-		        case TextureDimension.Texture2DMSArray:
-		            dimension = TextureDimension.Texture2DMS;
-		            break;
-		        default:
-		            break;
-		        }
-		    }
+			if (!isArray)
+			{
+				// Demote arrays to single textures if we just need one layer
+				switch (dimension) // NOLINT(clang-diagnostic-switch-enum)
+				{
+				case TextureDimension.Texture1DArray:
+					dimension = TextureDimension.Texture1D;
+					break;
+				case TextureDimension.Texture2DArray:
+					dimension = TextureDimension.Texture2D;
+					break;
+				case TextureDimension.Texture2DMSArray:
+					dimension = TextureDimension.Texture2DMS;
+					break;
+				default:
+					break;
+				}
+			}
 
-		    return dimension;
+			return dimension;
 		}
 
 		public static VkViewport VKViewportWithDXCoords(Viewport v)
@@ -1245,10 +1248,10 @@ namespace nvrhi.vulkan
 
 		public static uint64 getQueueLastFinishedID(Device device, CommandQueue queueIndex)
 		{
-		    Queue queue = device.getQueue(queueIndex);
-		    if (queue != null)
-		        return queue.getLastFinishedID();
-		    return 0;
+			Queue queue = device.getQueue(queueIndex);
+			if (queue != null)
+				return queue.getLastFinishedID();
+			return 0;
 		}
 	}
 }

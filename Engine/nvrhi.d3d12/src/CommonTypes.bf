@@ -31,6 +31,7 @@ namespace nvrhi.d3d12
 	typealias D3D12_GPU_VIRTUAL_ADDRESS = uint64;
 	typealias UINT = uint32;
 	typealias UINT64 = uint64;
+	typealias LONG = int64;
 	typealias D3D12_RECT = RECT;
 
 	typealias D3D12RefCountPtr<T> = T*;

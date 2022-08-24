@@ -95,7 +95,7 @@ namespace nvrhi.vulkan
 			}
 #endif
 
-			VkResult result = vkEndCommandBuffer(m_CurrentCmdBuf.cmdBuf);
+			/*VkResult result =*/ vkEndCommandBuffer(m_CurrentCmdBuf.cmdBuf);
 			/*ASSERT_VK_OK!(result);*/
 
 			clearState();
@@ -1304,6 +1304,7 @@ namespace nvrhi.vulkan
 				dst.setInstanceShaderBindingTableRecordOffset(src.instanceContributionToHitGroupIndex * m_Context.rayTracingPipelineProperties.shaderGroupBaseAlignment);
 				dst.setFlags(convertInstanceFlags(src.flags));
 				dst.setMask(src.instanceMask);
+				var src;
 				Internal.MemCpy(&dst.transform.matrix, &src.transform, sizeof(float) * 12);
 
 #if !NVRHI_WITH_RTXMU

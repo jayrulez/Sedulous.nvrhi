@@ -5,6 +5,7 @@ using Win32.Graphics.Direct3D;
 using Win32.Foundation;
 using Win32.System.WindowsProgramming;
 using Win32.System.Threading;
+using System;
 namespace nvrhi.d3d12
 {
 	public static
@@ -403,6 +404,132 @@ namespace nvrhi.d3d12
 				outD3dGeometryDesc.AABBs.AABBs.StrideInBytes = aabbs.stride;
 				outD3dGeometryDesc.AABBs.AABBCount = aabbs.count;
 			}
+		}
+
+		public static DX12_ViewportState convertViewportState(RasterState rasterState, FramebufferInfo framebufferInfo, ViewportState vpState)
+		{
+			DX12_ViewportState ret = .();
+
+			ret.numViewports = UINT(vpState.viewports.Count);
+			for (int rt = 0; rt < vpState.viewports.Count; rt++)
+			{
+				ret.viewports[rt].TopLeftX = vpState.viewports[rt].minX;
+				ret.viewports[rt].TopLeftY = vpState.viewports[rt].minY;
+				ret.viewports[rt].Width = vpState.viewports[rt].maxX - vpState.viewports[rt].minX;
+				ret.viewports[rt].Height = vpState.viewports[rt].maxY - vpState.viewports[rt].minY;
+				ret.viewports[rt].MinDepth = vpState.viewports[rt].minZ;
+				ret.viewports[rt].MaxDepth = vpState.viewports[rt].maxZ;
+			}
+
+			ret.numScissorRects = UINT(vpState.scissorRects.Count);
+			for (int rt = 0; rt < vpState.scissorRects.Count; rt++)
+			{
+				if (rasterState.scissorEnable)
+				{
+					ret.scissorRects[rt].left = (.)vpState.scissorRects[rt].minX;
+					ret.scissorRects[rt].top = (.)vpState.scissorRects[rt].minY;
+					ret.scissorRects[rt].right = (.)vpState.scissorRects[rt].maxX;
+					ret.scissorRects[rt].bottom = (.)vpState.scissorRects[rt].maxY;
+				}
+				else
+				{
+					ret.scissorRects[rt].left = (.)vpState.viewports[rt].minX;
+					ret.scissorRects[rt].top = (.)vpState.viewports[rt].minY;
+					ret.scissorRects[rt].right = (.)vpState.viewports[rt].maxX;
+					ret.scissorRects[rt].bottom = (.)vpState.viewports[rt].maxY;
+
+					if (framebufferInfo.width > 0)
+					{
+						ret.scissorRects[rt].left = Math.Max(ret.scissorRects[rt].left, 0);
+						ret.scissorRects[rt].top = Math.Max(ret.scissorRects[rt].top, 0);
+						ret.scissorRects[rt].right = Math.Min(ret.scissorRects[rt].right, (.)framebufferInfo.width);
+						ret.scissorRects[rt].bottom = Math.Min(ret.scissorRects[rt].bottom, (.)framebufferInfo.height);
+					}
+				}
+			}
+
+			return ret;
+		}
+
+		public static void TranslateBlendState(BlendState inState, ref D3D12_BLEND_DESC outState)
+		{
+			outState.AlphaToCoverageEnable = inState.alphaToCoverageEnable ? 1 : 0;
+			outState.IndependentBlendEnable = 1;
+
+			for (uint32 i = 0; i < c_MaxRenderTargets; i++)
+			{
+				readonly ref BlendState.RenderTarget src = ref inState.targets[i];
+				ref D3D12_RENDER_TARGET_BLEND_DESC dst = ref outState.RenderTarget[i];
+
+				dst.BlendEnable = src.blendEnable ? 1 : 0;
+				dst.SrcBlend = convertBlendValue(src.srcBlend);
+				dst.DestBlend = convertBlendValue(src.destBlend);
+				dst.BlendOp = convertBlendOp(src.blendOp);
+				dst.SrcBlendAlpha = convertBlendValue(src.srcBlendAlpha);
+				dst.DestBlendAlpha = convertBlendValue(src.destBlendAlpha);
+				dst.BlendOpAlpha = convertBlendOp(src.blendOpAlpha);
+				dst.RenderTargetWriteMask = (.)(D3D12_COLOR_WRITE_ENABLE)src.colorWriteMask;
+			}
+		}
+
+		public static void TranslateDepthStencilState(DepthStencilState inState, ref D3D12_DEPTH_STENCIL_DESC outState)
+		{
+			outState.DepthEnable = inState.depthTestEnable ? 1 : 0;
+			outState.DepthWriteMask = inState.depthWriteEnable ? D3D12_DEPTH_WRITE_MASK.ALL : D3D12_DEPTH_WRITE_MASK.ZERO;
+			outState.DepthFunc = convertComparisonFunc(inState.depthFunc);
+			outState.StencilEnable = inState.stencilEnable ? 1 : 0;
+			outState.StencilReadMask = (uint8)inState.stencilReadMask;
+			outState.StencilWriteMask = (uint8)inState.stencilWriteMask;
+			outState.FrontFace.StencilFailOp = convertStencilOp(inState.frontFaceStencil.failOp);
+			outState.FrontFace.StencilDepthFailOp = convertStencilOp(inState.frontFaceStencil.depthFailOp);
+			outState.FrontFace.StencilPassOp = convertStencilOp(inState.frontFaceStencil.passOp);
+			outState.FrontFace.StencilFunc = convertComparisonFunc(inState.frontFaceStencil.stencilFunc);
+			outState.BackFace.StencilFailOp = convertStencilOp(inState.backFaceStencil.failOp);
+			outState.BackFace.StencilDepthFailOp = convertStencilOp(inState.backFaceStencil.depthFailOp);
+			outState.BackFace.StencilPassOp = convertStencilOp(inState.backFaceStencil.passOp);
+			outState.BackFace.StencilFunc = convertComparisonFunc(inState.backFaceStencil.stencilFunc);
+		}
+
+		public static void TranslateRasterizerState(RasterState inState, ref D3D12_RASTERIZER_DESC outState)
+		{
+			switch (inState.fillMode)
+			{
+			case RasterFillMode.Solid:
+				outState.FillMode = D3D12_FILL_MODE.SOLID;
+				break;
+			case RasterFillMode.Wireframe:
+				outState.FillMode = D3D12_FILL_MODE.WIREFRAME;
+				break;
+			default:
+				nvrhi.utils.InvalidEnum();
+				break;
+			}
+
+			switch (inState.cullMode)
+			{
+			case RasterCullMode.Back:
+				outState.CullMode = D3D12_CULL_MODE.BACK;
+				break;
+			case RasterCullMode.Front:
+				outState.CullMode = D3D12_CULL_MODE.FRONT;
+				break;
+			case RasterCullMode.None:
+				outState.CullMode = D3D12_CULL_MODE.NONE;
+				break;
+			default:
+				nvrhi.utils.InvalidEnum();
+				break;
+			}
+
+			outState.FrontCounterClockwise = inState.frontCounterClockwise ? 1 : 0;
+			outState.DepthBias = inState.depthBias;
+			outState.DepthBiasClamp = inState.depthBiasClamp;
+			outState.SlopeScaledDepthBias = inState.slopeScaledDepthBias;
+			outState.DepthClipEnable = inState.depthClipEnable ? 1 : 0;
+			outState.MultisampleEnable = inState.multisampleEnable ? 1 : 0;
+			outState.AntialiasedLineEnable = inState.antialiasedLineEnable ? 1 : 0;
+			outState.ConservativeRaster = inState.conservativeRasterEnable ? D3D12_CONSERVATIVE_RASTERIZATION_MODE.ON : D3D12_CONSERVATIVE_RASTERIZATION_MODE.OFF;
+			outState.ForcedSampleCount = inState.forcedSampleCount;
 		}
 	}
 

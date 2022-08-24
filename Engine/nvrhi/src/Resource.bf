@@ -42,7 +42,7 @@ namespace nvrhi
 	{
 		public virtual NativeObject getNativeObject(ObjectType objectType) { (void)objectType; return null; }
 
-		public int GetHashCode()
+		public virtual int GetHashCode()
 		{
 			return (.)Internal.UnsafeCastToPtr(this);
 		}
