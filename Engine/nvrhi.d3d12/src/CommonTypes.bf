@@ -1,6 +1,8 @@
 using Win32.Graphics.Direct3D12;
 using System;
 using Win32.Foundation;
+using System.Collections;
+using Win32.System.COM;
 
 namespace nvrhi
 {
@@ -110,9 +112,88 @@ namespace nvrhi.d3d12
 
 	struct DX12_ViewportState
 	{
-	    public UINT numViewports = 0;
-	    public D3D12_VIEWPORT[16] viewports = .();
-	    public UINT numScissorRects = 0;
-	    public D3D12_RECT[16] scissorRects = .();
+		public UINT numViewports = 0;
+		public D3D12_VIEWPORT[16] viewports = .();
+		public UINT numScissorRects = 0;
+		public D3D12_RECT[16] scissorRects = .();
+	}
+
+	class TextureState
+	{
+		public List<D3D12_RESOURCE_STATES> subresourceStates = new .() ~ delete _;
+		public bool enableUavBarriers = true;
+		public bool firstUavBarrierPlaced = false;
+		public bool permanentTransition = false;
+
+		public this(uint32 numSubresources)
+		{
+			subresourceStates.Resize(numSubresources, c_ResourceStateUnknown);
+		}
+	}
+
+	class BufferState
+	{
+		public D3D12_RESOURCE_STATES state = c_ResourceStateUnknown;
+		public bool enableUavBarriers = true;
+		public bool firstUavBarrierPlaced = false;
+		public D3D12_GPU_VIRTUAL_ADDRESS volatileData = 0;
+		public bool permanentTransition = false;
+	}
+
+	class ShaderTableState
+	{
+	    public uint32 committedVersion = 0;
+	    public ID3D12DescriptorHeap* descriptorHeapSRV = null;
+	    public ID3D12DescriptorHeap* descriptorHeapSamplers = null;
+	    public D3D12_DISPATCH_RAYS_DESC dispatchRaysTemplate = .();
+	}
+
+	class BufferChunk
+	{
+		public const uint64 c_sizeAlignment = 4096; // GPU page size
+
+		public D3D12RefCountPtr<ID3D12Resource> buffer;
+		public uint64 version = 0;
+		public uint64 bufferSize = 0;
+		public uint64 writePointer = 0;
+		public void* cpuVA = null;
+		public D3D12_GPU_VIRTUAL_ADDRESS gpuVA = 0;
+		public uint32 identifier = 0;
+
+		public ~this()
+		{
+			if (buffer != null && cpuVA != null)
+			{
+				buffer.Unmap(0, null);
+				cpuVA = null;
+			}
+		}
+	}
+
+	class InternalCommandList
+	{
+	    public D3D12RefCountPtr<ID3D12CommandAllocator> allocator;
+	    public D3D12RefCountPtr<ID3D12GraphicsCommandList> commandList;
+	    public D3D12RefCountPtr<ID3D12GraphicsCommandList4> commandList4;
+	    public D3D12RefCountPtr<ID3D12GraphicsCommandList6> commandList6;
+	    public uint64 lastSubmittedInstance = 0;
+	}
+
+	class CommandListInstance
+	{
+	    public uint64 submittedInstance = 0;
+	    public CommandQueue commandQueue = CommandQueue.Graphics;
+	    public D3D12RefCountPtr<ID3D12Fence> fence;
+	    public D3D12RefCountPtr<ID3D12CommandAllocator> commandAllocator;
+	    public D3D12RefCountPtr<ID3D12CommandList> commandList;
+	    public List<RefCountPtr<IResource>> referencedResources;
+	    public List<RefCountPtr<IUnknown>> referencedNativeResources;
+	    public List<RefCountPtr<StagingTexture>> referencedStagingTextures;
+	    public List<RefCountPtr<Buffer>> referencedStagingBuffers;
+	    public List<RefCountPtr<TimerQuery>> referencedTimerQueries;
+#if NVRHI_WITH_RTXMU
+	    public List<uint64> rtxmuBuildIds;
+	    public List<uint64> rtxmuCompactionIds;
+#endif
 	}
 }

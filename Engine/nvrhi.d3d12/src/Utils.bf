@@ -326,42 +326,83 @@ namespace nvrhi.d3d12
 
 		public static ResourceType GetNormalizedResourceType(ResourceType type)
 		{
-		    switch (type)  // NOLINT(clang-diagnostic-switch-enum)
-		    {
-		    case ResourceType.StructuredBuffer_UAV: fallthrough;
-		    case ResourceType.RawBuffer_UAV:
-		        return ResourceType.TypedBuffer_UAV;
-		    case ResourceType.StructuredBuffer_SRV: fallthrough;
-		    case ResourceType.RawBuffer_SRV:
-		        return ResourceType.TypedBuffer_SRV;
-		    default:
-		        return type;
-		    }
+			switch (type) // NOLINT(clang-diagnostic-switch-enum)
+			{
+			case ResourceType.StructuredBuffer_UAV: fallthrough;
+			case ResourceType.RawBuffer_UAV:
+				return ResourceType.TypedBuffer_UAV;
+			case ResourceType.StructuredBuffer_SRV: fallthrough;
+			case ResourceType.RawBuffer_SRV:
+				return ResourceType.TypedBuffer_SRV;
+			default:
+				return type;
+			}
 		}
 
 		public static bool AreResourceTypesCompatible(ResourceType a, ResourceType b)
 		{
 			var a;
 			var b;
-		    if (a == b)
-		        return true;
+			if (a == b)
+				return true;
 
-		    a = GetNormalizedResourceType(a);
-		    b = GetNormalizedResourceType(b);
+			a = GetNormalizedResourceType(a);
+			b = GetNormalizedResourceType(b);
 
-		    if (a == ResourceType.TypedBuffer_SRV && b == ResourceType.Texture_SRV ||
-		        b == ResourceType.TypedBuffer_SRV && a == ResourceType.Texture_SRV ||
-		        a == ResourceType.TypedBuffer_SRV && b == ResourceType.RayTracingAccelStruct ||
-		        a == ResourceType.Texture_SRV && b == ResourceType.RayTracingAccelStruct ||
-		        b == ResourceType.TypedBuffer_SRV && a == ResourceType.RayTracingAccelStruct ||
-		        b == ResourceType.Texture_SRV && a == ResourceType.RayTracingAccelStruct)
-		        return true;
+			if (a == ResourceType.TypedBuffer_SRV && b == ResourceType.Texture_SRV ||
+				b == ResourceType.TypedBuffer_SRV && a == ResourceType.Texture_SRV ||
+				a == ResourceType.TypedBuffer_SRV && b == ResourceType.RayTracingAccelStruct ||
+				a == ResourceType.Texture_SRV && b == ResourceType.RayTracingAccelStruct ||
+				b == ResourceType.TypedBuffer_SRV && a == ResourceType.RayTracingAccelStruct ||
+				b == ResourceType.Texture_SRV && a == ResourceType.RayTracingAccelStruct)
+				return true;
 
-		    if (a == ResourceType.TypedBuffer_UAV && b == ResourceType.Texture_UAV ||
-		        b == ResourceType.TypedBuffer_UAV && a == ResourceType.Texture_UAV)
-		        return true;
+			if (a == ResourceType.TypedBuffer_UAV && b == ResourceType.Texture_UAV ||
+				b == ResourceType.TypedBuffer_UAV && a == ResourceType.Texture_UAV)
+				return true;
 
-		    return false;
+			return false;
+		}
+
+		public static void fillD3dGeometryDesc(ref D3D12_RAYTRACING_GEOMETRY_DESC outD3dGeometryDesc, nvrhi.rt.GeometryDesc geometryDesc)
+		{
+			if (geometryDesc.geometryType == nvrhi.rt.GeometryType.Triangles)
+			{
+				readonly var triangles = /*ref*/ geometryDesc.geometryData.triangles;
+				outD3dGeometryDesc.Type = D3D12_RAYTRACING_GEOMETRY_TYPE.TRIANGLES;
+				outD3dGeometryDesc.Flags = (D3D12_RAYTRACING_GEOMETRY_FLAGS)geometryDesc.flags;
+
+				if (triangles.indexBuffer != null)
+					outD3dGeometryDesc.Triangles.IndexBuffer = checked_cast<Buffer, IBuffer>(triangles.indexBuffer).gpuVA + triangles.indexOffset;
+				else
+					outD3dGeometryDesc.Triangles.IndexBuffer = 0;
+
+				if (triangles.vertexBuffer != null)
+					outD3dGeometryDesc.Triangles.VertexBuffer.StartAddress = checked_cast<Buffer, IBuffer>(triangles.vertexBuffer).gpuVA + triangles.vertexOffset;
+				else
+					outD3dGeometryDesc.Triangles.VertexBuffer.StartAddress = 0;
+
+				outD3dGeometryDesc.Triangles.VertexBuffer.StrideInBytes = triangles.vertexStride;
+				outD3dGeometryDesc.Triangles.IndexFormat = getDxgiFormatMapping(triangles.indexFormat).srvFormat;
+				outD3dGeometryDesc.Triangles.VertexFormat = getDxgiFormatMapping(triangles.vertexFormat).srvFormat;
+				outD3dGeometryDesc.Triangles.IndexCount = triangles.indexCount;
+				outD3dGeometryDesc.Triangles.VertexCount = triangles.vertexCount;
+				outD3dGeometryDesc.Triangles.Transform3x4 = 0;
+			}
+			else
+			{
+				readonly var aabbs = /*ref*/ geometryDesc.geometryData.aabbs;
+				outD3dGeometryDesc.Type = D3D12_RAYTRACING_GEOMETRY_TYPE.PROCEDURAL_PRIMITIVE_AABBS;
+				outD3dGeometryDesc.Flags = (D3D12_RAYTRACING_GEOMETRY_FLAGS)geometryDesc.flags;
+
+				if (aabbs.buffer != null)
+					outD3dGeometryDesc.AABBs.AABBs.StartAddress = checked_cast<Buffer, IBuffer>(aabbs.buffer).gpuVA + aabbs.offset;
+				else
+					outD3dGeometryDesc.AABBs.AABBs.StartAddress = 0;
+
+				outD3dGeometryDesc.AABBs.AABBs.StrideInBytes = aabbs.stride;
+				outD3dGeometryDesc.AABBs.AABBCount = aabbs.count;
+			}
 		}
 	}
 

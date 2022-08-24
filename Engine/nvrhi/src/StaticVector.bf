@@ -36,6 +36,8 @@ namespace nvrhi
 			get mut { return ref mVal[index]; }
 		}
 
+		public ref T Back { get mut { return ref mVal[CurrentSize - 1]; } }
+
 		/*public ref T GetValueAt(int index) mut
 		{
 			return ref mVal[index];
@@ -88,6 +90,14 @@ namespace nvrhi
 			Runtime.Assert(CurrentSize < MaxSize);
 			mVal[CurrentSize] = value;
 			CurrentSize++;
+		}
+
+		public ref T AddAndGetRef(T value = default) mut
+		{
+			Runtime.Assert(CurrentSize < MaxSize);
+			mVal[CurrentSize] = value;
+			CurrentSize++;
+			return ref Back;
 		}
 
 		public void PopBack() mut
