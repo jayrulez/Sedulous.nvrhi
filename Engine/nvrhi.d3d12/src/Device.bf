@@ -8,6 +8,8 @@ using Win32.System.WindowsProgramming;
 using Win32.Graphics.Dxgi;
 using System;
 using nvrhi.d3dcommon;
+using nvrhi.rt;
+using Win32.Graphics.Direct3D;
 namespace nvrhi.d3d12;
 
 class Device : RefCounter<nvrhi.d3d12.IDevice>
@@ -76,7 +78,7 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 		    m_Context.device.CreateCommandSignature(csDesc, null, ID3D12CommandSignature.IID, (void**)&m_Context.dispatchIndirectSignature);
 		}
 
-		m_FenceEvent = CreateEvent(null, false, false, null);
+		m_FenceEvent = CreateEventA(null, 0, 0, null);
 
 		m_CommandListsToExecute.Reserve(64);
 
@@ -717,7 +719,7 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
             return null;
         }
 #else
-        if (d.numCustomSemantics || d.pCoordinateSwizzling || (d.fastGSFlags != 0) || d.hlslExtensionsUAV >= 0)
+        if (d.numCustomSemantics != 0 || d.pCoordinateSwizzling != null || (d.fastGSFlags != 0) || d.hlslExtensionsUAV >= 0)
         {
             nvrhi.utils.NotSupported();
             delete shader;
@@ -727,7 +729,7 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
         }
 #endif
         
-        return ShaderHandle.Create(shader);
+        return ShaderHandle.Attach(shader);
     }
     public override ShaderHandle createShaderSpecialization(IShader shader, ShaderSpecialization* data, uint32 num)
     {
@@ -821,9 +823,9 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
         query.fenceCounter = pQueue.lastSubmittedInstance;
         query.resolved = false;
     }
-    public bool pollEventQuery(IEventQuery* _query)
+    public override bool pollEventQuery(IEventQuery _query)
     {
-        EventQuery* query = checked_cast<EventQuery*>(_query);
+        EventQuery query = checked_cast<EventQuery, IEventQuery>(_query);
 
         if (!query.started)
             return false;
@@ -831,7 +833,7 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
         if (query.resolved)
             return true;
 
-        Runtime.Assert(query.fence);
+        Runtime.Assert(query.fence != null);
         
         if (query.fence.GetCompletedValue() >= query.fenceCounter)
         {
@@ -1053,9 +1055,12 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
         return createHandleForNativeMeshletPipeline(pRS, pPSO, desc, fb.getFramebufferInfo());
     }
 
-	/**
-	#define NEW_ON_STACK(T) (T*)alloca(sizeof(T))
-	*/
+	public static mixin NEW_ON_STACK<T>(){
+		T* data = null;
+		data = scope :: [Align(alignof(T))] T[1]*;
+		data
+	}
+
 	struct Library
 	{
 	    public void* pBlob = null;
@@ -1104,10 +1109,12 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
                 ref RootSignatureHandle localRS = ref pso.localRootSignatures[shaderDesc.bindingLayout];
                 if (localRS == null)
                 {
-                    localRS = buildRootSignature({ shaderDesc.bindingLayout }, false, true);
+					StaticVector<BindingLayoutHandle, const c_MaxBindingLayouts> pipelineLayouts = .();
+					pipelineLayouts.PushBack(shaderDesc.bindingLayout);
+                    localRS = buildRootSignature(pipelineLayouts, false, true);
 
-                    BindingLayout* layout = checked_cast<BindingLayout*>(shaderDesc.bindingLayout.Get());
-                    pso.maxLocalRootParameters = std.max(pso.maxLocalRootParameters, uint32(layout.rootParameters.size()));
+                    BindingLayout layout = checked_cast<BindingLayout, IBindingLayout>(shaderDesc.bindingLayout?.Get<IBindingLayout>());
+                    pso.maxLocalRootParameters = Math.Max(pso.maxLocalRootParameters, uint32(layout.rootParameters.Count));
                 }
             }
         }
@@ -1115,22 +1122,22 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
         // Still in the collection phase - go through the hit groups.
         // Rename all exports used in the hit groups to avoid collisions between different libraries.
 
-        List<D3D12_HIT_GROUP_DESC> d3dHitGroups;
-        Dictionary<IShader*, std.wstring> hitGroupShaderNames;
-        List<std.wstring> hitGroupExportNames;
+        List<D3D12_HIT_GROUP_DESC> d3dHitGroups = scope .();
+        Dictionary<IShader, char16*> hitGroupShaderNames = scope .();
+        List<char16*> hitGroupExportNames = scope .();
 
-        for (const nvrhi.rt.PipelineHitGroupDesc& hitGroupDesc : desc.hitGroups)
+        for (readonly ref nvrhi.rt.PipelineHitGroupDesc hitGroupDesc in ref desc.hitGroups)
         {
-            for (const ShaderHandle& shader : { hitGroupDesc.closestHitShader, hitGroupDesc.anyHitShader, hitGroupDesc.intersectionShader })
+            for (readonly /*ref*/ ShaderHandle shader in /*ref*/ scope List<IShader>(){ hitGroupDesc.closestHitShader, hitGroupDesc.anyHitShader, hitGroupDesc.intersectionShader })
             {
-                if (!shader)
+                if (shader == null)
                     continue;
 
-                std.wstring& newName = hitGroupShaderNames[shader];
+                char16* newName = hitGroupShaderNames[shader];
 
                 // See if we've encountered this particular shader before...
 
-                if (newName.empty())
+                if (newName == null)
                 {
                     // No - add it to the corresponding library, come up with a new name for it.
 
@@ -1138,225 +1145,221 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
                     int blobSize = 0;
                     shader.getBytecode(&pBlob, &blobSize);
 
-                    Library& library = dxilLibraries[pBlob];
+                    ref Library library = ref dxilLibraries[pBlob];
                     library.pBlob = pBlob;
                     library.blobSize = blobSize;
 
                     String originalShaderName = shader.getDesc().entryName;
-                    String newShaderName = originalShaderName + std.to_string(hitGroupShaderNames.size());
+                    String newShaderName = scope:: $"{originalShaderName}{hitGroupShaderNames.Count}";
 
-                    library.exports.push_back(std.make_pair<std.wstring, std.wstring>(
-                        std.wstring(originalShaderName.begin(), originalShaderName.end()),
-                        std.wstring(newShaderName.begin(), newShaderName.end())
-                        ));
+                    library.exports.Add((originalShaderName.ToScopedNativeWChar!::(),newShaderName.ToScopedNativeWChar!::()));
 
-                    newName = std.wstring(newShaderName.begin(), newShaderName.end());
+                    newName = newShaderName.ToScopedNativeWChar!::();
                 }
             }
 
             // Build a local root signature for the hit group, if needed.
 
-            if (hitGroupDesc.bindingLayout)
+            if (hitGroupDesc.bindingLayout != null)
             {
-                RootSignatureHandle& localRS = pso.localRootSignatures[hitGroupDesc.bindingLayout];
-                if (!localRS)
+                ref RootSignatureHandle localRS = ref pso.localRootSignatures[hitGroupDesc.bindingLayout];
+                if (localRS == null)
                 {
-                    localRS = buildRootSignature({ hitGroupDesc.bindingLayout }, false, true);
+					StaticVector<BindingLayoutHandle, const c_MaxBindingLayouts> pipelineLayouts = .();
+					pipelineLayouts.PushBack(hitGroupDesc.bindingLayout);
+                    localRS = buildRootSignature(pipelineLayouts, false, true);
 
-                    BindingLayout* layout = checked_cast<BindingLayout*>(hitGroupDesc.bindingLayout.Get());
-                    pso.maxLocalRootParameters = std.max(pso.maxLocalRootParameters, uint32(layout.rootParameters.size()));
+                    BindingLayout layout = checked_cast<BindingLayout, IBindingLayout>(hitGroupDesc.bindingLayout?.Get<IBindingLayout>());
+                    pso.maxLocalRootParameters = Math.Max(pso.maxLocalRootParameters, uint32(layout.rootParameters.Count));
                 }
             }
 
             // Create a hit group descriptor and store the new export names in it.
 
-            D3D12_HIT_GROUP_DESC d3dHitGroupDesc = {};
-            if (hitGroupDesc.anyHitShader)
-                d3dHitGroupDesc.AnyHitShaderImport = hitGroupShaderNames[hitGroupDesc.anyHitShader].c_str();
-            if (hitGroupDesc.closestHitShader)
-                d3dHitGroupDesc.ClosestHitShaderImport = hitGroupShaderNames[hitGroupDesc.closestHitShader].c_str();
-            if (hitGroupDesc.intersectionShader)
-                d3dHitGroupDesc.IntersectionShaderImport = hitGroupShaderNames[hitGroupDesc.intersectionShader].c_str();
+            D3D12_HIT_GROUP_DESC d3dHitGroupDesc = .();
+            if (hitGroupDesc.anyHitShader != null)
+                d3dHitGroupDesc.AnyHitShaderImport = hitGroupShaderNames[hitGroupDesc.anyHitShader];
+            if (hitGroupDesc.closestHitShader != null)
+                d3dHitGroupDesc.ClosestHitShaderImport = hitGroupShaderNames[hitGroupDesc.closestHitShader];
+            if (hitGroupDesc.intersectionShader != null)
+                d3dHitGroupDesc.IntersectionShaderImport = hitGroupShaderNames[hitGroupDesc.intersectionShader];
 
             if (hitGroupDesc.isProceduralPrimitive)
-                d3dHitGroupDesc.Type = D3D12_HIT_GROUP_TYPE_PROCEDURAL_PRIMITIVE;
+                d3dHitGroupDesc.Type = D3D12_HIT_GROUP_TYPE.PROCEDURAL_PRIMITIVE;
             else
-                d3dHitGroupDesc.Type = D3D12_HIT_GROUP_TYPE_TRIANGLES;
+                d3dHitGroupDesc.Type = D3D12_HIT_GROUP_TYPE.TRIANGLES;
 
-            std.wstring hitGroupExportName = std.wstring(hitGroupDesc.exportName.begin(), hitGroupDesc.exportName.end());
-            hitGroupExportNames.push_back(hitGroupExportName); // store the wstring so that it's not deallocated
-            d3dHitGroupDesc.HitGroupExport = hitGroupExportNames[hitGroupExportNames.size() - 1].c_str();
-            d3dHitGroups.push_back(d3dHitGroupDesc);
+            char16* hitGroupExportName = hitGroupDesc.exportName.ToScopedNativeWChar!::();
+            hitGroupExportNames.Add(hitGroupExportName); // store the wstring so that it's not deallocated
+            d3dHitGroupDesc.HitGroupExport = hitGroupExportNames[hitGroupExportNames.Count - 1];
+            d3dHitGroups.Add(d3dHitGroupDesc);
         }
 
         // Create descriptors for DXIL libraries, enumerate the exports used from each library.
 
-        List<D3D12_DXIL_LIBRARY_DESC> d3dDxilLibraries;
-        d3dDxilLibraries.reserve(dxilLibraries.size());
-        for (auto& it : dxilLibraries)
+        List<D3D12_DXIL_LIBRARY_DESC> d3dDxilLibraries = scope .();
+        d3dDxilLibraries.Reserve(dxilLibraries.Count);
+        for (var it in ref dxilLibraries)
         {
-            Library& library = it.second;
+            ref Library library = ref *it.valueRef;
 
-            for (const std.pair<std.wstring, std.wstring>& exportNames : library.exports)
+            for (readonly (char16* key, char16* value) exportNames in library.exports)
             {
-                D3D12_EXPORT_DESC d3dExportDesc = {};
-                d3dExportDesc.ExportToRename = exportNames.first.c_str();
-                d3dExportDesc.Name = exportNames.second.c_str();
-                d3dExportDesc.Flags = D3D12_EXPORT_FLAG_NONE;
-                library.d3dExports.push_back(d3dExportDesc);
+                D3D12_EXPORT_DESC d3dExportDesc = .();
+                d3dExportDesc.ExportToRename = exportNames.key;
+                d3dExportDesc.Name = exportNames.value;
+                d3dExportDesc.Flags = D3D12_EXPORT_FLAGS.FLAG_NONE;
+                library.d3dExports.Add(d3dExportDesc);
             }
 
-            D3D12_DXIL_LIBRARY_DESC d3dLibraryDesc = {};
+            D3D12_DXIL_LIBRARY_DESC d3dLibraryDesc = .();
             d3dLibraryDesc.DXILLibrary.pShaderBytecode = library.pBlob;
-            d3dLibraryDesc.DXILLibrary.BytecodeLength = library.blobSize;
-            d3dLibraryDesc.NumExports = UINT(library.d3dExports.size());
-            d3dLibraryDesc.pExports = library.d3dExports.data();
+            d3dLibraryDesc.DXILLibrary.BytecodeLength = (.)library.blobSize;
+            d3dLibraryDesc.NumExports = UINT(library.d3dExports.Count);
+            d3dLibraryDesc.pExports = library.d3dExports.Ptr;
 
-            d3dDxilLibraries.push_back(d3dLibraryDesc);
+            d3dDxilLibraries.Add(d3dLibraryDesc);
         }
 
         // Start building the D3D state subobject array.
 
-        List<D3D12_STATE_SUBOBJECT> d3dSubobjects;
+        List<D3D12_STATE_SUBOBJECT> d3dSubobjects = scope .();
 
         // Same subobject is reused multiple times and copied to the vector each time.
-        D3D12_STATE_SUBOBJECT d3dSubobject = {};
+        D3D12_STATE_SUBOBJECT d3dSubobject = .();
 
         // Subobject: Shader config
 
-        D3D12_RAYTRACING_SHADER_CONFIG d3dShaderConfig = {};
+        D3D12_RAYTRACING_SHADER_CONFIG d3dShaderConfig = .();
         d3dShaderConfig.MaxAttributeSizeInBytes = desc.maxAttributeSize;
         d3dShaderConfig.MaxPayloadSizeInBytes = desc.maxPayloadSize;
 
-        d3dSubobject.Type = D3D12_STATE_SUBOBJECT_TYPE_RAYTRACING_SHADER_CONFIG;
+        d3dSubobject.Type = D3D12_STATE_SUBOBJECT_TYPE.RAYTRACING_SHADER_CONFIG;
         d3dSubobject.pDesc = &d3dShaderConfig;
-        d3dSubobjects.push_back(d3dSubobject);
+        d3dSubobjects.Add(d3dSubobject);
 
         // Subobject: Pipeline config
 
-        D3D12_RAYTRACING_PIPELINE_CONFIG d3dPipelineConfig = {};
+        D3D12_RAYTRACING_PIPELINE_CONFIG d3dPipelineConfig = .();
         d3dPipelineConfig.MaxTraceRecursionDepth = desc.maxRecursionDepth;
 
-        d3dSubobject.Type = D3D12_STATE_SUBOBJECT_TYPE_RAYTRACING_PIPELINE_CONFIG;
+        d3dSubobject.Type = D3D12_STATE_SUBOBJECT_TYPE.RAYTRACING_PIPELINE_CONFIG;
         d3dSubobject.pDesc = &d3dPipelineConfig;
-        d3dSubobjects.push_back(d3dSubobject);
+        d3dSubobjects.Add(d3dSubobject);
 
         // Subobjects: DXIL libraries
 
-        for (const D3D12_DXIL_LIBRARY_DESC& d3dLibraryDesc : d3dDxilLibraries)
+        for (readonly ref D3D12_DXIL_LIBRARY_DESC d3dLibraryDesc in ref d3dDxilLibraries)
         {
-            d3dSubobject.Type = D3D12_STATE_SUBOBJECT_TYPE_DXIL_LIBRARY;
+            d3dSubobject.Type = D3D12_STATE_SUBOBJECT_TYPE.DXIL_LIBRARY;
             d3dSubobject.pDesc = &d3dLibraryDesc;
-            d3dSubobjects.push_back(d3dSubobject);
+            d3dSubobjects.Add(d3dSubobject);
         }
 
         // Subobjects: hit groups
 
-        for (const D3D12_HIT_GROUP_DESC& d3dHitGroupDesc : d3dHitGroups)
+        for (readonly ref D3D12_HIT_GROUP_DESC d3dHitGroupDesc in ref d3dHitGroups)
         {
-            d3dSubobject.Type = D3D12_STATE_SUBOBJECT_TYPE_HIT_GROUP;
+            d3dSubobject.Type = D3D12_STATE_SUBOBJECT_TYPE.HIT_GROUP;
             d3dSubobject.pDesc = &d3dHitGroupDesc;
-            d3dSubobjects.push_back(d3dSubobject);
+            d3dSubobjects.Add(d3dSubobject);
         }
 
         // Subobject: global root signature
 
-        D3D12_GLOBAL_ROOT_SIGNATURE d3dGlobalRootSignature = {};
+        D3D12_GLOBAL_ROOT_SIGNATURE d3dGlobalRootSignature = .();
 
-        if (!desc.globalBindingLayouts.empty())
+        if (!desc.globalBindingLayouts.IsEmpty)
         {
             RootSignatureHandle rootSignature = buildRootSignature(desc.globalBindingLayouts, false, false);
-            pso.globalRootSignature = checked_cast<RootSignature*>(rootSignature.Get());
-            d3dGlobalRootSignature.pGlobalRootSignature = pso.globalRootSignature.getNativeObject(ObjectTypes.D3D12_RootSignature);
+            pso.globalRootSignature = checked_cast<RootSignature, IRootSignature>(rootSignature.Get<IRootSignature>());
+            d3dGlobalRootSignature.pGlobalRootSignature = (ID3D12RootSignature*)pso.globalRootSignature.getNativeObject(ObjectType.D3D12_RootSignature).pointer;
 
-            d3dSubobject.Type = D3D12_STATE_SUBOBJECT_TYPE_GLOBAL_ROOT_SIGNATURE;
+            d3dSubobject.Type = D3D12_STATE_SUBOBJECT_TYPE.GLOBAL_ROOT_SIGNATURE;
             d3dSubobject.pDesc = &d3dGlobalRootSignature;
-            d3dSubobjects.push_back(d3dSubobject);
+            d3dSubobjects.Add(d3dSubobject);
         }
 
         // Subobjects: local root signatures
 
         // Make sure that adding local root signatures does not resize the array,
         // because we need to store pointers to array elements there.
-        d3dSubobjects.reserve(d3dSubobjects.size() + pso.localRootSignatures.size() * 2);
+        d3dSubobjects.Reserve(d3dSubobjects.Count + pso.localRootSignatures.Count * 2);
 
         // Same - pre-allocate the arrays to avoid resizing them
-        int numAssociations = desc.shaders.size() + desc.hitGroups.size();
-        List<std.wstring> d3dAssociationExports;
-        List<LPCWSTR> d3dAssociationExportsCStr;
-        d3dAssociationExports.reserve(numAssociations);
-        d3dAssociationExportsCStr.reserve(numAssociations);
+        int numAssociations = desc.shaders.Count + desc.hitGroups.Count;
+        List<char16*> d3dAssociationExports = scope .();
+        List<char16*> d3dAssociationExportsCStr = scope .();
+        d3dAssociationExports.Reserve(numAssociations);
+        d3dAssociationExportsCStr.Reserve(numAssociations);
 
-        for (const auto& it : pso.localRootSignatures)
+        for (readonly var it in /*ref*/ pso.localRootSignatures)
         {
-            auto d3dLocalRootSignature = NEW_ON_STACK(D3D12_LOCAL_ROOT_SIGNATURE);
-            d3dLocalRootSignature.pLocalRootSignature = it.second.getNativeObject(ObjectTypes.D3D12_RootSignature);
+            var d3dLocalRootSignature = NEW_ON_STACK!<D3D12_LOCAL_ROOT_SIGNATURE>();
+            d3dLocalRootSignature.pLocalRootSignature = (ID3D12RootSignature*)it.value.getNativeObject(ObjectType.D3D12_RootSignature).pointer;
 
-            d3dSubobject.Type = D3D12_STATE_SUBOBJECT_TYPE_LOCAL_ROOT_SIGNATURE;
+            d3dSubobject.Type = D3D12_STATE_SUBOBJECT_TYPE.LOCAL_ROOT_SIGNATURE;
             d3dSubobject.pDesc = d3dLocalRootSignature;
-            d3dSubobjects.push_back(d3dSubobject);
+            d3dSubobjects.Add(d3dSubobject);
 
-            auto d3dAssociation = NEW_ON_STACK(D3D12_SUBOBJECT_TO_EXPORTS_ASSOCIATION);
-            d3dAssociation.pSubobjectToAssociate = &d3dSubobjects[d3dSubobjects.size() - 1];
+            var d3dAssociation = NEW_ON_STACK!<D3D12_SUBOBJECT_TO_EXPORTS_ASSOCIATION>();
+            d3dAssociation.pSubobjectToAssociate = &d3dSubobjects[d3dSubobjects.Count - 1];
             d3dAssociation.NumExports = 0;
-            int firstExportIndex = d3dAssociationExportsCStr.size();
+            int firstExportIndex = d3dAssociationExportsCStr.Count;
 
-            for (auto shader : desc.shaders)
+            for (var shader in desc.shaders)
             {
-                if (shader.bindingLayout == it.first)
+                if (shader.bindingLayout == it.key)
                 {
-                    String exportName = shader.exportName.empty() ? shader.shader.getDesc().entryName : shader.exportName;
-                    std.wstring exportNameW = std.wstring(exportName.begin(), exportName.end());
-                    d3dAssociationExports.push_back(exportNameW);
-                    d3dAssociationExportsCStr.push_back(d3dAssociationExports[d3dAssociationExports.size() - 1].c_str());
+                    String exportName = !String.IsNullOrEmpty(shader.exportName) ? shader.shader.getDesc().entryName : shader.exportName;
+                    d3dAssociationExports.Add(exportName.ToScopedNativeWChar!::());
+                    d3dAssociationExportsCStr.Add(d3dAssociationExports[d3dAssociationExports.Count - 1]);
                     d3dAssociation.NumExports += 1;
                 }
             }
 
-            for (auto hitGroup : desc.hitGroups)
+            for (var hitGroup in desc.hitGroups)
             {
-                if (hitGroup.bindingLayout == it.first)
+                if (hitGroup.bindingLayout == it.key)
                 {
-                    std.wstring exportNameW = std.wstring(hitGroup.exportName.begin(), hitGroup.exportName.end());
-                    d3dAssociationExports.push_back(exportNameW);
-                    d3dAssociationExportsCStr.push_back(d3dAssociationExports[d3dAssociationExports.size() - 1].c_str());
+                    d3dAssociationExports.Add(hitGroup.exportName.ToScopedNativeWChar!::());
+                    d3dAssociationExportsCStr.Add(d3dAssociationExports[d3dAssociationExports.Count - 1]);
                     d3dAssociation.NumExports += 1;
                 }
             }
             
             d3dAssociation.pExports = &d3dAssociationExportsCStr[firstExportIndex];
 
-            d3dSubobject.Type = D3D12_STATE_SUBOBJECT_TYPE_SUBOBJECT_TO_EXPORTS_ASSOCIATION;
+            d3dSubobject.Type = D3D12_STATE_SUBOBJECT_TYPE.SUBOBJECT_TO_EXPORTS_ASSOCIATION;
             d3dSubobject.pDesc = d3dAssociation;
-            d3dSubobjects.push_back(d3dSubobject);
+            d3dSubobjects.Add(d3dSubobject);
         }
 
         // Top-level PSO descriptor structure
 
-        D3D12_STATE_OBJECT_DESC pipelineDesc = {};
-        pipelineDesc.Type = D3D12_STATE_OBJECT_TYPE_RAYTRACING_PIPELINE;
-        pipelineDesc.NumSubobjects = static_cast<UINT>(d3dSubobjects.size());
-        pipelineDesc.pSubobjects = d3dSubobjects.data();
+        D3D12_STATE_OBJECT_DESC pipelineDesc = .();
+        pipelineDesc.Type = D3D12_STATE_OBJECT_TYPE.RAYTRACING_PIPELINE;
+        pipelineDesc.NumSubobjects = (UINT)(d3dSubobjects.Count);
+        pipelineDesc.pSubobjects = d3dSubobjects.Ptr;
 
-        HRESULT hr = m_Context.device5.CreateStateObject(&pipelineDesc, IID_PPV_ARGS(&pso.pipelineState));
+        HRESULT hr = m_Context.device5.CreateStateObject(pipelineDesc, ID3D12StateObject.IID, (void**)(&pso.pipelineState));
         if (FAILED(hr))
         {
             m_Context.error("Failed to create a DXR pipeline state object");
             return null;
         }
 
-        hr = pso.pipelineState.QueryInterface(IID_PPV_ARGS(&pso.pipelineInfo));
+        hr = pso.pipelineState.QueryInterface(ID3D12StateObjectProperties.IID, (void**)(&pso.pipelineInfo));
         if (FAILED(hr))
         {
             m_Context.error("Failed to get a DXR pipeline info interface from a PSO");
             return null;
         }
 
-        for (const nvrhi.rt.PipelineShaderDesc& shaderDesc : desc.shaders)
+        for (readonly ref nvrhi.rt.PipelineShaderDesc shaderDesc in ref desc.shaders)
         {
-            String exportName = !shaderDesc.exportName.empty() ? shaderDesc.exportName : shaderDesc.shader.getDesc().entryName;
-            std.wstring exportNameW = std.wstring(exportName.begin(), exportName.end());
-            const void* pShaderIdentifier = pso.pipelineInfo.GetShaderIdentifier(exportNameW.c_str());
+            String exportName = !String.IsNullOrEmpty(shaderDesc.exportName) ? shaderDesc.exportName : shaderDesc.shader.getDesc().entryName;
+            readonly void* pShaderIdentifier = pso.pipelineInfo.GetShaderIdentifier(exportName.ToScopedNativeWChar!::());
 
             if (pShaderIdentifier == null)
             {
@@ -1364,13 +1367,12 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
                 return null;
             }
 
-            pso.exports[exportName] = RayTracingPipeline.ExportTableEntry{ shaderDesc.bindingLayout, pShaderIdentifier };
+            pso.exports[exportName] = RayTracingPipeline.ExportTableEntry(){ bindingLayout= shaderDesc.bindingLayout,pShaderIdentifier= pShaderIdentifier };
         }
 
-        for(const nvrhi.rt.PipelineHitGroupDesc& hitGroupDesc : desc.hitGroups)
+        for(readonly ref nvrhi.rt.PipelineHitGroupDesc hitGroupDesc in ref desc.hitGroups)
         { 
-            std.wstring exportNameW = std.wstring(hitGroupDesc.exportName.begin(), hitGroupDesc.exportName.end());
-            const void* pShaderIdentifier = pso.pipelineInfo.GetShaderIdentifier(exportNameW.c_str());
+            readonly void* pShaderIdentifier = pso.pipelineInfo.GetShaderIdentifier(hitGroupDesc.exportName.ToScopedNativeWChar!::());
 
             if (pShaderIdentifier == null)
             {
@@ -1378,56 +1380,56 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
                 return null;
             }
 
-            pso.exports[hitGroupDesc.exportName] = RayTracingPipeline.ExportTableEntry{ hitGroupDesc.bindingLayout, pShaderIdentifier };
+            pso.exports[hitGroupDesc.exportName] = RayTracingPipeline.ExportTableEntry(){ bindingLayout= hitGroupDesc.bindingLayout, pShaderIdentifier= pShaderIdentifier };
         }
 
-        return nvrhi.rt.PipelineHandle.Create(pso);
+        return nvrhi.rt.PipelineHandle.Attach(pso);
     }
 
-    public BindingLayoutHandle createBindingLayout(const BindingLayoutDesc& desc)
+    public override BindingLayoutHandle createBindingLayout(BindingLayoutDesc desc)
     {
-        BindingLayout* ret = new BindingLayout(desc);
-        return BindingLayoutHandle.Create(ret);
+        BindingLayout ret = new BindingLayout(desc);
+        return BindingLayoutHandle.Attach(ret);
     }
-    public BindingLayoutHandle createBindlessLayout(const BindlessLayoutDesc& desc)
+    public override BindingLayoutHandle createBindlessLayout(BindlessLayoutDesc desc)
     {
-        BindlessLayout* ret = new BindlessLayout(desc);
-        return BindingLayoutHandle.Create(ret);
+        BindlessLayout ret = new BindlessLayout(desc);
+        return BindingLayoutHandle.Attach(ret);
     }
 
-    public BindingSetHandle createBindingSet(const BindingSetDesc& desc, IBindingLayout* _layout)
+    public override BindingSetHandle createBindingSet(BindingSetDesc desc, IBindingLayout _layout)
     {
-        BindingSet *ret = new BindingSet(m_Context, m_Resources);
+        BindingSet ret = new BindingSet(m_Context, m_Resources);
         ret.desc = desc;
 
-        BindingLayout* pipelineLayout = checked_cast<BindingLayout*>(_layout);
+        BindingLayout pipelineLayout = checked_cast<BindingLayout, IBindingLayout>(_layout);
         ret.layout = pipelineLayout;
 
         ret.createDescriptors();
 
-        return BindingSetHandle.Create(ret);
+        return BindingSetHandle.Attach(ret);
     }
-    public DescriptorTableHandle createDescriptorTable(IBindingLayout* layout)
+    public override DescriptorTableHandle createDescriptorTable(IBindingLayout layout)
     {
         (void)layout; // not necessary on DX12
 
-        DescriptorTable* ret = new DescriptorTable(m_Resources);
+        DescriptorTable ret = new DescriptorTable(m_Resources);
         ret.capacity = 0;
         ret.firstDescriptor = 0;
         
-        return DescriptorTableHandle.Create(ret);
+        return DescriptorTableHandle.Attach(ret);
     }
 
-    public void resizeDescriptorTable(IDescriptorTable* _descriptorTable, uint32 newSize, bool keepContents)
+    public override void resizeDescriptorTable(IDescriptorTable _descriptorTable, uint32 newSize, bool keepContents)
     {
-        DescriptorTable* descriptorTable = checked_cast<DescriptorTable*>(_descriptorTable);
+        DescriptorTable descriptorTable = checked_cast<DescriptorTable, IDescriptorTable>(_descriptorTable);
 
         if (newSize == descriptorTable.capacity)
             return;
 
         if (newSize < descriptorTable.capacity)
         {
-            m_Resources.shaderResourceViewHeap.releaseDescriptors(descriptorTable.firstDescriptor + newSize, descriptorTable.capacity - newSize);
+            m_Resources.shaderResourceViewHeap.releaseDescriptors(descriptorTable.firstDescriptor + newSize, (.)descriptorTable.capacity - newSize);
             descriptorTable.capacity = newSize;
             return;
         }
@@ -1445,21 +1447,21 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
             m_Context.device.CopyDescriptorsSimple(descriptorTable.capacity,
                 m_Resources.shaderResourceViewHeap.getCpuHandle(descriptorTable.firstDescriptor),
                 m_Resources.shaderResourceViewHeap.getCpuHandle(originalFirst),
-                D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+                D3D12_DESCRIPTOR_HEAP_TYPE.CBV_SRV_UAV);
 
             m_Context.device.CopyDescriptorsSimple(descriptorTable.capacity,
                 m_Resources.shaderResourceViewHeap.getCpuHandleShaderVisible(descriptorTable.firstDescriptor),
                 m_Resources.shaderResourceViewHeap.getCpuHandle(originalFirst),
-                D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+                D3D12_DESCRIPTOR_HEAP_TYPE.CBV_SRV_UAV);
 
             m_Resources.shaderResourceViewHeap.releaseDescriptors(originalFirst, descriptorTable.capacity);
         }
 
         descriptorTable.capacity = newSize;
     }
-    public bool writeDescriptorTable(IDescriptorTable* _descriptorTable, const BindingSetItem& binding)
+    public override bool writeDescriptorTable(IDescriptorTable _descriptorTable, BindingSetItem binding)
     {
-        DescriptorTable* descriptorTable = checked_cast<DescriptorTable*>(_descriptorTable);
+        DescriptorTable descriptorTable = checked_cast<DescriptorTable, IDescriptorTable>(_descriptorTable);
 
         if (binding.slot >= descriptorTable.capacity)
             return false;
@@ -1469,40 +1471,40 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
         switch (binding.type)
         {
         case ResourceType.None:
-            Buffer.createNullSRV(descriptorHandle.ptr, Format.UNKNOWN, m_Context);
+            Buffer.createNullSRV((.)descriptorHandle.ptr, Format.UNKNOWN, m_Context);
             break; 
         case ResourceType.Texture_SRV: {
-            Texture* texture = checked_cast<Texture*>(binding.resourceHandle);
-            texture.createSRV(descriptorHandle.ptr, binding.format, binding.dimension, binding.subresources);
+            Texture texture = checked_cast<Texture, IResource>(binding.resourceHandle);
+            texture.createSRV((.)descriptorHandle.ptr, binding.format, binding.dimension, binding.subresources);
             break;
         }
         case ResourceType.Texture_UAV: {
-            Texture* texture = checked_cast<Texture*>(binding.resourceHandle);
-            texture.createUAV(descriptorHandle.ptr, binding.format, binding.dimension, binding.subresources);
+            Texture texture = checked_cast<Texture, IResource>(binding.resourceHandle);
+            texture.createUAV((.)descriptorHandle.ptr, binding.format, binding.dimension, binding.subresources);
             break;
         }
-        case ResourceType.TypedBuffer_SRV:
-        case ResourceType.StructuredBuffer_SRV:
+        case ResourceType.TypedBuffer_SRV: fallthrough;
+        case ResourceType.StructuredBuffer_SRV: fallthrough;
         case ResourceType.RawBuffer_SRV: {
-            Buffer* buffer = checked_cast<Buffer*>(binding.resourceHandle);
-            buffer.createSRV(descriptorHandle.ptr, binding.format, binding.range, binding.type);
+            Buffer buffer = checked_cast<Buffer, IResource>(binding.resourceHandle);
+            buffer.createSRV((.)descriptorHandle.ptr, binding.format, binding.range, binding.type);
             break;
         }
-        case ResourceType.TypedBuffer_UAV:
-        case ResourceType.StructuredBuffer_UAV:
+        case ResourceType.TypedBuffer_UAV: fallthrough;
+        case ResourceType.StructuredBuffer_UAV: fallthrough;
         case ResourceType.RawBuffer_UAV: {
-            Buffer* buffer = checked_cast<Buffer*>(binding.resourceHandle);
-            buffer.createUAV(descriptorHandle.ptr, binding.format, binding.range, binding.type);
+            Buffer buffer = checked_cast<Buffer, IResource>(binding.resourceHandle);
+            buffer.createUAV((.)descriptorHandle.ptr, binding.format, binding.range, binding.type);
             break;
         }
         case ResourceType.ConstantBuffer: {
-            Buffer* buffer = checked_cast<Buffer*>(binding.resourceHandle);
-            buffer.createCBV(descriptorHandle.ptr);
+            Buffer buffer = checked_cast<Buffer, IResource>(binding.resourceHandle);
+            buffer.createCBV((.)descriptorHandle.ptr);
             break;
         }
         case ResourceType.RayTracingAccelStruct: {
-            AccelStruct* accelStruct = checked_cast<AccelStruct*>(binding.resourceHandle);
-            accelStruct.createSRV(descriptorHandle.ptr);
+            AccelStruct accelStruct = checked_cast<AccelStruct, IResource>(binding.resourceHandle);
+            accelStruct.createSRV((.)descriptorHandle.ptr);
             break;
         }
 
@@ -1510,9 +1512,9 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
             m_Context.error("Attempted to bind a volatile constant buffer to a bindless set.");
             return false;
 
-        case ResourceType.Sampler:
-        case ResourceType.PushConstants:
-        case ResourceType.Count:
+        case ResourceType.Sampler: fallthrough;
+        case ResourceType.PushConstants: fallthrough;
+        case ResourceType.Count: fallthrough;
         default:
             nvrhi.utils.InvalidEnum();
             return false;
@@ -1522,43 +1524,43 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
         return true;
     }
 
-    public nvrhi.rt.AccelStructHandle createAccelStruct(const nvrhi.rt.AccelStructDesc& desc)
+    public override nvrhi.rt.AccelStructHandle createAccelStruct(nvrhi.rt.AccelStructDesc desc)
     {
-        List<D3D12_RAYTRACING_GEOMETRY_DESC> d3dGeometryDescs;
-        d3dGeometryDescs.resize(desc.bottomLevelGeometries.size());
+        List<D3D12_RAYTRACING_GEOMETRY_DESC> d3dGeometryDescs = scope .();
+        d3dGeometryDescs.Resize(desc.bottomLevelGeometries.Count);
 
         D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS ASInputs;
         if (desc.isTopLevel)
         {
-            ASInputs.Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL;
+            ASInputs.Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE.TOP_LEVEL;
             ASInputs.InstanceDescs = 0;
             ASInputs.NumDescs = UINT(desc.topLevelMaxInstances);
         }
         else
         {
-            for (uint32 i = 0; i < desc.bottomLevelGeometries.size(); i++)
+            for (uint32 i = 0; i < desc.bottomLevelGeometries.Count; i++)
             {
-                fillD3dGeometryDesc(d3dGeometryDescs[i], desc.bottomLevelGeometries[i]);
+                fillD3dGeometryDesc(ref d3dGeometryDescs[i], desc.bottomLevelGeometries[i]);
             }
 
-            ASInputs.Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL;
-            ASInputs.pGeometryDescs = d3dGeometryDescs.data();
-            ASInputs.NumDescs = UINT(d3dGeometryDescs.size());
+            ASInputs.Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE.BOTTOM_LEVEL;
+            ASInputs.pGeometryDescs = d3dGeometryDescs.Ptr;
+            ASInputs.NumDescs = UINT(d3dGeometryDescs.Count);
         }
 
-        ASInputs.DescsLayout = D3D12_ELEMENTS_LAYOUT_ARRAY;
+        ASInputs.DescsLayout = D3D12_ELEMENTS_LAYOUT.ARRAY;
         ASInputs.Flags = (D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAGS)desc.buildFlags;
 
-        D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO ASPreBuildInfo = {};
-        m_Context.device5.GetRaytracingAccelerationStructurePrebuildInfo(&ASInputs, &ASPreBuildInfo);
+        D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO ASPreBuildInfo = .();
+        m_Context.device5.GetRaytracingAccelerationStructurePrebuildInfo(ASInputs, out ASPreBuildInfo);
 
-        AccelStruct* as = new AccelStruct(m_Context);
-        as.desc = desc;
-        as.allowUpdate = (desc.buildFlags & nvrhi.rt.AccelStructBuildFlags.AllowUpdate) != 0;
+        AccelStruct @as = new AccelStruct(m_Context);
+        @as.desc = desc;
+        @as.allowUpdate = (desc.buildFlags & nvrhi.rt.AccelStructBuildFlags.AllowUpdate) != 0;
 
         Runtime.Assert(ASPreBuildInfo.ResultDataMaxSizeInBytes <= ~0u);
 
-#ifdef NVRHI_WITH_RTXMU
+#if NVRHI_WITH_RTXMU
         bool needBuffer = desc.isTopLevel;
 #else
         bool needBuffer = true;
@@ -1566,7 +1568,7 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 
         if (needBuffer)
         {
-            BufferDesc bufferDesc;
+            BufferDesc bufferDesc = .();
             bufferDesc.canHaveUAVs = true;
             bufferDesc.byteSize = ASPreBuildInfo.ResultDataMaxSizeInBytes;
             bufferDesc.initialState = desc.isTopLevel ? ResourceStates.AccelStructRead : ResourceStates.AccelStructBuildBlas;
@@ -1575,15 +1577,15 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
             bufferDesc.debugName = desc.debugName;
             bufferDesc.isVirtual = desc.isVirtual;
             BufferHandle buffer = createBuffer(bufferDesc);
-            as.dataBuffer = checked_cast<Buffer*>(buffer.Get());
+            @as.dataBuffer = checked_cast<Buffer, IBuffer>(buffer.Get<IBuffer>());
         }
         
         // Sanitize the geometry data to avoid dangling pointers, we don't need these buffers in the Desc
-        for (auto& geometry : as.desc.bottomLevelGeometries)
+        for (var geometry in ref @as.desc.bottomLevelGeometries)
         {
-            static_assert(offsetof(nvrhi.rt.GeometryTriangles, indexBuffer)
+            Compiler.Assert(offsetof(nvrhi.rt.GeometryTriangles, indexBuffer)
                 == offsetof(nvrhi.rt.GeometryAABBs, buffer));
-            static_assert(offsetof(nvrhi.rt.GeometryTriangles, vertexBuffer)
+            Compiler.Assert(offsetof(nvrhi.rt.GeometryTriangles, vertexBuffer)
                 == offsetof(nvrhi.rt.GeometryAABBs, unused));
 
             // Clear only the triangles' data, because the AABBs' data is aliased to triangles (verified above)
@@ -1591,52 +1593,53 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
             geometry.geometryData.triangles.vertexBuffer = null;
         }
 
-        return nvrhi.rt.AccelStructHandle.Create(as);
+        return nvrhi.rt.AccelStructHandle.Attach(@as);
     }
-    public MemoryRequirements getAccelStructMemoryRequirements(nvrhi.rt.IAccelStruct* _as)
+    public override MemoryRequirements getAccelStructMemoryRequirements(nvrhi.rt.IAccelStruct _as)
     {
-        AccelStruct* as = checked_cast<AccelStruct*>(_as);
+        AccelStruct @as = checked_cast<AccelStruct, IAccelStruct>(_as);
 
-        if (as.dataBuffer)
-            return getBufferMemoryRequirements(as.dataBuffer);
+        if (@as.dataBuffer != null)
+            return getBufferMemoryRequirements(@as.dataBuffer);
 
         return MemoryRequirements();
     }
-    public bool bindAccelStructMemory(nvrhi.rt.IAccelStruct* _as, IHeap* heap, uint64 offset)
+    public override bool bindAccelStructMemory(nvrhi.rt.IAccelStruct _as, IHeap heap, uint64 offset)
     {
-        AccelStruct* as = checked_cast<AccelStruct*>(_as);
+        AccelStruct @as = checked_cast<AccelStruct, IAccelStruct>(_as);
 
-        if (as.dataBuffer)
-            return bindBufferMemory(as.dataBuffer, heap, offset);
+        if (@as.dataBuffer != null)
+            return bindBufferMemory(@as.dataBuffer, heap, offset);
 
         return false;
     }
 
-    public nvrhi.CommandListHandle createCommandList(const CommandListParameters& params)
+    public override nvrhi.CommandListHandle createCommandList(CommandListParameters @params)
     {
-        if (!getQueue(params.queueType))
+        if (getQueue(@params.queueType) == null)
             return null;
 
-        return CommandListHandle.Create(new CommandList(this, m_Context, m_Resources, params));
+        return nvrhi.CommandListHandle.Attach(new CommandList(this, m_Context, m_Resources, @params));
     }
-    public uint64 executeCommandLists(nvrhi.ICommandList* const* pCommandLists, int numCommandLists, CommandQueue executionQueue)
+    public override uint64 executeCommandLists(Span<nvrhi.ICommandList> pCommandLists, CommandQueue executionQueue)
     {
-        m_CommandListsToExecute.resize(numCommandLists);
+		int numCommandLists = pCommandLists.Length;
+        m_CommandListsToExecute.Resize(numCommandLists);
         for (int i = 0; i < numCommandLists; i++)
         {
-            m_CommandListsToExecute[i] = checked_cast<CommandList*>(pCommandLists[i]).getD3D12CommandList();
+            m_CommandListsToExecute[i] = checked_cast<CommandList, nvrhi.ICommandList>(pCommandLists[i]).getD3D12CommandList();
         }
 
-        Queue* pQueue = getQueue(executionQueue);
+        Queue pQueue = getQueue(executionQueue);
 
-        pQueue.queue.ExecuteCommandLists(uint32(m_CommandListsToExecute.size()), m_CommandListsToExecute.data());
+        pQueue.queue.ExecuteCommandLists(uint32(m_CommandListsToExecute.Count), m_CommandListsToExecute.Ptr);
         pQueue.lastSubmittedInstance++;
-        pQueue.queue.Signal(pQueue.fence, pQueue.lastSubmittedInstance);
+        pQueue.queue.Signal(ref *pQueue.fence, pQueue.lastSubmittedInstance);
 
         for (int i = 0; i < numCommandLists; i++)
         {
-            auto instance = checked_cast<CommandList*>(pCommandLists[i]).executed(pQueue);
-            pQueue.commandListsInFlight.push_front(instance);
+            var instance = checked_cast<CommandList, nvrhi.ICommandList>(pCommandLists[i]).executed(pQueue);
+            pQueue.commandListsInFlight.AddFront(instance);
         }
 
         HRESULT hr = m_Context.device.GetDeviceRemovedReason();
@@ -1647,20 +1650,21 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 
         return pQueue.lastSubmittedInstance;
     }
-    public void queueWaitForCommandList(CommandQueue waitQueue, CommandQueue executionQueue, uint64 instanceID)
+    public override void queueWaitForCommandList(CommandQueue waitQueue, CommandQueue executionQueue, uint64 instanceID)
     {
-        Queue* pWaitQueue = getQueue(waitQueue);
-        Queue* pExecutionQueue = getQueue(executionQueue);
+        Queue pWaitQueue = getQueue(waitQueue);
+        Queue pExecutionQueue = getQueue(executionQueue);
         Runtime.Assert(instanceID <= pExecutionQueue.lastSubmittedInstance);
 
-        pWaitQueue.queue.Wait(pExecutionQueue.fence, instanceID);
+        pWaitQueue.queue.Wait(ref *pExecutionQueue.fence, instanceID);
     }
-    public void waitForIdle()
+
+    public override void waitForIdle()
     {
         // Wait for every queue to reach its last submitted instance
-        for (const auto& pQueue : m_Queues)
+        for (var pQueue in m_Queues)
         {
-            if (!pQueue)
+            if (pQueue == null)
                 continue;
 
             if (pQueue.updateLastCompletedInstance() < pQueue.lastSubmittedInstance)
@@ -1669,25 +1673,25 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
             }
         }
     }
-    public void runGarbageCollection()
+    public override void runGarbageCollection()
     {
-        for (const auto& pQueue : m_Queues)
+        for (var pQueue in m_Queues)
         {
-            if (!pQueue)
+            if (pQueue == null)
                 continue;
 
             pQueue.updateLastCompletedInstance();
 
             // Starting from the back of the queue, i.e. oldest submitted command lists,
             // see if those command lists have finished executing.
-            while (!pQueue.commandListsInFlight.empty())
+            while (!pQueue.commandListsInFlight.IsEmpty)
             {
-                std.shared_ptr<CommandListInstance> instance = pQueue.commandListsInFlight.back();
+                CommandListInstance instance = pQueue.commandListsInFlight.Back;
                 
                 if (pQueue.lastCompletedInstance >= instance.submittedInstance)
                 {
-#ifdef NVRHI_WITH_RTXMU
-                    if (!instance.rtxmuBuildIds.empty())
+#if NVRHI_WITH_RTXMU
+                    if (!instance.rtxmuBuildIds.IsEmpty)
                     {
                         std.lock_guard lockGuard(m_Resources.asListMutex);
 
@@ -1702,7 +1706,7 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
                         instance.rtxmuCompactionIds.clear();
                     }
 #endif
-                    pQueue.commandListsInFlight.pop_back();
+                    pQueue.commandListsInFlight.PopBack();
                 }
                 else
                 {
@@ -1711,7 +1715,7 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
             }
         }
     }
-    public bool queryFeatureSupport(Feature feature, void* pInfo, int infoSize = 0)
+    public override bool queryFeatureSupport(Feature feature, void* pInfo, int infoSize = 0)
     {
         switch (feature)  // NOLINT(clang-diagnostic-switch-enum)
         {
@@ -1730,11 +1734,11 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
         case Feature.Meshlets:
             return m_MeshletsSupported;
         case Feature.VariableRateShading:
-            if (pInfo)
+            if (pInfo != null)
             {
                 if (infoSize == sizeof(VariableRateShadingFeatureInfo))
                 {
-                    auto* pVrsInfo = reinterpret_cast<VariableRateShadingFeatureInfo*>(pInfo);
+                    var pVrsInfo = (VariableRateShadingFeatureInfo*)(pInfo);
                     pVrsInfo.shadingRateImageTileSize = m_Options6.ShadingRateImageTileSize;
                 }
                 else
@@ -1751,26 +1755,26 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
             return false;
         }
     }
-    public FormatSupport queryFormatSupport(Format format)
+    public override FormatSupport queryFormatSupport(Format format)
     {
-        const DxgiFormatMapping& formatMapping = getDxgiFormatMapping(format);
+        readonly ref DxgiFormatMapping formatMapping = ref getDxgiFormatMapping(format);
 
         FormatSupport result = FormatSupport.None;
 
-        D3D12_FEATURE_DATA_FORMAT_SUPPORT featureData = {};
+        D3D12_FEATURE_DATA_FORMAT_SUPPORT featureData = .();
         featureData.Format = formatMapping.rtvFormat;
 
-        m_Context.device.CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &featureData, sizeof(featureData));
+        m_Context.device.CheckFeatureSupport(D3D12_FEATURE.FORMAT_SUPPORT, &featureData, sizeof(decltype(featureData)));
 
-        if (featureData.Support1 & D3D12_FORMAT_SUPPORT1_BUFFER)
+        if (featureData.Support1 & D3D12_FORMAT_SUPPORT1.BUFFER != 0)
             result = result | FormatSupport.Buffer;
-        if (featureData.Support1 & (D3D12_FORMAT_SUPPORT1_TEXTURE1D | D3D12_FORMAT_SUPPORT1_TEXTURE2D | D3D12_FORMAT_SUPPORT1_TEXTURE3D | D3D12_FORMAT_SUPPORT1_TEXTURECUBE))
+        if (featureData.Support1 & (D3D12_FORMAT_SUPPORT1.TEXTURE1D | D3D12_FORMAT_SUPPORT1.TEXTURE2D | D3D12_FORMAT_SUPPORT1.TEXTURE3D | D3D12_FORMAT_SUPPORT1.TEXTURECUBE) != 0)
             result = result | FormatSupport.Texture;
-        if (featureData.Support1 & D3D12_FORMAT_SUPPORT1_DEPTH_STENCIL)
+        if (featureData.Support1 & D3D12_FORMAT_SUPPORT1.DEPTH_STENCIL != 0)
             result = result | FormatSupport.DepthStencil;
-        if (featureData.Support1 & D3D12_FORMAT_SUPPORT1_RENDER_TARGET)
+        if (featureData.Support1 & D3D12_FORMAT_SUPPORT1.RENDER_TARGET != 0)
             result = result | FormatSupport.RenderTarget;
-        if (featureData.Support1 & D3D12_FORMAT_SUPPORT1_BLENDABLE)
+        if (featureData.Support1 & D3D12_FORMAT_SUPPORT1.BLENDABLE != 0)
             result = result | FormatSupport.Blendable;
 
         if (formatMapping.srvFormat != featureData.Format)
@@ -1778,144 +1782,143 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
             featureData.Format = formatMapping.srvFormat;
             featureData.Support1 = (D3D12_FORMAT_SUPPORT1)0;
             featureData.Support2 = (D3D12_FORMAT_SUPPORT2)0;
-            m_Context.device.CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &featureData, sizeof(featureData));
+            m_Context.device.CheckFeatureSupport(D3D12_FEATURE.FORMAT_SUPPORT, &featureData, sizeof(decltype(featureData)));
         }
 
-        if (featureData.Support1 & D3D12_FORMAT_SUPPORT1_IA_INDEX_BUFFER)
+        if (featureData.Support1 & D3D12_FORMAT_SUPPORT1.IA_INDEX_BUFFER != 0)
             result = result | FormatSupport.IndexBuffer;
-        if (featureData.Support1 & D3D12_FORMAT_SUPPORT1_IA_VERTEX_BUFFER)
+        if (featureData.Support1 & D3D12_FORMAT_SUPPORT1.IA_VERTEX_BUFFER != 0)
             result = result | FormatSupport.VertexBuffer;
-        if (featureData.Support1 & D3D12_FORMAT_SUPPORT1_SHADER_LOAD)
+        if (featureData.Support1 & D3D12_FORMAT_SUPPORT1.SHADER_LOAD != 0)
             result = result | FormatSupport.ShaderLoad;
-        if (featureData.Support1 & D3D12_FORMAT_SUPPORT1_SHADER_SAMPLE)
+        if (featureData.Support1 & D3D12_FORMAT_SUPPORT1.SHADER_SAMPLE != 0)
             result = result | FormatSupport.ShaderSample;
-        if (featureData.Support2 & D3D12_FORMAT_SUPPORT2_UAV_ATOMIC_ADD)
+        if (featureData.Support2 & D3D12_FORMAT_SUPPORT2.UAV_ATOMIC_ADD != 0)
             result = result | FormatSupport.ShaderAtomic;
-        if (featureData.Support2 & D3D12_FORMAT_SUPPORT2_UAV_TYPED_LOAD)
+        if (featureData.Support2 & D3D12_FORMAT_SUPPORT2.UAV_TYPED_LOAD != 0)
             result = result | FormatSupport.ShaderUavLoad;
-        if (featureData.Support2 & D3D12_FORMAT_SUPPORT2_UAV_TYPED_STORE)
+        if (featureData.Support2 & D3D12_FORMAT_SUPPORT2.UAV_TYPED_STORE != 0)
             result = result | FormatSupport.ShaderUavStore;
 
         return result;
     }
-    public NativeObject getNativeQueue(ObjectType objectType, CommandQueue queue)
+    public override NativeObject getNativeQueue(ObjectType objectType, CommandQueue queue)
     {
-        if (objectType != ObjectTypes.D3D12_CommandQueue)
+        if (objectType != ObjectType.D3D12_CommandQueue)
             return null;
 
         if (queue >= CommandQueue.Count)
             return null;
 
-        Queue* pQueue = getQueue(queue);
+        Queue pQueue = getQueue(queue);
 
-        if (!pQueue)
+        if (pQueue == null)
             return null;
 
-        return NativeObject(pQueue.queue.Get());
+        return NativeObject(pQueue.queue);
     }
-    public IMessageCallback* getMessageCallback() override { return m_Context.messageCallback; }
+    public override IMessageCallback getMessageCallback() { return m_Context.messageCallback; }
 
     // d3d12.IDevice implementation
 
-    public RootSignatureHandle buildRootSignature(const StaticVector<BindingLayoutHandle, c_MaxBindingLayouts>& pipelineLayouts, bool allowInputLayout, bool isLocal, const D3D12_ROOT_PARAMETER1* pCustomParameters = null, uint32 numCustomParameters = 0)
+    public override RootSignatureHandle buildRootSignature(StaticVector<BindingLayoutHandle, const c_MaxBindingLayouts> pipelineLayouts, bool allowInputLayout, bool isLocal, D3D12_ROOT_PARAMETER1* pCustomParameters = null, uint32 numCustomParameters = 0)
     {
         HRESULT res;
 
-        RootSignature* rootsig = new RootSignature(m_Resources);
+        RootSignature rootsig = new RootSignature(m_Resources);
         
         // Assemble the root parameter table from the pipeline binding layouts
         // Also attach the root parameter offsets to the pipeline layouts
 
-        List<D3D12_ROOT_PARAMETER1> rootParameters;
+        List<D3D12_ROOT_PARAMETER1> rootParameters = scope .();
 
         // Add custom parameters in the beginning of the RS
         for (uint32 index = 0; index < numCustomParameters; index++)
         {
-            rootParameters.push_back(pCustomParameters[index]);
+            rootParameters.Add(pCustomParameters[index]);
         }
 
-        for(uint32 layoutIndex = 0; layoutIndex < uint32(pipelineLayouts.size()); layoutIndex++)
+        for(uint32 layoutIndex = 0; layoutIndex < uint32(pipelineLayouts.Count); layoutIndex++)
         {
-            if (pipelineLayouts[layoutIndex].getDesc())
+            if (pipelineLayouts[layoutIndex].getDesc() != null)
             {
-                BindingLayout* layout = checked_cast<BindingLayout*>(pipelineLayouts[layoutIndex].Get());
-                RootParameterIndex rootParameterOffset = RootParameterIndex(rootParameters.size());
+                BindingLayout layout = checked_cast<BindingLayout, IBindingLayout>(pipelineLayouts[layoutIndex].Get<IBindingLayout>());
+                RootParameterIndex rootParameterOffset = RootParameterIndex(rootParameters.Count);
 
-                rootsig.pipelineLayouts.push_back(std.make_pair(layout, rootParameterOffset));
+                rootsig.pipelineLayouts.PushBack((layout, rootParameterOffset));
 
-                rootParameters.insert(rootParameters.end(), layout.rootParameters.begin(), layout.rootParameters.end());
+                rootParameters.AddRange(layout.rootParameters);
 
-                if (layout.pushConstantByteSize)
+                if (layout.pushConstantByteSize > 0)
                 {
                     rootsig.pushConstantByteSize = layout.pushConstantByteSize;
                     rootsig.rootParameterPushConstants = layout.rootParameterPushConstants + rootParameterOffset;
                 }
             }
-            else if (pipelineLayouts[layoutIndex].getBindlessDesc())
+            else if (pipelineLayouts[layoutIndex].getBindlessDesc() != null)
             {
-                BindlessLayout* layout = checked_cast<BindlessLayout*>(pipelineLayouts[layoutIndex].Get());
-                RootParameterIndex rootParameterOffset = RootParameterIndex(rootParameters.size());
+                BindlessLayout layout = checked_cast<BindlessLayout, IBindingLayout>(pipelineLayouts[layoutIndex].Get<IBindingLayout>());
+                RootParameterIndex rootParameterOffset = RootParameterIndex(rootParameters.Count);
 
-                rootsig.pipelineLayouts.push_back(std.make_pair(layout, rootParameterOffset));
+                rootsig.pipelineLayouts.PushBack((layout, rootParameterOffset));
 
-                rootParameters.push_back(layout.rootParameter);
+                rootParameters.Add(layout.rootParameter);
             }
         }
 
         // Build the description structure
 
-        D3D12_VERSIONED_ROOT_SIGNATURE_DESC rsDesc = {};
-        rsDesc.Version = D3D_ROOT_SIGNATURE_VERSION_1_1;
+        D3D12_VERSIONED_ROOT_SIGNATURE_DESC rsDesc = .();
+        rsDesc.Version = D3D_ROOT_SIGNATURE_VERSION._1_1;
 
         if (allowInputLayout)
         {
-            rsDesc.Desc_1_1.Flags |= D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+            rsDesc.Desc_1_1.Flags |= D3D12_ROOT_SIGNATURE_FLAGS.ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
         }
         if (isLocal)
         {
-            rsDesc.Desc_1_1.Flags |= D3D12_ROOT_SIGNATURE_FLAG_LOCAL_ROOT_SIGNATURE;
+            rsDesc.Desc_1_1.Flags |= D3D12_ROOT_SIGNATURE_FLAGS.LOCAL_ROOT_SIGNATURE;
         }
 
-        if (!rootParameters.empty())
+        if (!rootParameters.IsEmpty)
         {
-            rsDesc.Desc_1_1.pParameters = rootParameters.data();
-            rsDesc.Desc_1_1.NumParameters = UINT(rootParameters.size());
+            rsDesc.Desc_1_1.pParameters = rootParameters.Ptr;
+            rsDesc.Desc_1_1.NumParameters = UINT(rootParameters.Count);
         }
 
         // Serialize the root signature
 
-        RefCountPtr<ID3DBlob> rsBlob;
-        RefCountPtr<ID3DBlob> errorBlob;
-        res = D3D12SerializeVersionedRootSignature(&rsDesc, &rsBlob, &errorBlob);
+        D3D12RefCountPtr<ID3DBlob> rsBlob = null;
+        D3D12RefCountPtr<ID3DBlob> errorBlob = null;
+        res = D3D12SerializeVersionedRootSignature(rsDesc, out rsBlob, &errorBlob);
 
         if (FAILED(res))
         {
-            std.stringstream ss;
-            ss << "D3D12SerializeVersionedRootSignature call failed, HRESULT = 0x" << std.hex << std.setw(8) << res;
-            if (errorBlob) {
-                ss << std.endl << (const char8*)errorBlob.GetBufferPointer();
+            String message = scope $"D3D12SerializeVersionedRootSignature call failed, HRESULT = 0x{res}";
+            if (errorBlob != null) {
+				message.AppendF("\n{}", (char8*)errorBlob.GetBufferPointer());
             }
-            m_Context.error(ss.str());
+            m_Context.error(message);
             
             return null;
         }
 
         // Create the RS object
 
-        res = m_Context.device.CreateRootSignature(0, rsBlob.GetBufferPointer(), rsBlob.GetBufferSize(), IID_PPV_ARGS(&rootsig.handle));
+        res = m_Context.device.CreateRootSignature(0, rsBlob.GetBufferPointer(), rsBlob.GetBufferSize(), ID3D12RootSignature.IID, (void**)(&rootsig.handle));
 
         if (FAILED(res))
         {
-            std.stringstream ss;
-            ss << "CreateRootSignature call failed, HRESULT = 0x" << std.hex << std.setw(8) << res;
-            m_Context.error(ss.str());
+            String message = scope $"CreateRootSignature call failed, HRESULT = 0x{res}";
+            m_Context.error(message);
 
             return null;
         }
 
-        return RootSignatureHandle.Create(rootsig);
+        return RootSignatureHandle.Attach(rootsig);
     }
-    public GraphicsPipelineHandle createHandleForNativeGraphicsPipeline(IRootSignature* rootSignature, ID3D12PipelineState* pipelineState, const GraphicsPipelineDesc& desc, const FramebufferInfo& framebufferInfo)
+
+    public override GraphicsPipelineHandle createHandleForNativeGraphicsPipeline(IRootSignature rootSignature, ID3D12PipelineState* pipelineState, GraphicsPipelineDesc desc, FramebufferInfo framebufferInfo)
     {
         if (rootSignature == null)
             return null;
@@ -1923,16 +1926,16 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
         if (pipelineState == null)
             return null;
 
-        GraphicsPipeline *pso = new GraphicsPipeline();
+        GraphicsPipeline pso = new GraphicsPipeline();
         pso.desc = desc;
         pso.framebufferInfo = framebufferInfo;
-        pso.rootSignature = checked_cast<RootSignature*>(rootSignature);
+        pso.rootSignature = checked_cast<RootSignature, IRootSignature>(rootSignature);
         pso.pipelineState = pipelineState;
-        pso.requiresBlendFactor = desc.renderState.blendState.usesConstantColor(uint32(pso.framebufferInfo.colorFormats.size()));
+        pso.requiresBlendFactor = desc.renderState.blendState.usesConstantColor(uint32(pso.framebufferInfo.colorFormats.Count));
         
-        return GraphicsPipelineHandle.Create(pso);
+        return GraphicsPipelineHandle.Attach(pso);
     }
-    public MeshletPipelineHandle createHandleForNativeMeshletPipeline(IRootSignature* rootSignature, ID3D12PipelineState* pipelineState, const MeshletPipelineDesc& desc, const FramebufferInfo& framebufferInfo)
+    public override MeshletPipelineHandle createHandleForNativeMeshletPipeline(IRootSignature rootSignature, ID3D12PipelineState* pipelineState, MeshletPipelineDesc desc, FramebufferInfo framebufferInfo)
     {
         if (rootSignature == null)
             return null;
@@ -1940,30 +1943,30 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
         if (pipelineState == null)
             return null;
 
-        MeshletPipeline *pso = new MeshletPipeline();
+        MeshletPipeline pso = new MeshletPipeline();
         pso.desc = desc;
         pso.framebufferInfo = framebufferInfo;
-        pso.rootSignature = checked_cast<RootSignature*>(rootSignature);
+        pso.rootSignature = checked_cast<RootSignature, IRootSignature>(rootSignature);
         pso.pipelineState = pipelineState;
-        pso.requiresBlendFactor = desc.renderState.blendState.usesConstantColor(uint32(pso.framebufferInfo.colorFormats.size()));
+        pso.requiresBlendFactor = desc.renderState.blendState.usesConstantColor(uint32(pso.framebufferInfo.colorFormats.Count));
 
-        return MeshletPipelineHandle.Create(pso);
+        return MeshletPipelineHandle.Attach(pso);
     }
     public override IDescriptorHeap getDescriptorHeap(DescriptorHeapType heapType)
     {
         switch(heapType)
         {
         case DescriptorHeapType.RenderTargetView:
-            return &m_Resources.renderTargetViewHeap;
+            return m_Resources.renderTargetViewHeap;
         case DescriptorHeapType.DepthStencilView:
-            return &m_Resources.depthStencilViewHeap;
+            return m_Resources.depthStencilViewHeap;
         case DescriptorHeapType.ShaderResrouceView:
-            return &m_Resources.shaderResourceViewHeap;
+            return m_Resources.shaderResourceViewHeap;
         case DescriptorHeapType.Sampler:
-            return &m_Resources.samplerHeap;
+            return m_Resources.samplerHeap;
+		default:
+			return null;
         }
-
-        return null;
     }
 
     // Internal interface
@@ -2018,7 +2021,7 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
         // Pass ownership of the RS to caller
         return rootsig;
     }
-    private D3D12RefCountPtr<ID3D12PipelineState> createPipelineState(const GraphicsPipelineDesc & state, RootSignature* pRS, const FramebufferInfo& fbinfo) const
+    private D3D12RefCountPtr<ID3D12PipelineState> createPipelineState(GraphicsPipelineDesc  state, RootSignature pRS, FramebufferInfo fbinfo)
 	{
 	    if (state.renderState.singlePassStereo.enabled && !m_SinglePassStereoSupported)
 	    {
@@ -2026,57 +2029,58 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 	        return null;
 	    }
 
-	    D3D12_GRAPHICS_PIPELINE_STATE_DESC desc = {};
+	    D3D12_GRAPHICS_PIPELINE_STATE_DESC desc = .();
 	    desc.pRootSignature = pRS.handle;
 
-	    Shader* shader;
-	    shader = checked_cast<Shader*>(state.VS.Get());
-	    if (shader) desc.VS = { &shader.bytecode[0], shader.bytecode.size() };
+	    Shader shader = null;
+	    shader = checked_cast<Shader, IShader>(state.VS?.Get<IShader>());
+	    if (shader != null) desc.VS = .(){ pShaderBytecode = &shader.bytecode[0], BytecodeLength= uint(shader.bytecode.Count) };
 
-	    shader = checked_cast<Shader*>(state.HS.Get());
-	    if (shader) desc.HS = { &shader.bytecode[0], shader.bytecode.size() };
+	    shader = checked_cast<Shader, IShader>(state.HS?.Get<IShader>());
+	    if (shader != null) desc.HS = .(){ pShaderBytecode = &shader.bytecode[0], BytecodeLength= uint(shader.bytecode.Count) };
 
-	    shader = checked_cast<Shader*>(state.DS.Get());
-	    if (shader) desc.DS = { &shader.bytecode[0], shader.bytecode.size() };
+	    shader = checked_cast<Shader, IShader>(state.DS?.Get<IShader>());
+	    if (shader != null) desc.DS = .(){ pShaderBytecode = &shader.bytecode[0], BytecodeLength= uint(shader.bytecode.Count) };
 
-	    shader = checked_cast<Shader*>(state.GS.Get());
-	    if (shader) desc.GS = { &shader.bytecode[0], shader.bytecode.size() };
+	    shader = checked_cast<Shader, IShader>(state.GS?.Get<IShader>());
+	    if (shader != null) desc.GS = .(){ pShaderBytecode = &shader.bytecode[0], BytecodeLength= uint(shader.bytecode.Count) };
 
-	    shader = checked_cast<Shader*>(state.PS.Get());
-	    if (shader) desc.PS = { &shader.bytecode[0], shader.bytecode.size() };
+	    shader = checked_cast<Shader, IShader>(state.PS?.Get<IShader>());
+	    if (shader != null) desc.PS = .(){ pShaderBytecode = &shader.bytecode[0], BytecodeLength= uint(shader.bytecode.Count) };
 
 
-	    TranslateBlendState(state.renderState.blendState, desc.BlendState);
+	    TranslateBlendState(state.renderState.blendState, ref desc.BlendState);
 	    
 
-	    const DepthStencilState& depthState = state.renderState.depthStencilState;
-	    TranslateDepthStencilState(depthState, desc.DepthStencilState);
+	    readonly ref DepthStencilState depthState = ref state.renderState.depthStencilState;
+	    TranslateDepthStencilState(depthState, ref desc.DepthStencilState);
 
 	    if ((depthState.depthTestEnable || depthState.stencilEnable) && fbinfo.depthFormat == Format.UNKNOWN)
 	    {
-	        desc.DepthStencilState.DepthEnable = FALSE;
-	        desc.DepthStencilState.StencilEnable = FALSE;
+	        desc.DepthStencilState.DepthEnable = 0;
+	        desc.DepthStencilState.StencilEnable = 0;
 	        m_Context.messageCallback.message(MessageSeverity.Warning, "depthEnable or stencilEnable is true, but no depth target is bound");
 	    }
 
-	    const RasterState& rasterState = state.renderState.rasterState;
-	    TranslateRasterizerState(rasterState, desc.RasterizerState);
+	    readonly ref RasterState rasterState = ref state.renderState.rasterState;
+	    TranslateRasterizerState(rasterState, ref desc.RasterizerState);
 
 	    switch (state.primType)
 	    {
 	    case PrimitiveType.PointList:
-	        desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
+	        desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE.POINT;
 	        break;
 	    case PrimitiveType.LineList:
-	        desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
+	        desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE.LINE;
 	        break;
-	    case PrimitiveType.TriangleList:
+	    case PrimitiveType.TriangleList: fallthrough;
 	    case PrimitiveType.TriangleStrip:
-	        desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	        desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE.TRIANGLE;
 	        break;
 	    case PrimitiveType.PatchList:
-	        desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_PATCH;
+	        desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE.PATCH;
 	        break;
+		default: break;
 	    }
 
 	    desc.DSVFormat = getDxgiFormatMapping(fbinfo.depthFormat).rtvFormat;
@@ -2084,22 +2088,22 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 	    desc.SampleDesc.Count = fbinfo.sampleCount;
 	    desc.SampleDesc.Quality = fbinfo.sampleQuality;
 
-	    for (uint32 i = 0; i < uint32(fbinfo.colorFormats.size()); i++)
+	    for (uint32 i = 0; i < uint32(fbinfo.colorFormats.Count); i++)
 	    {
 	        desc.RTVFormats[i] = getDxgiFormatMapping(fbinfo.colorFormats[i]).rtvFormat;
 	    }
 
-	    InputLayout* inputLayout = checked_cast<InputLayout*>(state.inputLayout.Get());
-	    if (inputLayout && !inputLayout.inputElements.empty())
+	    InputLayout inputLayout = checked_cast<InputLayout, IInputLayout>(state.inputLayout.Get<IInputLayout>());
+	    if (inputLayout != null && !inputLayout.inputElements.IsEmpty)
 	    {
-	        desc.InputLayout.NumElements = uint32(inputLayout.inputElements.size());
+	        desc.InputLayout.NumElements = uint32(inputLayout.inputElements.Count);
 	        desc.InputLayout.pInputElementDescs = &(inputLayout.inputElements[0]);
 	    }
 
-	    desc.NumRenderTargets = uint32(fbinfo.colorFormats.size());
+	    desc.NumRenderTargets = uint32(fbinfo.colorFormats.Count);
 	    desc.SampleMask = ~0u;
 
-	    D3D12RefCountPtr<ID3D12PipelineState> pipelineState;
+	    D3D12RefCountPtr<ID3D12PipelineState> pipelineState = null;
 
 #if NVRHI_D3D12_WITH_NVAPI
 	    List<const NVAPI_D3D12_PSO_EXTENSION_DESC*> extensions;
@@ -2140,7 +2144,7 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 	    }
 #endif
 
-	    const HRESULT hr = m_Context.device.CreateGraphicsPipelineState(&desc, IID_PPV_ARGS(&pipelineState));
+	    readonly HRESULT hr = m_Context.device.CreateGraphicsPipelineState(desc, ID3D12PipelineState.IID, (void**)(&pipelineState));
 
 	    if (FAILED(hr))
 	    {
@@ -2150,15 +2154,15 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 
 	    return pipelineState;
 	}
-    private D3D12RefCountPtr<ID3D12PipelineState> createPipelineState(const ComputePipelineDesc & state, RootSignature* pRS) const
+    private D3D12RefCountPtr<ID3D12PipelineState> createPipelineState(ComputePipelineDesc state, RootSignature pRS)
     {
-        D3D12RefCountPtr<ID3D12PipelineState> pipelineState;
+        D3D12RefCountPtr<ID3D12PipelineState> pipelineState = null;
 
-        D3D12_COMPUTE_PIPELINE_STATE_DESC desc = {};
+        D3D12_COMPUTE_PIPELINE_STATE_DESC desc = .();
 
         desc.pRootSignature = pRS.handle;
-        Shader* shader = checked_cast<Shader*>(state.CS.Get());
-        desc.CS = { &shader.bytecode[0], shader.bytecode.size() };
+        Shader shader = checked_cast<Shader, IShader>(state.CS?.Get<IShader>());
+        desc.CS = .(){ pShaderBytecode = &shader.bytecode[0], BytecodeLength= uint(shader.bytecode.Count) };
 
 #if NVRHI_D3D12_WITH_NVAPI
         if (!shader.extensions.empty())
@@ -2176,7 +2180,7 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
         }
 #endif
 
-        const HRESULT hr = m_Context.device.CreateComputePipelineState(&desc, IID_PPV_ARGS(&pipelineState));
+        readonly HRESULT hr = m_Context.device.CreateComputePipelineState(desc, ID3D12PipelineState.IID, (void**)(&pipelineState));
 
         if (FAILED(hr))
         {
@@ -2186,71 +2190,72 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 
         return pipelineState;
     }
-    private D3D12RefCountPtr<ID3D12PipelineState> createPipelineState(const MeshletPipelineDesc& state, RootSignature* pRS, const FramebufferInfo& fbinfo) const
+
+	struct PSO_STREAM
+	{
+	    [Align(sizeof(void*))]public D3D12_PIPELINE_STATE_SUBOBJECT_TYPE RootSignature_Type;        public ID3D12RootSignature* RootSignature;
+	    [Align(sizeof(void*))]public D3D12_PIPELINE_STATE_SUBOBJECT_TYPE PrimitiveTopology_Type;    public D3D12_PRIMITIVE_TOPOLOGY_TYPE PrimitiveTopologyType;
+	    [Align(sizeof(void*))]public D3D12_PIPELINE_STATE_SUBOBJECT_TYPE AmplificationShader_Type;  public D3D12_SHADER_BYTECODE AmplificationShader;
+	    [Align(sizeof(void*))]public D3D12_PIPELINE_STATE_SUBOBJECT_TYPE MeshShader_Type;           public D3D12_SHADER_BYTECODE MeshShader;
+	    [Align(sizeof(void*))]public D3D12_PIPELINE_STATE_SUBOBJECT_TYPE PixelShader_Type;          public D3D12_SHADER_BYTECODE PixelShader;
+	    [Align(sizeof(void*))]public D3D12_PIPELINE_STATE_SUBOBJECT_TYPE RasterizerState_Type;      public D3D12_RASTERIZER_DESC RasterizerState;
+	    [Align(sizeof(void*))]public D3D12_PIPELINE_STATE_SUBOBJECT_TYPE DepthStencilState_Type;    public D3D12_DEPTH_STENCIL_DESC DepthStencilState;
+	    [Align(sizeof(void*))]public D3D12_PIPELINE_STATE_SUBOBJECT_TYPE BlendState_Type;           public D3D12_BLEND_DESC BlendState;
+	    [Align(sizeof(void*))]public D3D12_PIPELINE_STATE_SUBOBJECT_TYPE SampleDesc_Type;           public DXGI_SAMPLE_DESC SampleDesc;
+	    [Align(sizeof(void*))]public D3D12_PIPELINE_STATE_SUBOBJECT_TYPE SampleMask_Type;           public UINT SampleMask;
+	    [Align(sizeof(void*))]public D3D12_PIPELINE_STATE_SUBOBJECT_TYPE RenderTargets_Type;        public D3D12_RT_FORMAT_ARRAY RenderTargets;
+	    [Align(sizeof(void*))]public D3D12_PIPELINE_STATE_SUBOBJECT_TYPE DSVFormat_Type;            public DXGI_FORMAT DSVFormat;
+	}
+
+    private D3D12RefCountPtr<ID3D12PipelineState> createPipelineState(MeshletPipelineDesc state, RootSignature pRS, FramebufferInfo fbinfo)
     {
-        D3D12RefCountPtr<ID3D12PipelineState> pipelineState;
+        D3D12RefCountPtr<ID3D12PipelineState> pipelineState = null;
 
-#pragma warning(push)
-#pragma warning(disable: 4324) // structure was padded due to alignment specifier
-        struct PSO_STREAM
-        {
-            typealias ALIGNED_TYPE = __declspec(align(sizeof(void*))) D3D12_PIPELINE_STATE_SUBOBJECT_TYPE ;
+//#pragma warning(push)
+//#pragma warning(disable: 4324) // structure was padded due to alignment specifier
+         PSO_STREAM psoDesc = .();
+//#pragma warning(pop)
 
-            ALIGNED_TYPE RootSignature_Type;        ID3D12RootSignature* RootSignature;
-            ALIGNED_TYPE PrimitiveTopology_Type;    D3D12_PRIMITIVE_TOPOLOGY_TYPE PrimitiveTopologyType;
-            ALIGNED_TYPE AmplificationShader_Type;  D3D12_SHADER_BYTECODE AmplificationShader;
-            ALIGNED_TYPE MeshShader_Type;           D3D12_SHADER_BYTECODE MeshShader;
-            ALIGNED_TYPE PixelShader_Type;          D3D12_SHADER_BYTECODE PixelShader;
-            ALIGNED_TYPE RasterizerState_Type;      D3D12_RASTERIZER_DESC RasterizerState;
-            ALIGNED_TYPE DepthStencilState_Type;    D3D12_DEPTH_STENCIL_DESC DepthStencilState;
-            ALIGNED_TYPE BlendState_Type;           D3D12_BLEND_DESC BlendState;
-            ALIGNED_TYPE SampleDesc_Type;           DXGI_SAMPLE_DESC SampleDesc;
-            ALIGNED_TYPE SampleMask_Type;           UINT SampleMask;
-            ALIGNED_TYPE RenderTargets_Type;        D3D12_RT_FORMAT_ARRAY RenderTargets;
-            ALIGNED_TYPE DSVFormat_Type;            DXGI_FORMAT DSVFormat;
-        } psoDesc = { };
-#pragma warning(pop)
-
-        psoDesc.RootSignature_Type = D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_ROOT_SIGNATURE;
-        psoDesc.PrimitiveTopology_Type = D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_PRIMITIVE_TOPOLOGY;
-        psoDesc.AmplificationShader_Type = D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_AS;
-        psoDesc.MeshShader_Type = D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_MS;
-        psoDesc.PixelShader_Type = D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_PS;
-        psoDesc.RasterizerState_Type = D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_RASTERIZER;
-        psoDesc.DepthStencilState_Type = D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_DEPTH_STENCIL;
-        psoDesc.BlendState_Type = D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_BLEND;
-        psoDesc.SampleDesc_Type = D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_SAMPLE_DESC;
-        psoDesc.SampleMask_Type = D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_SAMPLE_MASK;
-        psoDesc.RenderTargets_Type = D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_RENDER_TARGET_FORMATS;
-        psoDesc.DSVFormat_Type = D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_DEPTH_STENCIL_FORMAT;
+        psoDesc.RootSignature_Type = D3D12_PIPELINE_STATE_SUBOBJECT_TYPE.ROOT_SIGNATURE;
+        psoDesc.PrimitiveTopology_Type = D3D12_PIPELINE_STATE_SUBOBJECT_TYPE.PRIMITIVE_TOPOLOGY;
+        psoDesc.AmplificationShader_Type = D3D12_PIPELINE_STATE_SUBOBJECT_TYPE.AS;
+        psoDesc.MeshShader_Type = D3D12_PIPELINE_STATE_SUBOBJECT_TYPE.MS;
+        psoDesc.PixelShader_Type = D3D12_PIPELINE_STATE_SUBOBJECT_TYPE.PS;
+        psoDesc.RasterizerState_Type = D3D12_PIPELINE_STATE_SUBOBJECT_TYPE.RASTERIZER;
+        psoDesc.DepthStencilState_Type = D3D12_PIPELINE_STATE_SUBOBJECT_TYPE.DEPTH_STENCIL;
+        psoDesc.BlendState_Type = D3D12_PIPELINE_STATE_SUBOBJECT_TYPE.BLEND;
+        psoDesc.SampleDesc_Type = D3D12_PIPELINE_STATE_SUBOBJECT_TYPE.SAMPLE_DESC;
+        psoDesc.SampleMask_Type = D3D12_PIPELINE_STATE_SUBOBJECT_TYPE.SAMPLE_MASK;
+        psoDesc.RenderTargets_Type = D3D12_PIPELINE_STATE_SUBOBJECT_TYPE.RENDER_TARGET_FORMATS;
+        psoDesc.DSVFormat_Type = D3D12_PIPELINE_STATE_SUBOBJECT_TYPE.DEPTH_STENCIL_FORMAT;
 
         psoDesc.RootSignature = pRS.handle;
 
-        TranslateBlendState(state.renderState.blendState, psoDesc.BlendState);
+        TranslateBlendState(state.renderState.blendState, ref psoDesc.BlendState);
         
-        const DepthStencilState& depthState = state.renderState.depthStencilState;
-        TranslateDepthStencilState(depthState, psoDesc.DepthStencilState);
+        readonly ref DepthStencilState depthState = ref state.renderState.depthStencilState;
+        TranslateDepthStencilState(depthState, ref psoDesc.DepthStencilState);
 
         if ((depthState.depthTestEnable || depthState.stencilEnable) && fbinfo.depthFormat == Format.UNKNOWN)
         {
-            psoDesc.DepthStencilState.DepthEnable = FALSE;
-            psoDesc.DepthStencilState.StencilEnable = FALSE;
+            psoDesc.DepthStencilState.DepthEnable = 0;
+            psoDesc.DepthStencilState.StencilEnable = 0;
         }
 
-        const RasterState& rasterState = state.renderState.rasterState;
-        TranslateRasterizerState(rasterState, psoDesc.RasterizerState);
+        readonly ref RasterState rasterState = ref state.renderState.rasterState;
+        TranslateRasterizerState(rasterState, ref psoDesc.RasterizerState);
 
         switch (state.primType)
         {
         case PrimitiveType.PointList:
-            psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
+            psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE.POINT;
             break;
         case PrimitiveType.LineList:
-            psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
+            psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE.LINE;
             break;
-        case PrimitiveType.TriangleList:
+        case PrimitiveType.TriangleList: fallthrough;
         case PrimitiveType.TriangleStrip:
-            psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+            psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE.TRIANGLE;
             break;
         case PrimitiveType.PatchList:
             m_Context.error("Unsupported primitive topology for meshlets");
@@ -2262,36 +2267,36 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 
         psoDesc.SampleDesc.Count = fbinfo.sampleCount;
         psoDesc.SampleDesc.Quality = fbinfo.sampleQuality;
-        psoDesc.SampleMask = ~0u;
+        psoDesc.SampleMask = (.)~0u;
 
-        for (uint32 i = 0; i < uint32(fbinfo.colorFormats.size()); i++)
+        for (uint32 i = 0; i < uint32(fbinfo.colorFormats.Count); i++)
         {
             psoDesc.RenderTargets.RTFormats[i] = getDxgiFormatMapping(fbinfo.colorFormats[i]).rtvFormat;
         }
-        psoDesc.RenderTargets.NumRenderTargets = uint32(fbinfo.colorFormats.size());
+        psoDesc.RenderTargets.NumRenderTargets = uint32(fbinfo.colorFormats.Count);
 
         psoDesc.DSVFormat = getDxgiFormatMapping(fbinfo.depthFormat).rtvFormat;
 
-        if (state.AS)
+        if (state.AS != null)
         {
-            state.AS.getBytecode(&psoDesc.AmplificationShader.pShaderBytecode, &psoDesc.AmplificationShader.BytecodeLength);
+            state.AS.getBytecode(&psoDesc.AmplificationShader.pShaderBytecode, (.)&psoDesc.AmplificationShader.BytecodeLength);
         }
 
-        if (state.MS)
+        if (state.MS != null)
         {
-            state.MS.getBytecode(&psoDesc.MeshShader.pShaderBytecode, &psoDesc.MeshShader.BytecodeLength);
+            state.MS.getBytecode(&psoDesc.MeshShader.pShaderBytecode, (.)&psoDesc.MeshShader.BytecodeLength);
         }
 
-        if (state.PS)
+        if (state.PS != null)
         {
-            state.PS.getBytecode(&psoDesc.PixelShader.pShaderBytecode, &psoDesc.PixelShader.BytecodeLength);
+            state.PS.getBytecode(&psoDesc.PixelShader.pShaderBytecode, (.)&psoDesc.PixelShader.BytecodeLength);
         }
 
         D3D12_PIPELINE_STATE_STREAM_DESC streamDesc;
         streamDesc.pPipelineStateSubobjectStream = &psoDesc;
-        streamDesc.SizeInBytes = sizeof(psoDesc);
+        streamDesc.SizeInBytes = sizeof(decltype(psoDesc));
 
-        HRESULT hr = m_Context.device2.CreatePipelineState(&streamDesc, IID_PPV_ARGS(&pipelineState));
+        HRESULT hr = m_Context.device2.CreatePipelineState(streamDesc, ID3D12PipelineState.IID, (void**)(&pipelineState));
         if (FAILED(hr))
         {
             m_Context.error("Failed to create a meshlet pipeline state object");

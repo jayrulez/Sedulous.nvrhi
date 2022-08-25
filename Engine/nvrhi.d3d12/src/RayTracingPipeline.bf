@@ -15,7 +15,7 @@ class RayTracingPipeline : RefCounter<nvrhi.rt.IPipeline>
 	public struct ExportTableEntry
 	{
 		public IBindingLayout bindingLayout;
-		public readonly void* pShaderIdentifier;
+		public void* pShaderIdentifier;
 	}
 
 	public Dictionary<String, ExportTableEntry> exports;
