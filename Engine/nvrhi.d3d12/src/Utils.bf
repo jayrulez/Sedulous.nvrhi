@@ -20,11 +20,11 @@ namespace nvrhi.d3d12
 			return res == S_OK;
 		}
 
-		/*nvrhi.DeviceHandle createDevice(DeviceDesc desc)
+		public static nvrhi.DeviceHandle createDevice(DeviceDesc desc)
 		{
 			nvrhi.d3d12.Device device = new .(desc);
 			return nvrhi.DeviceHandle.Attach(device);
-		}*/
+		}
 
 		public static DXGI_FORMAT convertFormat(nvrhi.Format format)
 		{
