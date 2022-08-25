@@ -1085,7 +1085,7 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 
 			uint32 entryIndex = 0;
 
-			delegate void(ShaderTable.Entry entry)  writeEntry = scope [=entrySize, &cpuVA, &gpuVA, &entryIndex] (entry) =>
+			delegate void(ShaderTable.Entry entry)  writeEntry = scope [=entrySize, &cpuVA, &gpuVA, &entryIndex, &] (entry) =>
 				{
 					Internal.MemCpy(cpuVA, entry.pShaderIdentifier, D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES);
 
@@ -1501,11 +1501,11 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 
 	public override void beginMarker(char8* name)
 	{
-		PIXBeginEvent(m_ActiveCommandList.commandList, 0, name);
+		//PIXBeginEvent(m_ActiveCommandList.commandList, 0, name); // todo
 	}
 	public override void endMarker()
 	{
-		PIXEndEvent(m_ActiveCommandList.commandList);
+		//PIXEndEvent(m_ActiveCommandList.commandList); // todo
 	}
 
 	public override void setEnableAutomaticBarriers(bool enable)
