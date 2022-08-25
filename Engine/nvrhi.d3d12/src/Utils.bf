@@ -531,6 +531,81 @@ namespace nvrhi.d3d12
 			outState.ConservativeRaster = inState.conservativeRasterEnable ? D3D12_CONSERVATIVE_RASTERIZATION_MODE.ON : D3D12_CONSERVATIVE_RASTERIZATION_MODE.OFF;
 			outState.ForcedSampleCount = inState.forcedSampleCount;
 		}
+
+		public static D3D12_RESOURCE_DESC convertTextureDesc(TextureDesc d)
+		{
+		    readonly var formatMapping = getDxgiFormatMapping(d.format);
+		    readonly ref FormatInfo formatInfo = ref getFormatInfo(d.format);
+
+		    D3D12_RESOURCE_DESC desc = .();
+		    desc.Width = d.width;
+		    desc.Height = d.height;
+		    desc.MipLevels = uint16(d.mipLevels);
+		    desc.Format = d.isTypeless ? formatMapping.resourceFormat : formatMapping.rtvFormat;
+		    desc.SampleDesc.Count = d.sampleCount;
+		    desc.SampleDesc.Quality = d.sampleQuality;
+
+		    switch (d.dimension)
+		    {
+		    case TextureDimension.Texture1D: fallthrough;
+		    case TextureDimension.Texture1DArray:
+		        desc.Dimension = D3D12_RESOURCE_DIMENSION.TEXTURE1D;
+		        desc.DepthOrArraySize = uint16(d.arraySize);
+		        break;
+		    case TextureDimension.Texture2D: fallthrough;
+		    case TextureDimension.Texture2DArray: fallthrough;
+		    case TextureDimension.TextureCube: fallthrough;
+		    case TextureDimension.TextureCubeArray: fallthrough;
+		    case TextureDimension.Texture2DMS: fallthrough;
+		    case TextureDimension.Texture2DMSArray:
+		        desc.Dimension = D3D12_RESOURCE_DIMENSION.TEXTURE2D;
+		        desc.DepthOrArraySize = uint16(d.arraySize);
+		        break;
+		    case TextureDimension.Texture3D:
+		        desc.Dimension = D3D12_RESOURCE_DIMENSION.TEXTURE3D;
+		        desc.DepthOrArraySize = uint16(d.depth);
+		        break;
+		    case TextureDimension.Unknown: fallthrough;
+		    default:
+		        nvrhi.utils.InvalidEnum();
+		        break;
+		    }
+
+		    if (d.isRenderTarget)
+		    {
+		        if (formatInfo.hasDepth || formatInfo.hasStencil)
+		            desc.Flags |= D3D12_RESOURCE_FLAGS.ALLOW_DEPTH_STENCIL;
+		        else
+		            desc.Flags |= D3D12_RESOURCE_FLAGS.ALLOW_RENDER_TARGET;
+		    }
+
+		    if (d.isUAV)
+		        desc.Flags |= D3D12_RESOURCE_FLAGS.ALLOW_UNORDERED_ACCESS;
+
+		    return desc;
+		}
+
+		public static D3D12_CLEAR_VALUE convertTextureClearValue(TextureDesc d)
+		{
+		    readonly var formatMapping = getDxgiFormatMapping(d.format);
+		    readonly ref FormatInfo formatInfo = ref getFormatInfo(d.format);
+		    D3D12_CLEAR_VALUE clearValue = .();
+		    clearValue.Format = formatMapping.rtvFormat;
+		    if (formatInfo.hasDepth || formatInfo.hasStencil)
+		    {
+		        clearValue.DepthStencil.Depth = d.clearValue.r;
+		        clearValue.DepthStencil.Stencil = uint8(d.clearValue.g);
+		    }
+		    else
+		    {
+		        clearValue.Color[0] = d.clearValue.r;
+		        clearValue.Color[1] = d.clearValue.g;
+		        clearValue.Color[2] = d.clearValue.b;
+		        clearValue.Color[3] = d.clearValue.a;
+		    }
+
+		    return clearValue;
+		}
 	}
 
 	public static
