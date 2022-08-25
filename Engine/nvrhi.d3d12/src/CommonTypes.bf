@@ -80,9 +80,9 @@ namespace nvrhi.d3d12
 	{
 		// D3D12-specific methods
 		public abstract RootSignatureHandle buildRootSignature(StaticVector<BindingLayoutHandle, const c_MaxBindingLayouts> pipelineLayouts, bool allowInputLayout, bool isLocal, D3D12_ROOT_PARAMETER1* pCustomParameters = null, uint32 numCustomParameters = 0);
-		public abstract GraphicsPipelineHandle createHandleForNativeGraphicsPipeline(IRootSignature* rootSignature, ID3D12PipelineState* pipelineState, GraphicsPipelineDesc desc, FramebufferInfo framebufferInfo);
-		public abstract MeshletPipelineHandle createHandleForNativeMeshletPipeline(IRootSignature* rootSignature, ID3D12PipelineState* pipelineState, MeshletPipelineDesc desc, FramebufferInfo framebufferInfo);
-		[NoDiscard] public abstract IDescriptorHeap* getDescriptorHeap(DescriptorHeapType heapType);
+		public abstract GraphicsPipelineHandle createHandleForNativeGraphicsPipeline(IRootSignature rootSignature, ID3D12PipelineState* pipelineState, GraphicsPipelineDesc desc, FramebufferInfo framebufferInfo);
+		public abstract MeshletPipelineHandle createHandleForNativeMeshletPipeline(IRootSignature rootSignature, ID3D12PipelineState* pipelineState, MeshletPipelineDesc desc, FramebufferInfo framebufferInfo);
+		[NoDiscard] public abstract IDescriptorHeap getDescriptorHeap(DescriptorHeapType heapType);
 	}
 
 	typealias DeviceHandle = RefCountPtr<nvrhi.d3d12.IDevice>;
