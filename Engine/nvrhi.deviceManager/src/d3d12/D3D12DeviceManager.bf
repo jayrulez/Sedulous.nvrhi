@@ -40,9 +40,8 @@ namespace nvrhi.deviceManager.d3d12
 		{
 			if (FAILED(hr)) return false;
 		}
-
-		public // Adjust window rect so that it is centred on the given adapter.  Clamps to fit if it's too big.
-			static bool MoveWindowOntoAdapter(IDXGIAdapter* targetAdapter, ref RECT rect)
+		 // Adjust window rect so that it is centred on the given adapter.  Clamps to fit if it's too big.
+		public static bool MoveWindowOntoAdapter(IDXGIAdapter* targetAdapter, ref RECT rect)
 		{
 			Runtime.Assert(targetAdapter != null);
 
@@ -79,8 +78,8 @@ namespace nvrhi.deviceManager.d3d12
 			return false;
 		}
 
-		public // Find an adapter whose name contains the given string.
-			static D3D12RefCountPtr<IDXGIAdapter> FindAdapter(String targetName)
+		 // Find an adapter whose name contains the given string.
+		public static D3D12RefCountPtr<IDXGIAdapter> FindAdapter(String targetName)
 		{
 			D3D12RefCountPtr<IDXGIAdapter> targetAdapter = null;
 			D3D12RefCountPtr<IDXGIFactory1> DXGIFactory = null;
@@ -123,6 +122,38 @@ namespace nvrhi.deviceManager.d3d12
 			}
 
 			return targetAdapter;
+		}
+
+		public static bool GetSuitableAdapter(out IDXGIAdapter* outAdapter)
+		{
+			outAdapter = null;
+
+			IDXGIFactory4* m_dxgi_factory = null;
+
+			uint32 flags = 0;
+			if (!(CreateDXGIFactory2(flags, IDXGIFactory4.IID, (void**)&m_dxgi_factory) == S_OK))
+			{
+				return false;
+			}
+
+			delegate HRESULT(uint32, ref IDXGIAdapter1*) GetNextAdapter = scope [&] (adapterIndex, adapter) =>
+				{
+					return m_dxgi_factory.EnumAdapters1(adapterIndex, out adapter);
+				};
+
+			IDXGIAdapter1* adapter = null;
+
+			for (uint32 adapterIndex = 0; DXGI_ERROR_NOT_FOUND != GetNextAdapter(adapterIndex, ref adapter); adapterIndex++)
+			{
+				if (adapter != null)
+				{
+					outAdapter = adapter;
+					return true;
+				}
+			}
+
+
+			return true;
 		}
 	}
 
@@ -173,6 +204,11 @@ namespace nvrhi.deviceManager.d3d12
 			}
 			else
 			{
+				if (!GetSuitableAdapter(out targetAdapter))
+				{
+					Debug.WriteLine("Could not find a suitable adapter.");
+				}
+
 				/*targetAdapter = FindAdapter(m_DeviceParams.adapterNameSubstring);
 
 				if (targetAdapter == null)
@@ -187,9 +223,7 @@ namespace nvrhi.deviceManager.d3d12
 				DXGI_ADAPTER_DESC aDesc = .();
 				targetAdapter.GetDesc(out aDesc);
 
-				String adapterName = scope:: String(aDesc.Description);
-
-				m_RendererString = new String(adapterName);
+				m_RendererString = new String(&aDesc.Description);
 			}
 
 			if (MoveWindowOntoAdapter(targetAdapter, ref rect))

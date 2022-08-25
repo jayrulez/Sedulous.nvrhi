@@ -1990,7 +1990,7 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 
 	public Context* getContext() { return m_Context; }
 
-	private Context* m_Context;
+	private Context* m_Context = new .() ~ _.Dispose();
 	private DeviceResources m_Resources;
 
 	private Queue[(int32)CommandQueue.Count] m_Queues;

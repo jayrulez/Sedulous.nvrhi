@@ -16,7 +16,7 @@ namespace nvrhi.d3d12
 		public this(Context* context, DeviceResources resources, TextureDesc desc, D3D12_RESOURCE_DESC resourceDesc)
 		{
 			this.desc = desc;
-			resourceDesc = resourceDesc;
+			this.resourceDesc = resourceDesc;
 			m_Context = context;
 			m_Resources = resources;
 			stateInitialized = true;

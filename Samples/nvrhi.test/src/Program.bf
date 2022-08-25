@@ -5,6 +5,7 @@ using nvrhi.deviceManager;
 using System.IO;
 using System.Diagnostics;
 using nvrhi.shaderCompiler.Dxc;
+using nvrhi.deviceManager.d3d12;
 namespace nvrhi.test
 {
 
@@ -75,7 +76,8 @@ namespace nvrhi.test
 					enableNvrhiValidationLayer = true
 				};
 
-			DeviceManager deviceManager = new VulkanDeviceManager(@params);
+			//DeviceManager deviceManager = new VulkanDeviceManager(@params);
+			DeviceManager deviceManager = new D3D12DeviceManager(@params);
 
 			defer delete deviceManager;
 
