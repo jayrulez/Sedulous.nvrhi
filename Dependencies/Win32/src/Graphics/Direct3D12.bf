@@ -4789,7 +4789,7 @@ namespace Win32.Graphics.Direct3D12
 
 			public HRESULT Map(uint32 Subresource, D3D12_RANGE* pReadRange, void** ppData) mut => VT.Map(ref this, Subresource, pReadRange, ppData);
 			public void Unmap(uint32 Subresource, D3D12_RANGE* pWrittenRange) mut => VT.Unmap(ref this, Subresource, pWrittenRange);
-			public D3D12_RESOURCE_DESC GetDesc() mut => VT.GetDesc(ref this);
+			public D3D12_RESOURCE_DESC GetDesc() mut => VT.GetDesc(ref this, .. ?);
 			public uint64 GetGPUVirtualAddress() mut => VT.GetGPUVirtualAddress(ref this);
 			public HRESULT WriteToSubresource(uint32 DstSubresource, D3D12_BOX* pDstBox, void* pSrcData, uint32 SrcRowPitch, uint32 SrcDepthPitch) mut => VT.WriteToSubresource(ref this, DstSubresource, pDstBox, pSrcData, SrcRowPitch, SrcDepthPitch);
 			public HRESULT ReadFromSubresource(void* pDstData, uint32 DstRowPitch, uint32 DstDepthPitch, uint32 SrcSubresource, D3D12_BOX* pSrcBox) mut => VT.ReadFromSubresource(ref this, pDstData, DstRowPitch, DstDepthPitch, SrcSubresource, pSrcBox);
@@ -4800,7 +4800,7 @@ namespace Win32.Graphics.Direct3D12
 			{
 				public new function [CallingConvention(.Stdcall)] HRESULT(ref ID3D12Resource self, uint32 Subresource, D3D12_RANGE* pReadRange, void** ppData) Map;
 				public new function [CallingConvention(.Stdcall)] void(ref ID3D12Resource self, uint32 Subresource, D3D12_RANGE* pWrittenRange) Unmap;
-				public new function [CallingConvention(.Stdcall)] D3D12_RESOURCE_DESC(ref ID3D12Resource self) GetDesc;
+				public new function [CallingConvention(.Stdcall)] void(ref ID3D12Resource self, out D3D12_RESOURCE_DESC @return) GetDesc;
 				public new function [CallingConvention(.Stdcall)] uint64(ref ID3D12Resource self) GetGPUVirtualAddress;
 				public new function [CallingConvention(.Stdcall)] HRESULT(ref ID3D12Resource self, uint32 DstSubresource, D3D12_BOX* pDstBox, void* pSrcData, uint32 SrcRowPitch, uint32 SrcDepthPitch) WriteToSubresource;
 				public new function [CallingConvention(.Stdcall)] HRESULT(ref ID3D12Resource self, void* pDstData, uint32 DstRowPitch, uint32 DstDepthPitch, uint32 SrcSubresource, D3D12_BOX* pSrcBox) ReadFromSubresource;
@@ -4878,16 +4878,16 @@ namespace Win32.Graphics.Direct3D12
 
 			public new VTable* VT { get => (.)vt; }
 
-			public D3D12_DESCRIPTOR_HEAP_DESC GetDesc() mut => VT.GetDesc(ref this);
-			public D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandleForHeapStart() mut => VT.GetCPUDescriptorHandleForHeapStart(ref this);
-			public D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandleForHeapStart() mut => VT.GetGPUDescriptorHandleForHeapStart(ref this);
+			public D3D12_DESCRIPTOR_HEAP_DESC GetDesc() mut => VT.GetDesc(ref this, .. ?);
+			public D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandleForHeapStart() mut => VT.GetCPUDescriptorHandleForHeapStart(ref this, .. ?);
+			public D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandleForHeapStart() mut => VT.GetGPUDescriptorHandleForHeapStart(ref this, .. ?);
 
 			[CRepr]
 			public struct VTable : ID3D12Pageable.VTable
 			{
-				public new function [CallingConvention(.Stdcall)] D3D12_DESCRIPTOR_HEAP_DESC(ref ID3D12DescriptorHeap self) GetDesc;
-				public new function [CallingConvention(.Stdcall)] D3D12_CPU_DESCRIPTOR_HANDLE(ref ID3D12DescriptorHeap self) GetCPUDescriptorHandleForHeapStart;
-				public new function [CallingConvention(.Stdcall)] D3D12_GPU_DESCRIPTOR_HANDLE(ref ID3D12DescriptorHeap self) GetGPUDescriptorHandleForHeapStart;
+				public new function [CallingConvention(.Stdcall)] void(ref ID3D12DescriptorHeap self, out D3D12_DESCRIPTOR_HEAP_DESC @return) GetDesc;
+				public new function [CallingConvention(.Stdcall)] void(ref ID3D12DescriptorHeap self, out D3D12_CPU_DESCRIPTOR_HANDLE @return) GetCPUDescriptorHandleForHeapStart;
+				public new function [CallingConvention(.Stdcall)] void(ref ID3D12DescriptorHeap self, out D3D12_GPU_DESCRIPTOR_HANDLE @return) GetGPUDescriptorHandleForHeapStart;
 			}
 		}
 		[CRepr]

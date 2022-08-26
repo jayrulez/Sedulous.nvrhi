@@ -28,7 +28,7 @@ class Queue
 			}
 		}
 	}
-	public System.Collections.Queue<CommandListInstance> commandListsInFlight;
+	public System.Collections.Queue<CommandListInstance> commandListsInFlight = new .() ~ delete _;
 
 	public  this(Context* context, ID3D12CommandQueue* queue)
 	{

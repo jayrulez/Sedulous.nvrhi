@@ -4,7 +4,7 @@ namespace nvrhi.d3d12
 	class Shader : RefCounter<IShader>
 	{
 		public ShaderDesc desc;
-		public List<char8> bytecode;
+		public List<char8> bytecode = new .() ~ delete _;
 	#if NVRHI_D3D12_WITH_NVAPI
 		public List<NVAPI_D3D12_PSO_EXTENSION_DESC*> extensions;
 		public List<NV_CUSTOM_SEMANTIC> customSemantics;

@@ -16,7 +16,7 @@ namespace nvrhi.d3d12
 #endif
 
 		// The cache does not own the RS objects, so store weak references
-		public Dictionary<int, RootSignature> rootsigCache;
+		public Dictionary<int, RootSignature> rootsigCache = new .() ~ delete _;
 
 		public this(Context* context, DeviceDesc desc)
 		{
@@ -30,6 +30,8 @@ namespace nvrhi.d3d12
 
 		public uint8 getFormatPlaneCount(DXGI_FORMAT format)
 		{
+			if(!m_DxgiFormatPlaneCounts.ContainsKey(format))
+				m_DxgiFormatPlaneCounts[format] = 0;
 			ref uint8 planeCount = ref m_DxgiFormatPlaneCounts[format];
 			if (planeCount == 0)
 			{
@@ -53,6 +55,6 @@ namespace nvrhi.d3d12
 		}
 
 		private Context* m_Context;
-		private Dictionary<DXGI_FORMAT, uint8> m_DxgiFormatPlaneCounts;
+		private Dictionary<DXGI_FORMAT, uint8> m_DxgiFormatPlaneCounts = new .() ~ delete _;
 	}
 }

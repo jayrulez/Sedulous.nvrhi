@@ -187,14 +187,14 @@ namespace nvrhi.d3d12
 	    public D3D12RefCountPtr<ID3D12Fence> fence;
 	    public D3D12RefCountPtr<ID3D12CommandAllocator> commandAllocator;
 	    public D3D12RefCountPtr<ID3D12CommandList> commandList;
-	    public List<RefCountPtr<IResource>> referencedResources;
-	    public List<RefCountPtr<IUnknown>> referencedNativeResources;
-	    public List<RefCountPtr<StagingTexture>> referencedStagingTextures;
-	    public List<RefCountPtr<Buffer>> referencedStagingBuffers;
-	    public List<RefCountPtr<TimerQuery>> referencedTimerQueries;
+	    public List<RefCountPtr<IResource>> referencedResources = new .() ~ delete _;
+	    public List<RefCountPtr<IUnknown>> referencedNativeResources = new .() ~ delete _;
+	    public List<RefCountPtr<StagingTexture>> referencedStagingTextures = new .() ~ delete _;
+	    public List<RefCountPtr<Buffer>> referencedStagingBuffers = new .() ~ delete _;
+	    public List<RefCountPtr<TimerQuery>> referencedTimerQueries = new .() ~ delete _;
 #if NVRHI_WITH_RTXMU
-	    public List<uint64> rtxmuBuildIds;
-	    public List<uint64> rtxmuCompactionIds;
+	    public List<uint64> rtxmuBuildIds = new .() ~ delete _;
+	    public List<uint64> rtxmuCompactionIds = new .() ~ delete _;
 #endif
 	}
 }

@@ -2073,16 +2073,16 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 
 	private nvrhi.d3d12.IDevice m_Device;
 	private Queue m_Queue;
-	private UploadManager m_UploadManager;
-	private UploadManager m_DxrScratchManager;
-	private CommandListResourceStateTracker m_StateTracker;
+	private UploadManager m_UploadManager ~ delete _;
+	private UploadManager m_DxrScratchManager ~ delete _;
+	private CommandListResourceStateTracker m_StateTracker ~ delete _;
 	private bool m_EnableAutomaticBarriers = true;
 
 	private CommandListParameters m_Desc;
 
-	private InternalCommandList m_ActiveCommandList;
-	private Queue<InternalCommandList> m_CommandListPool;
-	private CommandListInstance m_Instance;
+	private InternalCommandList m_ActiveCommandList ~ delete _;
+	private Queue<InternalCommandList> m_CommandListPool = new .() ~ delete _;
+	private CommandListInstance m_Instance ~ delete _;
 	private uint64 m_RecordingVersion = 0;
 
 	// Cache for user-provided state
@@ -2103,10 +2103,10 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 	private ID3D12Resource* m_CurrentUploadBuffer = null;
 	private SinglePassStereoState m_CurrentSinglePassStereoState;
 
-	private Dictionary<IBuffer, D3D12_GPU_VIRTUAL_ADDRESS> m_VolatileConstantBufferAddresses;
+	private Dictionary<IBuffer, D3D12_GPU_VIRTUAL_ADDRESS> m_VolatileConstantBufferAddresses = new .() ~ delete _;
 	private bool m_AnyVolatileBufferWrites = false;
 
-	private List<D3D12_RESOURCE_BARRIER> m_D3DBarriers; // Used locally in commitBarriers, member to avoid re-allocations
+	private List<D3D12_RESOURCE_BARRIER> m_D3DBarriers = new .() ~ delete _; // Used locally in commitBarriers, member to avoid re-allocations
 
 	// Bound volatile buffer state. Saves currently bound volatile buffers and their current GPU VAs.
 	// Necessary to patch the bound VAs when a buffer is updated between setGraphicsState and draw, or between draws.
@@ -2114,7 +2114,7 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 	private StaticVector<VolatileConstantBufferBinding, const c_MaxVolatileConstantBuffers> m_CurrentGraphicsVolatileCBs = .();
 	private StaticVector<VolatileConstantBufferBinding, const c_MaxVolatileConstantBuffers> m_CurrentComputeVolatileCBs = .();
 
-	private Dictionary<nvrhi.rt.IShaderTable, ShaderTableState> m_ShaderTableStates;
+	private Dictionary<nvrhi.rt.IShaderTable, ShaderTableState> m_ShaderTableStates = new .() ~ delete _;
 	private ShaderTableState getShaderTableStateTracking(nvrhi.rt.IShaderTable shaderTable)
 	{
 		if (m_ShaderTableStates.ContainsKey(shaderTable))

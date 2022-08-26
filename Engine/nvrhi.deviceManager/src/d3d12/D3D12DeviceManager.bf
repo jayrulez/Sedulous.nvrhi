@@ -170,10 +170,10 @@ namespace nvrhi.deviceManager.d3d12
 		private HWND                                        m_hWnd = 0;
 		private bool                                        m_TearingSupported = false;
 
-		private List<D3D12RefCountPtr<ID3D12Resource>>    m_SwapChainBuffers;
-		private List<nvrhi.TextureHandle>           m_RhiSwapChainBuffers;
+		private List<D3D12RefCountPtr<ID3D12Resource>>    m_SwapChainBuffers = new .() ~ delete _;
+		private List<nvrhi.TextureHandle>           m_RhiSwapChainBuffers = new .() ~ delete _;
 		private D3D12RefCountPtr<ID3D12Fence>                    m_FrameFence;
-		private List<HANDLE>                         m_FrameFenceEvents;
+		private List<HANDLE>                         m_FrameFenceEvents = new .() ~ delete _;
 
 		private UINT64                                      m_FrameCount = 1;
 
@@ -396,11 +396,16 @@ namespace nvrhi.deviceManager.d3d12
 
 		protected override void DestroyDeviceAndSwapChain()
 		{
+			for(var scb in m_RhiSwapChainBuffers){
+				scb?.Release();
+			}
+
 			m_RhiSwapChainBuffers.Clear();
 			m_RendererString.Clear();
 
 			ReleaseRenderTargets();
 
+			m_NvrhiDevice?.Release();
 			m_NvrhiDevice = null;
 
 			for (var fenceEvent in m_FrameFenceEvents)
@@ -576,6 +581,10 @@ namespace nvrhi.deviceManager.d3d12
 				SetEvent(e);
 
 			// Release the old buffers because ResizeBuffers requires that
+			for(var scb in m_RhiSwapChainBuffers){
+				scb?.Release();
+				scb = null;
+			}
 			m_RhiSwapChainBuffers.Clear();
 			m_SwapChainBuffers.Clear();
 		}

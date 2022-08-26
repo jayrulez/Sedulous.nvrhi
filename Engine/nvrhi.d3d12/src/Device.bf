@@ -292,7 +292,7 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 		if (objectType != ObjectType.D3D12_Resource)
 			return null;
 
-		ID3D12Resource* pResource = (ID3D12Resource*)(_texture.pointer);
+		ID3D12Resource* pResource = (ID3D12Resource*)_texture.pointer;
 
 		Texture texture = new Texture(m_Context, m_Resources, desc, pResource.GetDesc());
 		texture.resource = pResource;
@@ -593,7 +593,7 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 		Shader shader = new Shader();
 		shader.bytecode.Resize(binarySize);
 		shader.desc = d;
-		Internal.MemCpy(&shader.bytecode[0], binary, binarySize);
+		Internal.MemCpy(shader.bytecode.Ptr, binary, binarySize);
 
 #if NVRHI_D3D12_WITH_NVAPI
 		// Save the custom semantics structure because it may be on the stack or otherwise dynamic.
@@ -1998,7 +1998,7 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 
 	private Monitor m_Mutex;
 
-	private List<ID3D12CommandList*> m_CommandListsToExecute; // used locally in executeCommandLists, member to avoid re-allocations
+	private List<ID3D12CommandList*> m_CommandListsToExecute = new .() ~ delete _; // used locally in executeCommandLists, member to avoid re-allocations
 
 	private bool m_NvapiIsInitialized = false;
 	private bool m_SinglePassStereoSupported = false;
@@ -2023,7 +2023,9 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 		hash_combine(ref hash, allowInputLayout ? 1 : 0);
 
 		// Get a cached RS and AddRef it (if it exists)
-		RefCountPtr<RootSignature> rootsig = m_Resources.rootsigCache[hash];
+		RefCountPtr<RootSignature> rootsig = null;
+		if(m_Resources.rootsigCache.ContainsKey(hash))
+		rootsig = m_Resources.rootsigCache[hash];
 
 		if (rootsig == null)
 		{
@@ -2109,7 +2111,7 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 			desc.RTVFormats[i] = getDxgiFormatMapping(fbinfo.colorFormats[i]).rtvFormat;
 		}
 
-		InputLayout inputLayout = checked_cast<InputLayout, IInputLayout>(state.inputLayout.Get<IInputLayout>());
+		InputLayout inputLayout = checked_cast<InputLayout, IInputLayout>(state.inputLayout?.Get<IInputLayout>());
 		if (inputLayout != null && !inputLayout.inputElements.IsEmpty)
 		{
 			desc.InputLayout.NumElements = uint32(inputLayout.inputElements.Count);

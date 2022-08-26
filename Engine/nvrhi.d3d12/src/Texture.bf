@@ -9,7 +9,7 @@ namespace nvrhi.d3d12
 	{
 		public readonly TextureDesc desc;
 		public D3D12_RESOURCE_DESC resourceDesc;
-		public D3D12RefCountPtr<ID3D12Resource> resource;
+		public D3D12RefCountPtr<ID3D12Resource> resource = null;
 		public uint8 planeCount = 1;
 		public HeapHandle heap;
 
@@ -151,7 +151,7 @@ namespace nvrhi.d3d12
 		{
 			if (!String.IsNullOrEmpty(desc.debugName))
 			{
-				resource.SetName(desc.debugName.ToScopedNativeWChar!());
+				resource.SetName(desc.debugName.ToScopedNativeWChar!::());
 			}
 
 			if (desc.isUAV)
