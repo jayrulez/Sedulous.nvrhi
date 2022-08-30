@@ -11,10 +11,10 @@ namespace nvrhi.validation
 			{
 				switch (item.type)
 				{
-				case ResourceType.Texture_SRV:
-				case ResourceType.TypedBuffer_SRV:
-				case ResourceType.StructuredBuffer_SRV:
-				case ResourceType.RawBuffer_SRV:
+				case ResourceType.Texture_SRV: fallthrough;
+				case ResourceType.TypedBuffer_SRV: fallthrough;
+				case ResourceType.StructuredBuffer_SRV: fallthrough;
+				case ResourceType.RawBuffer_SRV: fallthrough;
 				case ResourceType.RayTracingAccelStruct:
 					if (bindingSet.SRV[item.slot])
 					{
@@ -27,9 +27,9 @@ namespace nvrhi.validation
 					}
 					break;
 
-				case ResourceType.Texture_UAV:
-				case ResourceType.TypedBuffer_UAV:
-				case ResourceType.StructuredBuffer_UAV:
+				case ResourceType.Texture_UAV: fallthrough;
+				case ResourceType.TypedBuffer_UAV: fallthrough;
+				case ResourceType.StructuredBuffer_UAV: fallthrough;
 				case ResourceType.RawBuffer_UAV:
 					if (bindingSet.UAV[item.slot])
 					{
@@ -42,8 +42,8 @@ namespace nvrhi.validation
 					}
 					break;
 
-				case ResourceType.ConstantBuffer:
-				case ResourceType.VolatileConstantBuffer:
+				case ResourceType.ConstantBuffer: fallthrough;
+				case ResourceType.VolatileConstantBuffer: fallthrough;
 				case ResourceType.PushConstants:
 					if (bindingSet.CB[item.slot])
 					{
@@ -72,8 +72,8 @@ namespace nvrhi.validation
 					}
 					break;
 
-				case ResourceType.None:
-				case ResourceType.Count:
+				case ResourceType.None: fallthrough;
+				case ResourceType.Count: fallthrough;
 				default:
 					{
 						String message = scope $"Invalid layout item type {(int32)item.type}";
@@ -415,8 +415,8 @@ namespace nvrhi.validation
 							}
 
 							FillShaderBindingSetFromDesc(m_MessageCallback, layoutDesc.bindings,
-								ref bindingsPerLayout.GetValueAt(layoutIndex) /*bindingsPerLayout[layoutIndex]*/,
-								ref duplicatesPerLayout.GetValueAt(layoutIndex) /*duplicatesPerLayout[layoutIndex]*/);
+								/*ref bindingsPerLayout.GetValueAt(layoutIndex)*/ ref bindingsPerLayout[layoutIndex],
+								/*ref duplicatesPerLayout.GetValueAt(layoutIndex)*/ ref duplicatesPerLayout[layoutIndex]);
 
 							// Layouts with duplicates should not have passed validation in createBindingLayout
 							Runtime.Assert(!duplicatesPerLayout[layoutIndex].any());
@@ -1644,7 +1644,7 @@ namespace nvrhi.validation
 				}
 				break;
 
-			case CommandQueue.Count:
+			case CommandQueue.Count: fallthrough;
 			default:
 				utils.InvalidEnum();
 				return null;

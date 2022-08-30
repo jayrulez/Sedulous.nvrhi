@@ -915,7 +915,7 @@ namespace nvrhi
 			ViewportMask = 2
 		};
 
-		public CustomSemanticType type;
+		public CustomSemanticType type = .Undefined;
 		public String name;
 	}
 
@@ -1096,7 +1096,7 @@ namespace nvrhi
 			}
 		};
 
-		public RenderTarget[c_MaxRenderTargets] targets = .();
+		public RenderTarget[c_MaxRenderTargets] targets = .InitAll;
 		public bool alphaToCoverageEnable = false;
 
 		public readonly ref BlendState setRenderTarget(uint32 index, RenderTarget target) mut { targets[index] = target; return ref this; }
@@ -1138,7 +1138,7 @@ namespace nvrhi
 			int hash = 0;
 			nvrhi.hash_combine(ref hash, alphaToCoverageEnable);
 			for (readonly ref RenderTarget target in ref targets)
-			    nvrhi.hash_combine(ref hash, target);
+				nvrhi.hash_combine(ref hash, target);
 			return hash;
 		}
 	}
@@ -1187,40 +1187,40 @@ namespace nvrhi
 		public char8[16] samplePositionsX = .();
 		public char8[16] samplePositionsY = .();
 
-		public readonly ref RasterState setFillMode(RasterFillMode value) mut { fillMode = value; return ref this; }
-		public readonly ref RasterState setFillSolid()  mut { fillMode = RasterFillMode.Solid; return ref this; }
-		public readonly ref RasterState setFillWireframe() mut  { fillMode = RasterFillMode.Wireframe; return ref this; }
-		public readonly ref RasterState setCullMode(RasterCullMode value) mut { cullMode = value; return ref this; }
-		public readonly ref RasterState setCullBack()  mut { cullMode = RasterCullMode.Back; return ref this; }
-		public readonly ref RasterState setCullFront() mut  { cullMode = RasterCullMode.Front; return ref this; }
-		public readonly ref RasterState setCullNone()  mut { cullMode = RasterCullMode.None; return ref this; }
-		public readonly ref RasterState setFrontCounterClockwise(bool value) mut { frontCounterClockwise = value; return ref this; }
-		public readonly ref RasterState setDepthClipEnable(bool value) mut { depthClipEnable = value; return ref this; }
-		public readonly ref RasterState enableDepthClip()  mut { depthClipEnable = true; return ref this; }
-		public readonly ref RasterState disableDepthClip() mut  { depthClipEnable = false; return ref this; }
-		public readonly ref RasterState setScissorEnable(bool value) mut { scissorEnable = value; return ref this; }
-		public readonly ref RasterState enableScissor()  mut { scissorEnable = true; return ref this; }
-		public readonly ref RasterState disableScissor() mut  { scissorEnable = false; return ref this; }
-		public readonly ref RasterState setMultisampleEnable(bool value) mut { multisampleEnable = value; return ref this; }
-		public readonly ref RasterState enableMultisample() mut  { multisampleEnable = true; return ref this; }
-		public readonly ref RasterState disableMultisample() mut  { multisampleEnable = false; return ref this; }
-		public readonly ref RasterState setAntialiasedLineEnable(bool value) mut { antialiasedLineEnable = value; return ref this; }
-		public readonly ref RasterState enableAntialiasedLine() mut  { antialiasedLineEnable = true; return ref this; }
-		public readonly ref RasterState disableAntialiasedLine() mut  { antialiasedLineEnable = false; return ref this; }
-		public readonly ref RasterState setDepthBias(int32 value) mut { depthBias = value; return ref this; }
-		public readonly ref RasterState setDepthBiasClamp(float value) mut { depthBiasClamp = value; return ref this; }
-		public readonly ref RasterState setSlopeScaleDepthBias(float value) mut { slopeScaledDepthBias = value; return ref this; }
-		public readonly ref RasterState setForcedSampleCount(uint8 value) mut { forcedSampleCount = value; return ref this; }
-		public readonly ref RasterState setProgrammableSamplePositionsEnable(bool value) mut { programmableSamplePositionsEnable = value; return ref this; }
-		public readonly ref RasterState enableProgrammableSamplePositions()  mut { programmableSamplePositionsEnable = true; return ref this; }
-		public readonly ref RasterState disableProgrammableSamplePositions() mut  { programmableSamplePositionsEnable = false; return ref this; }
-		public readonly ref RasterState setConservativeRasterEnable(bool value) mut { conservativeRasterEnable = value; return ref this; }
-		public readonly ref RasterState enableConservativeRaster()  mut { conservativeRasterEnable = true; return ref this; }
-		public readonly ref RasterState disableConservativeRaster()  mut { conservativeRasterEnable = false; return ref this; }
-		public readonly ref RasterState setQuadFillEnable(bool value) mut { quadFillEnable = value; return ref this; }
-		public readonly ref RasterState enableQuadFill()  mut { quadFillEnable = true; return ref this; }
-		public readonly ref RasterState disableQuadFill() mut  { quadFillEnable = false; return ref this; }
-		public readonly ref RasterState setSamplePositions(char8* x, char8* y, int32 count) mut  { for (int32 i = 0; i < count; i++) { samplePositionsX[i] = x[i]; samplePositionsY[i] = y[i]; } return ref this; }
+		public ref RasterState setFillMode(RasterFillMode value) mut { fillMode = value; return ref this; }
+		public ref RasterState setFillSolid()  mut { fillMode = RasterFillMode.Solid; return ref this; }
+		public ref RasterState setFillWireframe() mut  { fillMode = RasterFillMode.Wireframe; return ref this; }
+		public ref RasterState setCullMode(RasterCullMode value) mut { cullMode = value; return ref this; }
+		public ref RasterState setCullBack()  mut { cullMode = RasterCullMode.Back; return ref this; }
+		public ref RasterState setCullFront() mut  { cullMode = RasterCullMode.Front; return ref this; }
+		public ref RasterState setCullNone()  mut { cullMode = RasterCullMode.None; return ref this; }
+		public ref RasterState setFrontCounterClockwise(bool value) mut { frontCounterClockwise = value; return ref this; }
+		public ref RasterState setDepthClipEnable(bool value) mut { depthClipEnable = value; return ref this; }
+		public ref RasterState enableDepthClip()  mut { depthClipEnable = true; return ref this; }
+		public ref RasterState disableDepthClip() mut  { depthClipEnable = false; return ref this; }
+		public ref RasterState setScissorEnable(bool value) mut { scissorEnable = value; return ref this; }
+		public ref RasterState enableScissor()  mut { scissorEnable = true; return ref this; }
+		public ref RasterState disableScissor() mut  { scissorEnable = false; return ref this; }
+		public ref RasterState setMultisampleEnable(bool value) mut { multisampleEnable = value; return ref this; }
+		public ref RasterState enableMultisample() mut  { multisampleEnable = true; return ref this; }
+		public ref RasterState disableMultisample() mut  { multisampleEnable = false; return ref this; }
+		public ref RasterState setAntialiasedLineEnable(bool value) mut { antialiasedLineEnable = value; return ref this; }
+		public ref RasterState enableAntialiasedLine() mut  { antialiasedLineEnable = true; return ref this; }
+		public ref RasterState disableAntialiasedLine() mut  { antialiasedLineEnable = false; return ref this; }
+		public ref RasterState setDepthBias(int32 value) mut { depthBias = value; return ref this; }
+		public ref RasterState setDepthBiasClamp(float value) mut { depthBiasClamp = value; return ref this; }
+		public ref RasterState setSlopeScaleDepthBias(float value) mut { slopeScaledDepthBias = value; return ref this; }
+		public ref RasterState setForcedSampleCount(uint8 value) mut { forcedSampleCount = value; return ref this; }
+		public ref RasterState setProgrammableSamplePositionsEnable(bool value) mut { programmableSamplePositionsEnable = value; return ref this; }
+		public ref RasterState enableProgrammableSamplePositions()  mut { programmableSamplePositionsEnable = true; return ref this; }
+		public ref RasterState disableProgrammableSamplePositions() mut  { programmableSamplePositionsEnable = false; return ref this; }
+		public ref RasterState setConservativeRasterEnable(bool value) mut { conservativeRasterEnable = value; return ref this; }
+		public ref RasterState enableConservativeRaster()  mut { conservativeRasterEnable = true; return ref this; }
+		public ref RasterState disableConservativeRaster()  mut { conservativeRasterEnable = false; return ref this; }
+		public ref RasterState setQuadFillEnable(bool value) mut { quadFillEnable = value; return ref this; }
+		public ref RasterState enableQuadFill()  mut { quadFillEnable = true; return ref this; }
+		public ref RasterState disableQuadFill() mut  { quadFillEnable = false; return ref this; }
+		public ref RasterState setSamplePositions(char8* x, char8* y, int32 count) mut  { for (int32 i = 0; i < count; i++) { samplePositionsX[i] = x[i]; samplePositionsY[i] = y[i]; } return ref this; }
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -1260,10 +1260,10 @@ namespace nvrhi
 			public StencilOp passOp = StencilOp.Keep;
 			public ComparisonFunc stencilFunc = ComparisonFunc.Always;
 
-			public readonly ref StencilOpDesc setFailOp(StencilOp value) mut { failOp = value; return ref this; }
-			public readonly ref StencilOpDesc setDepthFailOp(StencilOp value) mut { depthFailOp = value; return ref this; }
-			public readonly ref StencilOpDesc setPassOp(StencilOp value) mut { passOp = value; return ref this; }
-			public readonly ref StencilOpDesc setStencilFunc(ComparisonFunc value) mut { stencilFunc = value; return ref this; }
+			public ref StencilOpDesc setFailOp(StencilOp value) mut { failOp = value; return ref this; }
+			public ref StencilOpDesc setDepthFailOp(StencilOp value) mut { depthFailOp = value; return ref this; }
+			public ref StencilOpDesc setPassOp(StencilOp value) mut { passOp = value; return ref this; }
+			public ref StencilOpDesc setStencilFunc(ComparisonFunc value) mut { stencilFunc = value; return ref this; }
 		}
 
 		public bool            depthTestEnable = true;
@@ -1276,21 +1276,21 @@ namespace nvrhi
 		public StencilOpDesc   frontFaceStencil = .();
 		public StencilOpDesc   backFaceStencil = .();
 
-		public readonly ref DepthStencilState setDepthTestEnable(bool value) mut { depthTestEnable = value; return ref this; }
-		public readonly ref DepthStencilState enableDepthTest() mut { depthTestEnable = true; return ref this; }
-		public readonly ref DepthStencilState disableDepthTest()  mut { depthTestEnable = false; return ref this; }
-		public readonly ref DepthStencilState setDepthWriteEnable(bool value) mut { depthWriteEnable = value; return ref this; }
-		public readonly ref DepthStencilState enableDepthWrite() mut  { depthWriteEnable = true; return ref this; }
-		public readonly ref DepthStencilState disableDepthWrite() mut  { depthWriteEnable = false; return ref this; }
-		public readonly ref DepthStencilState setDepthFunc(ComparisonFunc value) mut { depthFunc = value; return ref this; }
-		public readonly ref DepthStencilState setStencilEnable(bool value) mut { stencilEnable = value; return ref this; }
-		public readonly ref DepthStencilState enableStencil() mut  { stencilEnable = true; return ref this; }
-		public readonly ref DepthStencilState disableStencil()  mut { stencilEnable = false; return ref this; }
-		public readonly ref DepthStencilState setStencilReadMask(uint8 value) mut { stencilReadMask = value; return ref this; }
-		public readonly ref DepthStencilState setStencilWriteMask(uint8 value) mut { stencilWriteMask = value; return ref this; }
-		public readonly ref DepthStencilState setStencilRefValue(uint8 value) mut { stencilRefValue = value; return ref this; }
-		public readonly ref DepthStencilState setFrontFaceStencil(StencilOpDesc value) mut { frontFaceStencil = value; return ref this; }
-		public readonly ref DepthStencilState setBackFaceStencil(StencilOpDesc value) mut { backFaceStencil = value; return ref this; }
+		public ref DepthStencilState setDepthTestEnable(bool value) mut { depthTestEnable = value; return ref this; }
+		public ref DepthStencilState enableDepthTest() mut { depthTestEnable = true; return ref this; }
+		public ref DepthStencilState disableDepthTest()  mut { depthTestEnable = false; return ref this; }
+		public ref DepthStencilState setDepthWriteEnable(bool value) mut { depthWriteEnable = value; return ref this; }
+		public ref DepthStencilState enableDepthWrite() mut  { depthWriteEnable = true; return ref this; }
+		public ref DepthStencilState disableDepthWrite() mut  { depthWriteEnable = false; return ref this; }
+		public ref DepthStencilState setDepthFunc(ComparisonFunc value) mut { depthFunc = value; return ref this; }
+		public ref DepthStencilState setStencilEnable(bool value) mut { stencilEnable = value; return ref this; }
+		public ref DepthStencilState enableStencil() mut  { stencilEnable = true; return ref this; }
+		public ref DepthStencilState disableStencil()  mut { stencilEnable = false; return ref this; }
+		public ref DepthStencilState setStencilReadMask(uint8 value) mut { stencilReadMask = value; return ref this; }
+		public ref DepthStencilState setStencilWriteMask(uint8 value) mut { stencilWriteMask = value; return ref this; }
+		public ref DepthStencilState setStencilRefValue(uint8 value) mut { stencilRefValue = value; return ref this; }
+		public ref DepthStencilState setFrontFaceStencil(StencilOpDesc value) mut { frontFaceStencil = value; return ref this; }
+		public ref DepthStencilState setBackFaceStencil(StencilOpDesc value) mut { backFaceStencil = value; return ref this; }
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -1511,7 +1511,7 @@ namespace nvrhi
 	{
 		public uint32 slot;
 
-		public ResourceType type; // : 8;
+		public ResourceType type = .None; // : 8;
 		public uint8 unused; // : 8;
 		public uint16 size; // : 16;
 
@@ -1641,8 +1641,8 @@ namespace nvrhi
 
 		[Union] struct Data
 		{
-			public TextureSubresourceSet subresources; // valid for Texture_SRV, Texture_UAV
-			public BufferRange range; // valid for Buffer_SRV, Buffer_UAV, ConstantBuffer
+			public TextureSubresourceSet subresources = .(); // valid for Texture_SRV, Texture_UAV
+			public BufferRange range = .(); // valid for Buffer_SRV, Buffer_UAV, ConstantBuffer
 			public uint64[2] rawData;
 		}
 		public using private Data _data = .();
@@ -1966,7 +1966,7 @@ namespace nvrhi
 		public BlendState blendState = .();
 		public DepthStencilState depthStencilState = .();
 		public RasterState rasterState = .();
-		public SinglePassStereoState singlePassStereo = .();
+		public SinglePassStereoState singlePassStereo;
 
 		public ref RenderState setBlendState(BlendState value) mut { blendState = value; return ref this; }
 		public ref RenderState setDepthStencilState(DepthStencilState value) mut { depthStencilState = value; return ref this; }
@@ -2070,9 +2070,9 @@ namespace nvrhi
 		public ShaderHandle MS;
 		public ShaderHandle PS;
 
-		public RenderState renderState;
+		public RenderState renderState = .();
 
-		public BindingLayoutVector bindingLayouts;
+		public BindingLayoutVector bindingLayouts = .();
 
 		public ref MeshletPipelineDesc setPrimType(PrimitiveType value) mut { primType = value; return ref this; }
 		public ref MeshletPipelineDesc setTaskShader(IShader value) mut { AS = value; return ref this; }
@@ -2133,14 +2133,14 @@ namespace nvrhi
 	{
 		public IGraphicsPipeline pipeline = null;
 		public IFramebuffer framebuffer = null;
-		public ViewportState viewport;
+		public ViewportState viewport = .();
 		public Color blendConstantColor = .();
-		public VariableRateShadingState shadingRateState;
+		public VariableRateShadingState shadingRateState = .();
 
-		public BindingSetVector bindings;
+		public BindingSetVector bindings = .();
 
-		public StaticVector<VertexBufferBinding, const c_MaxVertexAttributes> vertexBuffers;
-		public IndexBufferBinding indexBuffer;
+		public StaticVector<VertexBufferBinding, const c_MaxVertexAttributes> vertexBuffers = .();
+		public IndexBufferBinding indexBuffer = .();
 
 		public IBuffer indirectParams = null;
 
@@ -2173,7 +2173,7 @@ namespace nvrhi
 	{
 		public IComputePipeline pipeline = null;
 
-		public BindingSetVector bindings;
+		public BindingSetVector bindings = .();
 
 		public IBuffer indirectParams = null;
 
@@ -2186,10 +2186,10 @@ namespace nvrhi
 	{
 		public IMeshletPipeline pipeline = null;
 		public IFramebuffer framebuffer = null;
-		public ViewportState viewport;
+		public ViewportState viewport = .();
 		public Color blendConstantColor = .();
 
-		public BindingSetVector bindings;
+		public BindingSetVector bindings = .();
 
 		public IBuffer indirectParams = null;
 
@@ -2271,10 +2271,11 @@ namespace nvrhi
 
 	public static
 	{
-		public static void hash_combine<T>(ref int seed, T v)
+		public static void hash_combine<T>(ref int seed, T v) where T : IHashable
 		{
 			/*std::hash<T> hasher;
 			seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);*/
+			seed ^= v.GetHashCode() + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 		}
 	}
 }

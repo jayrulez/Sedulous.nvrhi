@@ -1820,7 +1820,7 @@ namespace nvrhi.vulkan
 				VkDescriptorImageInfo* imageInfo,
 				VkDescriptorBufferInfo* bufferInfo,
 				VkBufferView* bufferView,
-				void* pNext = null) generateWriteDescriptorData = // generates a VkWriteDescriptorSet struct in descriptorWriteInfo
+				void* pNext) generateWriteDescriptorData = // generates a VkWriteDescriptorSet struct in descriptorWriteInfo
 				scope [&] (bindingLocation,
 				descriptorType,
 				imageInfo,

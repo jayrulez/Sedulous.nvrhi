@@ -4,6 +4,7 @@ using System.Collections;
 using System;
 using System.Diagnostics;
 using static Bulkan.VulkanNative;
+using nvrhi.vulkan;
 
 namespace nvrhi.deviceManager
 {
@@ -28,6 +29,7 @@ namespace nvrhi.deviceManager.vulkan
 		{
 			if (!(a)) { return false; }
 		}
+	}
 
 		class VulkanDeviceManager : DeviceManager
 		{
@@ -1107,6 +1109,8 @@ namespace nvrhi.deviceManager.vulkan
 				var semaphoreCreateInfo = VkSemaphoreCreateInfo();
 				VkResult res = vkCreateSemaphore(m_VulkanDevice, &semaphoreCreateInfo, null, &m_PresentSemaphore);
 
+				ASSERT_VK_OK!(res);
+
 				return true;
 			}
 
@@ -1152,5 +1156,5 @@ namespace nvrhi.deviceManager.vulkan
 				}
 			}
 		}
-	}
+
 }

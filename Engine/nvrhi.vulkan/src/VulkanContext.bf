@@ -64,7 +64,7 @@ namespace nvrhi.vulkan
 
 		public void error(String message)
 		{
-        	messageCallback.message(MessageSeverity.Error, message);
+        	messageCallback?.message(MessageSeverity.Error, message);
 		}
 	}
 }

@@ -84,7 +84,7 @@ namespace nvrhi.vulkan
 
 		public ref VkDeviceMemory memory { get; set; } = .Null;
 
-		public int GetHashCode()
+		public override int GetHashCode()
 		{
 			return (int)(Internal.UnsafeCastToPtr(this));
 		}

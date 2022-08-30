@@ -4,12 +4,12 @@ namespace nvrhi.vulkan
 {
 	class MeshletPipeline : RefCounter<IMeshletPipeline>
 	{
-		public MeshletPipelineDesc desc;
-		public FramebufferInfo framebufferInfo;
+		public MeshletPipelineDesc desc = .();
+		public FramebufferInfo framebufferInfo = .();
 		public ShaderType shaderMask = ShaderType.None;
-		public BindingVector<RefCountPtr<BindingLayout>> pipelineBindingLayouts;
-		public VkPipelineLayout pipelineLayout;
-		public VkPipeline pipeline;
+		public BindingVector<RefCountPtr<BindingLayout>> pipelineBindingLayouts = .();
+		public VkPipelineLayout pipelineLayout = .Null;
+		public VkPipeline pipeline = .Null;
 		public bool usesBlendConstants = false;
 
 		public this(VulkanContext* context)

@@ -5,6 +5,7 @@ using nvrhi.deviceManager;
 using System.IO;
 using System.Diagnostics;
 using nvrhi.shaderCompiler.Dxc;
+using nvrhi.deviceManager.d3d12;
 namespace nvrhi.test
 {
 
@@ -75,7 +76,8 @@ namespace nvrhi.test
 					enableNvrhiValidationLayer = true
 				};
 
-			DeviceManager deviceManager = new VulkanDeviceManager(@params);
+			//DeviceManager deviceManager = new VulkanDeviceManager(@params);
+			DeviceManager deviceManager = new D3D12DeviceManager(@params);
 
 			defer delete deviceManager;
 
@@ -181,14 +183,15 @@ namespace nvrhi.test
 					psoDesc.primType = nvrhi.PrimitiveType.TriangleList;
 					psoDesc.renderState.depthStencilState.depthTestEnable = false;
 
+					// Note: Latest beef has .InitAll for sized arrays, use it wherever necessary.
 					//// None of this should be necessary. Perhaps there is a beef bug here. I need to ask in the discord.
 					//// I expect that all nested struct members should be initialzed automatically when nvrhi.GraphicsPipelineDesc psoDesc = .();
 					//// is called. For some reason, the members of the static array of render targets initializer fields are not called
-					psoDesc.renderState.blendState = .();
+					/*psoDesc.renderState.blendState = .();
 					for (int i = 0; i < psoDesc.renderState.blendState.targets.Count; i++)
 					{
 						psoDesc.renderState.blendState.targets[i] = .();
-					}
+					}*/
 					////
 
 					pipeline = deviceManager.GetDevice().createGraphicsPipeline(psoDesc, framebuffer);
