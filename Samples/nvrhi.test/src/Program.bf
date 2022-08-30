@@ -21,8 +21,6 @@ namespace nvrhi.test
 
 	class Program
 	{
-		char8[?] g = .('H', 'e', 'l', 'l', 'o');
-
 		private static bool mSDLInitialized = false;
 		private static SDL.Window* SDLNativeWindow;
 		private static void* NativeWindow;

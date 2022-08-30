@@ -178,7 +178,8 @@ namespace nvrhi.deviceManager.d3d12
 
 		private UINT64                                      m_FrameCount = 1;
 
-		private nvrhi.DeviceHandle                         m_NvrhiDevice;
+		private nvrhi.d3d12.DeviceHandle                         m_NvrhiDevice;
+		private nvrhi.DeviceHandle                         m_ValidationLayer;
 
 		private String                                 m_RendererString;
 
@@ -378,7 +379,7 @@ namespace nvrhi.deviceManager.d3d12
 
 			if (m_DeviceParams.enableNvrhiValidationLayer)
 			{
-				m_NvrhiDevice = nvrhi.validation.createValidationLayer(m_NvrhiDevice);
+				m_ValidationLayer = nvrhi.validation.createValidationLayer(m_NvrhiDevice);
 			}
 
 			if (!CreateRenderTargets())
@@ -403,8 +404,12 @@ namespace nvrhi.deviceManager.d3d12
 
 			m_RhiSwapChainBuffers.Clear();
 			m_RendererString.Clear();
+			delete m_RendererString;
 
 			ReleaseRenderTargets();
+
+			m_ValidationLayer?.Release();
+			m_ValidationLayer = null;
 
 			m_NvrhiDevice?.Release();
 			m_NvrhiDevice = null;
@@ -424,12 +429,25 @@ namespace nvrhi.deviceManager.d3d12
 
 			m_SwapChainBuffers.Clear();
 
+			m_FrameFence?.Release();
 			m_FrameFence = null;
+
+			m_SwapChain?.Release();
 			m_SwapChain = null;
+
+			m_GraphicsQueue?.Release();
 			m_GraphicsQueue = null;
+
+			m_ComputeQueue?.Release();
 			m_ComputeQueue = null;
+
+			m_CopyQueue?.Release();
 			m_CopyQueue = null;
+
+			m_Device12?.Release();
 			m_Device12 = null;
+
+			m_DxgiAdapter?.Release();
 			m_DxgiAdapter = null;
 		}
 
@@ -511,7 +529,10 @@ namespace nvrhi.deviceManager.d3d12
 
 		public override nvrhi.IDevice GetDevice()
 		{
-			return m_NvrhiDevice;
+				if (m_ValidationLayer != null)
+					return m_ValidationLayer;
+
+				return m_NvrhiDevice;
 		}
 
 		public override GraphicsAPI GetGraphicsAPI()

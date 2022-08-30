@@ -21,6 +21,11 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 		m_Desc = @params;
 	}
 
+	public ~this(){
+		
+		delete m_ActiveCommandList;
+	}
+
 	public CommandListInstance executed(Queue pQueue)
 	{
 		CommandListInstance instance = m_Instance;
@@ -2083,7 +2088,12 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 	private CommandListParameters m_Desc;
 
 	private InternalCommandList m_ActiveCommandList ~ delete _;
-	private Queue<InternalCommandList> m_CommandListPool = new .() ~ delete _;
+	private Queue<InternalCommandList> m_CommandListPool = new .() ~ {
+		for(var item in _){
+			delete item;
+		}
+		delete _;
+	};
 	private CommandListInstance m_Instance ~ delete _;
 	private uint64 m_RecordingVersion = 0;
 

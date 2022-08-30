@@ -29,6 +29,7 @@ namespace nvrhi.deviceManager.vulkan
 		{
 			if (!(a)) { return false; }
 		}
+	}
 
 		class VulkanDeviceManager : DeviceManager
 		{
@@ -1155,5 +1156,5 @@ namespace nvrhi.deviceManager.vulkan
 				}
 			}
 		}
-	}
+
 }

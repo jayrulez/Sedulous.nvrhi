@@ -117,6 +117,16 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 			CloseHandle(m_FenceEvent);
 			m_FenceEvent = 0;
 		}
+
+		for (var queue in m_Queues)
+		{
+			if (queue != null)
+			{
+				delete queue;
+			}
+		}
+
+		delete m_Resources;
 	}
 
 	// IResource implementation
@@ -1259,7 +1269,7 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 
 		// Subobjects: DXIL libraries
 
-		for (/*readonly*/ ref D3D12_DXIL_LIBRARY_DESC d3dLibraryDesc in ref d3dDxilLibraries)
+		for ( /*readonly*/ref D3D12_DXIL_LIBRARY_DESC d3dLibraryDesc in ref d3dDxilLibraries)
 		{
 			d3dSubobject.Type = D3D12_STATE_SUBOBJECT_TYPE.D3D12_STATE_SUBOBJECT_TYPE_DXIL_LIBRARY;
 			d3dSubobject.pDesc = &d3dLibraryDesc;
@@ -1268,7 +1278,7 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 
 		// Subobjects: hit groups
 
-		for (/*readonly*/ ref D3D12_HIT_GROUP_DESC d3dHitGroupDesc in ref d3dHitGroups)
+		for ( /*readonly*/ref D3D12_HIT_GROUP_DESC d3dHitGroupDesc in ref d3dHitGroups)
 		{
 			d3dSubobject.Type = D3D12_STATE_SUBOBJECT_TYPE.D3D12_STATE_SUBOBJECT_TYPE_HIT_GROUP;
 			d3dSubobject.pDesc = &d3dHitGroupDesc;
@@ -1704,6 +1714,8 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 			{
 				CommandListInstance instance = pQueue.commandListsInFlight.Back;
 
+				defer delete instance;
+
 				if (pQueue.lastCompletedInstance >= instance.submittedInstance)
 				{
 #if NVRHI_WITH_RTXMU
@@ -1991,7 +2003,10 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 
 	public Context* getContext() { return m_Context; }
 
-	private Context* m_Context = new .() ~ _.Dispose();
+	private Context* m_Context = new .() ~ {
+		_.Dispose();
+		delete _;
+	};
 	private DeviceResources m_Resources;
 
 	private Queue[(int32)CommandQueue.Count] m_Queues;
@@ -2025,8 +2040,8 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 
 		// Get a cached RS and AddRef it (if it exists)
 		RefCountPtr<RootSignature> rootsig = null;
-		if(m_Resources.rootsigCache.ContainsKey(hash))
-		rootsig = m_Resources.rootsigCache[hash];
+		if (m_Resources.rootsigCache.ContainsKey(hash))
+			rootsig = m_Resources.rootsigCache[hash];
 
 		if (rootsig == null)
 		{

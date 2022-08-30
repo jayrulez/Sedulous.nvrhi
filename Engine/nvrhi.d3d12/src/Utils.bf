@@ -21,7 +21,7 @@ namespace nvrhi.d3d12
 			return res == S_OK;
 		}
 
-		public static nvrhi.DeviceHandle createDevice(DeviceDesc desc)
+		public static nvrhi.d3d12.DeviceHandle createDevice(DeviceDesc desc)
 		{
 			nvrhi.d3d12.Device device = new .(desc);
 			return nvrhi.DeviceHandle.Attach(device);

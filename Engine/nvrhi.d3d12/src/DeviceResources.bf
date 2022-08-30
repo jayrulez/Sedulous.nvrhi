@@ -6,18 +6,23 @@ namespace nvrhi.d3d12
 {
 	class DeviceResources
 	{
-		public StaticDescriptorHeap renderTargetViewHeap;
-		public StaticDescriptorHeap depthStencilViewHeap;
-		public StaticDescriptorHeap shaderResourceViewHeap;
-		public StaticDescriptorHeap samplerHeap;
-		public nvrhi.utils.BitSetAllocator timerQueries;
+		public StaticDescriptorHeap renderTargetViewHeap ~ delete _;
+		public StaticDescriptorHeap depthStencilViewHeap ~ delete _;
+		public StaticDescriptorHeap shaderResourceViewHeap ~ delete _;
+		public StaticDescriptorHeap samplerHeap ~ delete _;
+		public nvrhi.utils.BitSetAllocator timerQueries ~ delete _;
 #if NVRHI_WITH_RTXMU
 		public Monitor asListMutex;
 		public List<uint64> asBuildsCompleted;
 #endif
 
 		// The cache does not own the RS objects, so store weak references
-		public Dictionary<int, RootSignature> rootsigCache = new .() ~ delete _;
+		public Dictionary<int, RootSignature> rootsigCache = new .() ~ {
+			for(var entry in _){
+				entry.value?.Release();
+			}
+			delete _;
+		};
 
 		public this(Context* context, DeviceDesc desc)
 		{
