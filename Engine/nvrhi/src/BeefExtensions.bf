@@ -2,19 +2,6 @@ namespace System.Collections
 {
 	extension List<T> where T : struct
 	{
-		public void Resize(int newSize, T fillValue)
-		{
-			let currentSize = this.Count;
-			this.Count = newSize;
-			if (newSize > currentSize)
-			{
-				for (int i = currentSize; i < newSize; i++)
-				{
-					this[i] = fillValue;
-				}
-			}
-		}
-
 		public void Fill(T fillValue)
 		{
 			for (int i = 0; i < Count; i++)
@@ -37,16 +24,6 @@ namespace System.Collections
 
 namespace System
 {
-	extension Compiler
-	{
-		[Comptime(ConstEval = true)]
-		public static void Assert(bool cond, String message)
-		{
-			if (!cond)
-				Runtime.FatalError(message);
-		}
-	}
-
 	extension String
 	{
 		public static bool Compare(char8* lhs, char8* rhs, int length)

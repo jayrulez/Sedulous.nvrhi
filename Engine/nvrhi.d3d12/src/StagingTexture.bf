@@ -37,7 +37,7 @@ namespace nvrhi.d3d12
 			Runtime.Assert(subresource < subresourceOffsets.Count);
 
 			UINT64 size = 0;
-			device.GetCopyableFootprints(resourceDesc, subresource, 1, subresourceOffsets[subresource], &ret.footprint, null, null, &size);
+			device.GetCopyableFootprints(&resourceDesc, subresource, 1, subresourceOffsets[subresource], &ret.footprint, null, null, &size);
 			ret.offset = int64(ret.footprint.Offset);
 			ret.size = (.)size;
 			return ret;
@@ -53,7 +53,7 @@ namespace nvrhi.d3d12
 
 			// compute size of last subresource
 			UINT64 lastSubresourceSize = 0;
-			device.GetCopyableFootprints(resourceDesc, lastSubresource, 1, 0,
+			device.GetCopyableFootprints(&resourceDesc, lastSubresource, 1, 0,
 				null, null, null, &lastSubresourceSize);
 
 			return (.)(subresourceOffsets[lastSubresource] + lastSubresourceSize);
@@ -71,7 +71,7 @@ namespace nvrhi.d3d12
 			for (UINT i = 0; i < lastSubresource + 1; i++)
 			{
 				UINT64 subresourceSize = 0;
-				device.GetCopyableFootprints(resourceDesc, i, 1, 0,
+				device.GetCopyableFootprints(&resourceDesc, i, 1, 0,
 					null, null, null, &subresourceSize);
 
 				subresourceOffsets[i] = baseOffset;

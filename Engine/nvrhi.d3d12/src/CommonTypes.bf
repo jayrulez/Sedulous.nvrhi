@@ -2,7 +2,7 @@ using Win32.Graphics.Direct3D12;
 using System;
 using Win32.Foundation;
 using System.Collections;
-using Win32.System.COM;
+using Win32.System.Com;
 
 namespace nvrhi
 {

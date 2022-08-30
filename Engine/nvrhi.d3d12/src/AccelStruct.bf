@@ -1,6 +1,7 @@
 using System.Collections;
 using Win32.Graphics.Direct3D12;
 using Win32.Graphics.Dxgi;
+using Win32.Graphics.Dxgi.Common;
 namespace nvrhi.d3d12
 {
 	class AccelStruct : RefCounter<nvrhi.rt.IAccelStruct>
@@ -22,8 +23,8 @@ namespace nvrhi.d3d12
 		public void createSRV(int descriptor)
 		{
 			D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = .();
-			srvDesc.Format = DXGI_FORMAT.UNKNOWN;
-			srvDesc.ViewDimension = D3D12_SRV_DIMENSION.RAYTRACING_ACCELERATION_STRUCTURE;
+			srvDesc.Format = DXGI_FORMAT.DXGI_FORMAT_UNKNOWN;
+			srvDesc.ViewDimension = D3D12_SRV_DIMENSION.D3D12_SRV_DIMENSION_RAYTRACING_ACCELERATION_STRUCTURE;
 			srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 			srvDesc.RaytracingAccelerationStructure.Location = dataBuffer.gpuVA;
 

@@ -6,6 +6,7 @@ using Win32.Foundation;
 using Win32.System.WindowsProgramming;
 using Win32.System.Threading;
 using System;
+using Win32.Graphics.Dxgi.Common;
 namespace nvrhi.d3d12
 {
 	public static
@@ -36,23 +37,23 @@ namespace nvrhi.d3d12
 			switch (s) // NOLINT(clang-diagnostic-switch-enum)
 			{
 			case ShaderType.Vertex:
-				return D3D12_SHADER_VISIBILITY.VERTEX;
+				return D3D12_SHADER_VISIBILITY.D3D12_SHADER_VISIBILITY_VERTEX;
 			case ShaderType.Hull:
-				return D3D12_SHADER_VISIBILITY.HULL;
+				return D3D12_SHADER_VISIBILITY.D3D12_SHADER_VISIBILITY_HULL;
 			case ShaderType.Domain:
-				return D3D12_SHADER_VISIBILITY.DOMAIN;
+				return D3D12_SHADER_VISIBILITY.D3D12_SHADER_VISIBILITY_DOMAIN;
 			case ShaderType.Geometry:
-				return D3D12_SHADER_VISIBILITY.GEOMETRY;
+				return D3D12_SHADER_VISIBILITY.D3D12_SHADER_VISIBILITY_GEOMETRY;
 			case ShaderType.Pixel:
-				return D3D12_SHADER_VISIBILITY.PIXEL;
+				return D3D12_SHADER_VISIBILITY.D3D12_SHADER_VISIBILITY_PIXEL;
 			case ShaderType.Amplification:
-				return D3D12_SHADER_VISIBILITY.AMPLIFICATION;
+				return D3D12_SHADER_VISIBILITY.D3D12_SHADER_VISIBILITY_AMPLIFICATION;
 			case ShaderType.Mesh:
-				return D3D12_SHADER_VISIBILITY.MESH;
+				return D3D12_SHADER_VISIBILITY.D3D12_SHADER_VISIBILITY_MESH;
 
 			default:
 				// catch-all case - actually some of the bitfield combinations are unrepresentable in DX12
-				return D3D12_SHADER_VISIBILITY.ALL;
+				return D3D12_SHADER_VISIBILITY.D3D12_SHADER_VISIBILITY_ALL;
 			}
 		}
 
@@ -61,42 +62,42 @@ namespace nvrhi.d3d12
 			switch (value)
 			{
 			case BlendFactor.Zero:
-				return D3D12_BLEND.ZERO;
+				return D3D12_BLEND.D3D12_BLEND_ZERO;
 			case BlendFactor.One:
-				return D3D12_BLEND.ONE;
+				return D3D12_BLEND.D3D12_BLEND_ONE;
 			case BlendFactor.SrcColor:
-				return D3D12_BLEND.SRC_COLOR;
+				return D3D12_BLEND.D3D12_BLEND_SRC_COLOR;
 			case BlendFactor.InvSrcColor:
-				return D3D12_BLEND.INV_SRC_COLOR;
+				return D3D12_BLEND.D3D12_BLEND_INV_SRC_COLOR;
 			case BlendFactor.SrcAlpha:
-				return D3D12_BLEND.SRC_ALPHA;
+				return D3D12_BLEND.D3D12_BLEND_SRC_ALPHA;
 			case BlendFactor.InvSrcAlpha:
-				return D3D12_BLEND.INV_SRC_ALPHA;
+				return D3D12_BLEND.D3D12_BLEND_INV_SRC_ALPHA;
 			case BlendFactor.DstAlpha:
-				return D3D12_BLEND.DEST_ALPHA;
+				return D3D12_BLEND.D3D12_BLEND_DEST_ALPHA;
 			case BlendFactor.InvDstAlpha:
-				return D3D12_BLEND.INV_DEST_ALPHA;
+				return D3D12_BLEND.D3D12_BLEND_INV_DEST_ALPHA;
 			case BlendFactor.DstColor:
-				return D3D12_BLEND.DEST_COLOR;
+				return D3D12_BLEND.D3D12_BLEND_DEST_COLOR;
 			case BlendFactor.InvDstColor:
-				return D3D12_BLEND.INV_DEST_COLOR;
+				return D3D12_BLEND.D3D12_BLEND_INV_DEST_COLOR;
 			case BlendFactor.SrcAlphaSaturate:
-				return D3D12_BLEND.SRC_ALPHA_SAT;
+				return D3D12_BLEND.D3D12_BLEND_SRC_ALPHA_SAT;
 			case BlendFactor.ConstantColor:
-				return D3D12_BLEND.BLEND_FACTOR;
+				return D3D12_BLEND.D3D12_BLEND_BLEND_FACTOR;
 			case BlendFactor.InvConstantColor:
-				return D3D12_BLEND.INV_BLEND_FACTOR;
+				return D3D12_BLEND.D3D12_BLEND_INV_BLEND_FACTOR;
 			case BlendFactor.Src1Color:
-				return D3D12_BLEND.SRC1_COLOR;
+				return D3D12_BLEND.D3D12_BLEND_SRC1_COLOR;
 			case BlendFactor.InvSrc1Color:
-				return D3D12_BLEND.INV_SRC1_COLOR;
+				return D3D12_BLEND.D3D12_BLEND_INV_SRC1_COLOR;
 			case BlendFactor.Src1Alpha:
-				return D3D12_BLEND.SRC1_ALPHA;
+				return D3D12_BLEND.D3D12_BLEND_SRC1_ALPHA;
 			case BlendFactor.InvSrc1Alpha:
-				return D3D12_BLEND.INV_SRC1_ALPHA;
+				return D3D12_BLEND.D3D12_BLEND_INV_SRC1_ALPHA;
 			default:
 				utils.InvalidEnum();
-				return D3D12_BLEND.ZERO;
+				return D3D12_BLEND.D3D12_BLEND_ZERO;
 			}
 		}
 
@@ -105,18 +106,18 @@ namespace nvrhi.d3d12
 			switch (value)
 			{
 			case BlendOp.Add:
-				return D3D12_BLEND_OP.ADD;
+				return D3D12_BLEND_OP.D3D12_BLEND_OP_ADD;
 			case BlendOp.Subrtact:
-				return D3D12_BLEND_OP.SUBTRACT;
+				return D3D12_BLEND_OP.D3D12_BLEND_OP_SUBTRACT;
 			case BlendOp.ReverseSubtract:
-				return D3D12_BLEND_OP.REV_SUBTRACT;
+				return D3D12_BLEND_OP.D3D12_BLEND_OP_REV_SUBTRACT;
 			case BlendOp.Min:
-				return D3D12_BLEND_OP.MIN;
+				return D3D12_BLEND_OP.D3D12_BLEND_OP_MIN;
 			case BlendOp.Max:
-				return D3D12_BLEND_OP.MAX;
+				return D3D12_BLEND_OP.D3D12_BLEND_OP_MAX;
 			default:
 				utils.InvalidEnum();
-				return D3D12_BLEND_OP.ADD;
+				return D3D12_BLEND_OP.D3D12_BLEND_OP_ADD;
 			}
 		}
 
@@ -125,24 +126,24 @@ namespace nvrhi.d3d12
 			switch (value)
 			{
 			case StencilOp.Keep:
-				return D3D12_STENCIL_OP.KEEP;
+				return D3D12_STENCIL_OP.D3D12_STENCIL_OP_KEEP;
 			case StencilOp.Zero:
-				return D3D12_STENCIL_OP.ZERO;
+				return D3D12_STENCIL_OP.D3D12_STENCIL_OP_ZERO;
 			case StencilOp.Replace:
-				return D3D12_STENCIL_OP.REPLACE;
+				return D3D12_STENCIL_OP.D3D12_STENCIL_OP_REPLACE;
 			case StencilOp.IncrementAndClamp:
-				return D3D12_STENCIL_OP.INCR_SAT;
+				return D3D12_STENCIL_OP.D3D12_STENCIL_OP_INCR_SAT;
 			case StencilOp.DecrementAndClamp:
-				return D3D12_STENCIL_OP.DECR_SAT;
+				return D3D12_STENCIL_OP.D3D12_STENCIL_OP_DECR_SAT;
 			case StencilOp.Invert:
-				return D3D12_STENCIL_OP.INVERT;
+				return D3D12_STENCIL_OP.D3D12_STENCIL_OP_INVERT;
 			case StencilOp.IncrementAndWrap:
-				return D3D12_STENCIL_OP.INCR;
+				return D3D12_STENCIL_OP.D3D12_STENCIL_OP_INCR;
 			case StencilOp.DecrementAndWrap:
-				return D3D12_STENCIL_OP.DECR;
+				return D3D12_STENCIL_OP.D3D12_STENCIL_OP_DECR;
 			default:
 				utils.InvalidEnum();
-				return D3D12_STENCIL_OP.KEEP;
+				return D3D12_STENCIL_OP.D3D12_STENCIL_OP_KEEP;
 			}
 		}
 
@@ -151,24 +152,24 @@ namespace nvrhi.d3d12
 			switch (value)
 			{
 			case ComparisonFunc.Never:
-				return D3D12_COMPARISON_FUNC.NEVER;
+				return D3D12_COMPARISON_FUNC.D3D12_COMPARISON_FUNC_NEVER;
 			case ComparisonFunc.Less:
-				return D3D12_COMPARISON_FUNC.LESS;
+				return D3D12_COMPARISON_FUNC.D3D12_COMPARISON_FUNC_LESS;
 			case ComparisonFunc.Equal:
-				return D3D12_COMPARISON_FUNC.EQUAL;
+				return D3D12_COMPARISON_FUNC.D3D12_COMPARISON_FUNC_EQUAL;
 			case ComparisonFunc.LessOrEqual:
-				return D3D12_COMPARISON_FUNC.LESS_EQUAL;
+				return D3D12_COMPARISON_FUNC.D3D12_COMPARISON_FUNC_LESS_EQUAL;
 			case ComparisonFunc.Greater:
-				return D3D12_COMPARISON_FUNC.GREATER;
+				return D3D12_COMPARISON_FUNC.D3D12_COMPARISON_FUNC_GREATER;
 			case ComparisonFunc.NotEqual:
-				return D3D12_COMPARISON_FUNC.NOT_EQUAL;
+				return D3D12_COMPARISON_FUNC.D3D12_COMPARISON_FUNC_NOT_EQUAL;
 			case ComparisonFunc.GreaterOrEqual:
-				return D3D12_COMPARISON_FUNC.GREATER_EQUAL;
+				return D3D12_COMPARISON_FUNC.D3D12_COMPARISON_FUNC_GREATER_EQUAL;
 			case ComparisonFunc.Always:
-				return D3D12_COMPARISON_FUNC.ALWAYS;
+				return D3D12_COMPARISON_FUNC.D3D12_COMPARISON_FUNC_ALWAYS;
 			default:
 				utils.InvalidEnum();
-				return D3D12_COMPARISON_FUNC.NEVER;
+				return D3D12_COMPARISON_FUNC.D3D12_COMPARISON_FUNC_NEVER;
 			}
 		}
 		public static D3D_PRIMITIVE_TOPOLOGY convertPrimitiveType(PrimitiveType pt, uint32 controlPoints)
@@ -207,18 +208,18 @@ namespace nvrhi.d3d12
 			switch (mode)
 			{
 			case SamplerAddressMode.Clamp:
-				return D3D12_TEXTURE_ADDRESS_MODE.CLAMP;
+				return D3D12_TEXTURE_ADDRESS_MODE.D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
 			case SamplerAddressMode.Wrap:
-				return D3D12_TEXTURE_ADDRESS_MODE.WRAP;
+				return D3D12_TEXTURE_ADDRESS_MODE.D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 			case SamplerAddressMode.Border:
-				return D3D12_TEXTURE_ADDRESS_MODE.BORDER;
+				return D3D12_TEXTURE_ADDRESS_MODE.D3D12_TEXTURE_ADDRESS_MODE_BORDER;
 			case SamplerAddressMode.Mirror:
-				return D3D12_TEXTURE_ADDRESS_MODE.MIRROR;
+				return D3D12_TEXTURE_ADDRESS_MODE.D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
 			case SamplerAddressMode.MirrorOnce:
-				return D3D12_TEXTURE_ADDRESS_MODE.MIRROR_ONCE;
+				return D3D12_TEXTURE_ADDRESS_MODE.D3D12_TEXTURE_ADDRESS_MODE_MIRROR_ONCE;
 			default:
 				utils.InvalidEnum();
-				return D3D12_TEXTURE_ADDRESS_MODE.CLAMP;
+				return D3D12_TEXTURE_ADDRESS_MODE.D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
 			}
 		}
 
@@ -227,46 +228,46 @@ namespace nvrhi.d3d12
 			switch (reductionType)
 			{
 			case SamplerReductionType.Standard:
-				return D3D12_FILTER_REDUCTION_TYPE.STANDARD;
+				return D3D12_FILTER_REDUCTION_TYPE.D3D12_FILTER_REDUCTION_TYPE_STANDARD;
 			case SamplerReductionType.Comparison:
-				return D3D12_FILTER_REDUCTION_TYPE.COMPARISON;
+				return D3D12_FILTER_REDUCTION_TYPE.D3D12_FILTER_REDUCTION_TYPE_COMPARISON;
 			case SamplerReductionType.Minimum:
-				return D3D12_FILTER_REDUCTION_TYPE.MINIMUM;
+				return D3D12_FILTER_REDUCTION_TYPE.D3D12_FILTER_REDUCTION_TYPE_MINIMUM;
 			case SamplerReductionType.Maximum:
-				return D3D12_FILTER_REDUCTION_TYPE.MAXIMUM;
+				return D3D12_FILTER_REDUCTION_TYPE.D3D12_FILTER_REDUCTION_TYPE_MAXIMUM;
 			default:
 				utils.InvalidEnum();
-				return D3D12_FILTER_REDUCTION_TYPE.STANDARD;
+				return D3D12_FILTER_REDUCTION_TYPE.D3D12_FILTER_REDUCTION_TYPE_STANDARD;
 			}
 		}
 
 		public static D3D12_RESOURCE_STATES convertResourceStates(ResourceStates stateBits)
 		{
 			if (stateBits == ResourceStates.Common)
-				return D3D12_RESOURCE_STATES.COMMON;
+				return D3D12_RESOURCE_STATES.D3D12_RESOURCE_STATE_COMMON;
 
-			D3D12_RESOURCE_STATES result = D3D12_RESOURCE_STATES.COMMON; // also 0
+			D3D12_RESOURCE_STATES result = D3D12_RESOURCE_STATES.D3D12_RESOURCE_STATE_COMMON; // also 0
 
-			if ((stateBits & ResourceStates.ConstantBuffer) != 0) result |= D3D12_RESOURCE_STATES.VERTEX_AND_CONSTANT_BUFFER;
-			if ((stateBits & ResourceStates.VertexBuffer) != 0) result |= D3D12_RESOURCE_STATES.VERTEX_AND_CONSTANT_BUFFER;
-			if ((stateBits & ResourceStates.IndexBuffer) != 0) result |= D3D12_RESOURCE_STATES.INDEX_BUFFER;
-			if ((stateBits & ResourceStates.IndirectArgument) != 0) result |= D3D12_RESOURCE_STATES.INDIRECT_ARGUMENT;
-			if ((stateBits & ResourceStates.ShaderResource) != 0) result |= D3D12_RESOURCE_STATES.PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATES.NON_PIXEL_SHADER_RESOURCE;
-			if ((stateBits & ResourceStates.UnorderedAccess) != 0) result |= D3D12_RESOURCE_STATES.UNORDERED_ACCESS;
-			if ((stateBits & ResourceStates.RenderTarget) != 0) result |= D3D12_RESOURCE_STATES.RENDER_TARGET;
-			if ((stateBits & ResourceStates.DepthWrite) != 0) result |= D3D12_RESOURCE_STATES.DEPTH_WRITE;
-			if ((stateBits & ResourceStates.DepthRead) != 0) result |= D3D12_RESOURCE_STATES.DEPTH_READ;
-			if ((stateBits & ResourceStates.StreamOut) != 0) result |= D3D12_RESOURCE_STATES.STREAM_OUT;
-			if ((stateBits & ResourceStates.CopyDest) != 0) result |= D3D12_RESOURCE_STATES.COPY_DEST;
-			if ((stateBits & ResourceStates.CopySource) != 0) result |= D3D12_RESOURCE_STATES.COPY_SOURCE;
-			if ((stateBits & ResourceStates.ResolveDest) != 0) result |= D3D12_RESOURCE_STATES.RESOLVE_DEST;
-			if ((stateBits & ResourceStates.ResolveSource) != 0) result |= D3D12_RESOURCE_STATES.RESOLVE_SOURCE;
-			if ((stateBits & ResourceStates.Present) != 0) result |= D3D12_RESOURCE_STATES.PRESENT;
-			if ((stateBits & ResourceStates.AccelStructRead) != 0) result |= D3D12_RESOURCE_STATES.RAYTRACING_ACCELERATION_STRUCTURE;
-			if ((stateBits & ResourceStates.AccelStructWrite) != 0) result |= D3D12_RESOURCE_STATES.RAYTRACING_ACCELERATION_STRUCTURE;
-			if ((stateBits & ResourceStates.AccelStructBuildInput) != 0) result |= D3D12_RESOURCE_STATES.NON_PIXEL_SHADER_RESOURCE;
-			if ((stateBits & ResourceStates.AccelStructBuildBlas) != 0) result |= D3D12_RESOURCE_STATES.RAYTRACING_ACCELERATION_STRUCTURE;
-			if ((stateBits & ResourceStates.ShadingRateSurface) != 0) result |= D3D12_RESOURCE_STATES.SHADING_RATE_SOURCE;
+			if ((stateBits & ResourceStates.ConstantBuffer) != 0) result |= D3D12_RESOURCE_STATES.D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
+			if ((stateBits & ResourceStates.VertexBuffer) != 0) result |= D3D12_RESOURCE_STATES.D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
+			if ((stateBits & ResourceStates.IndexBuffer) != 0) result |= D3D12_RESOURCE_STATES.D3D12_RESOURCE_STATE_INDEX_BUFFER;
+			if ((stateBits & ResourceStates.IndirectArgument) != 0) result |= D3D12_RESOURCE_STATES.D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT;
+			if ((stateBits & ResourceStates.ShaderResource) != 0) result |= D3D12_RESOURCE_STATES.D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATES.D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE;
+			if ((stateBits & ResourceStates.UnorderedAccess) != 0) result |= D3D12_RESOURCE_STATES.D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+			if ((stateBits & ResourceStates.RenderTarget) != 0) result |= D3D12_RESOURCE_STATES.D3D12_RESOURCE_STATE_RENDER_TARGET;
+			if ((stateBits & ResourceStates.DepthWrite) != 0) result |= D3D12_RESOURCE_STATES.D3D12_RESOURCE_STATE_DEPTH_WRITE;
+			if ((stateBits & ResourceStates.DepthRead) != 0) result |= D3D12_RESOURCE_STATES.D3D12_RESOURCE_STATE_DEPTH_READ;
+			if ((stateBits & ResourceStates.StreamOut) != 0) result |= D3D12_RESOURCE_STATES.D3D12_RESOURCE_STATE_STREAM_OUT;
+			if ((stateBits & ResourceStates.CopyDest) != 0) result |= D3D12_RESOURCE_STATES.D3D12_RESOURCE_STATE_COPY_DEST;
+			if ((stateBits & ResourceStates.CopySource) != 0) result |= D3D12_RESOURCE_STATES.D3D12_RESOURCE_STATE_COPY_SOURCE;
+			if ((stateBits & ResourceStates.ResolveDest) != 0) result |= D3D12_RESOURCE_STATES.D3D12_RESOURCE_STATE_RESOLVE_DEST;
+			if ((stateBits & ResourceStates.ResolveSource) != 0) result |= D3D12_RESOURCE_STATES.D3D12_RESOURCE_STATE_RESOLVE_SOURCE;
+			if ((stateBits & ResourceStates.Present) != 0) result |= D3D12_RESOURCE_STATES.D3D12_RESOURCE_STATE_PRESENT;
+			if ((stateBits & ResourceStates.AccelStructRead) != 0) result |= D3D12_RESOURCE_STATES.D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE;
+			if ((stateBits & ResourceStates.AccelStructWrite) != 0) result |= D3D12_RESOURCE_STATES.D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE;
+			if ((stateBits & ResourceStates.AccelStructBuildInput) != 0) result |= D3D12_RESOURCE_STATES.D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE;
+			if ((stateBits & ResourceStates.AccelStructBuildBlas) != 0) result |= D3D12_RESOURCE_STATES.D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE;
+			if ((stateBits & ResourceStates.ShadingRateSurface) != 0) result |= D3D12_RESOURCE_STATES.D3D12_RESOURCE_STATE_SHADING_RATE_SOURCE;
 
 			return result;
 		}
@@ -276,20 +277,20 @@ namespace nvrhi.d3d12
 			switch (shadingRate)
 			{
 			case VariableShadingRate.e1x2:
-				return D3D12_SHADING_RATE._1X2;
+				return D3D12_SHADING_RATE.D3D12_SHADING_RATE_1X2;
 			case VariableShadingRate.e2x1:
-				return D3D12_SHADING_RATE._2X1;
+				return D3D12_SHADING_RATE.D3D12_SHADING_RATE_2X1;
 			case VariableShadingRate.e2x2:
-				return D3D12_SHADING_RATE._2X2;
+				return D3D12_SHADING_RATE.D3D12_SHADING_RATE_2X2;
 			case VariableShadingRate.e2x4:
-				return D3D12_SHADING_RATE._2X4;
+				return D3D12_SHADING_RATE.D3D12_SHADING_RATE_2X4;
 			case VariableShadingRate.e4x2:
-				return D3D12_SHADING_RATE._4X2;
+				return D3D12_SHADING_RATE.D3D12_SHADING_RATE_4X2;
 			case VariableShadingRate.e4x4:
-				return D3D12_SHADING_RATE._4X4;
+				return D3D12_SHADING_RATE.D3D12_SHADING_RATE_4X4;
 			case VariableShadingRate.e1x1: fallthrough;
 			default:
-				return D3D12_SHADING_RATE._1X1;
+				return D3D12_SHADING_RATE.D3D12_SHADING_RATE_1X1;
 			}
 		}
 
@@ -298,16 +299,16 @@ namespace nvrhi.d3d12
 			switch (combiner)
 			{
 			case ShadingRateCombiner.Override:
-				return D3D12_SHADING_RATE_COMBINER.OVERRIDE;
+				return D3D12_SHADING_RATE_COMBINER.D3D12_SHADING_RATE_COMBINER_OVERRIDE;
 			case ShadingRateCombiner.Min:
-				return D3D12_SHADING_RATE_COMBINER.MIN;
+				return D3D12_SHADING_RATE_COMBINER.D3D12_SHADING_RATE_COMBINER_MIN;
 			case ShadingRateCombiner.Max:
-				return D3D12_SHADING_RATE_COMBINER.MAX;
+				return D3D12_SHADING_RATE_COMBINER.D3D12_SHADING_RATE_COMBINER_MAX;
 			case ShadingRateCombiner.ApplyRelative:
-				return D3D12_SHADING_RATE_COMBINER.SUM;
+				return D3D12_SHADING_RATE_COMBINER.D3D12_SHADING_RATE_COMBINER_SUM;
 			case ShadingRateCombiner.Passthrough: fallthrough;
 			default:
-				return D3D12_SHADING_RATE_COMBINER.PASSTHROUGH;
+				return D3D12_SHADING_RATE_COMBINER.D3D12_SHADING_RATE_COMBINER_PASSTHROUGH;
 			}
 		}
 
@@ -375,7 +376,7 @@ namespace nvrhi.d3d12
 			if (geometryDesc.geometryType == nvrhi.rt.GeometryType.Triangles)
 			{
 				readonly var triangles = /*ref*/ geometryDesc.geometryData.triangles;
-				outD3dGeometryDesc.Type = D3D12_RAYTRACING_GEOMETRY_TYPE.TRIANGLES;
+				outD3dGeometryDesc.Type = D3D12_RAYTRACING_GEOMETRY_TYPE.D3D12_RAYTRACING_GEOMETRY_TYPE_TRIANGLES;
 				outD3dGeometryDesc.Flags = (D3D12_RAYTRACING_GEOMETRY_FLAGS)geometryDesc.flags;
 
 				if (triangles.indexBuffer != null)
@@ -398,7 +399,7 @@ namespace nvrhi.d3d12
 			else
 			{
 				readonly var aabbs = /*ref*/ geometryDesc.geometryData.aabbs;
-				outD3dGeometryDesc.Type = D3D12_RAYTRACING_GEOMETRY_TYPE.PROCEDURAL_PRIMITIVE_AABBS;
+				outD3dGeometryDesc.Type = D3D12_RAYTRACING_GEOMETRY_TYPE.D3D12_RAYTRACING_GEOMETRY_TYPE_PROCEDURAL_PRIMITIVE_AABBS;
 				outD3dGeometryDesc.Flags = (D3D12_RAYTRACING_GEOMETRY_FLAGS)geometryDesc.flags;
 
 				if (aabbs.buffer != null)
@@ -480,7 +481,7 @@ namespace nvrhi.d3d12
 		public static void TranslateDepthStencilState(DepthStencilState inState, ref D3D12_DEPTH_STENCIL_DESC outState)
 		{
 			outState.DepthEnable = inState.depthTestEnable ? 1 : 0;
-			outState.DepthWriteMask = inState.depthWriteEnable ? D3D12_DEPTH_WRITE_MASK.ALL : D3D12_DEPTH_WRITE_MASK.ZERO;
+			outState.DepthWriteMask = inState.depthWriteEnable ? D3D12_DEPTH_WRITE_MASK.D3D12_DEPTH_WRITE_MASK_ALL : D3D12_DEPTH_WRITE_MASK.D3D12_DEPTH_WRITE_MASK_ZERO;
 			outState.DepthFunc = convertComparisonFunc(inState.depthFunc);
 			outState.StencilEnable = inState.stencilEnable ? 1 : 0;
 			outState.StencilReadMask = (uint8)inState.stencilReadMask;
@@ -500,10 +501,10 @@ namespace nvrhi.d3d12
 			switch (inState.fillMode)
 			{
 			case RasterFillMode.Solid:
-				outState.FillMode = D3D12_FILL_MODE.SOLID;
+				outState.FillMode = D3D12_FILL_MODE.D3D12_FILL_MODE_SOLID;
 				break;
 			case RasterFillMode.Wireframe:
-				outState.FillMode = D3D12_FILL_MODE.WIREFRAME;
+				outState.FillMode = D3D12_FILL_MODE.D3D12_FILL_MODE_WIREFRAME;
 				break;
 			default:
 				nvrhi.utils.InvalidEnum();
@@ -513,13 +514,13 @@ namespace nvrhi.d3d12
 			switch (inState.cullMode)
 			{
 			case RasterCullMode.Back:
-				outState.CullMode = D3D12_CULL_MODE.BACK;
+				outState.CullMode = D3D12_CULL_MODE.D3D12_CULL_MODE_BACK;
 				break;
 			case RasterCullMode.Front:
-				outState.CullMode = D3D12_CULL_MODE.FRONT;
+				outState.CullMode = D3D12_CULL_MODE.D3D12_CULL_MODE_FRONT;
 				break;
 			case RasterCullMode.None:
-				outState.CullMode = D3D12_CULL_MODE.NONE;
+				outState.CullMode = D3D12_CULL_MODE.D3D12_CULL_MODE_NONE;
 				break;
 			default:
 				nvrhi.utils.InvalidEnum();
@@ -533,7 +534,7 @@ namespace nvrhi.d3d12
 			outState.DepthClipEnable = inState.depthClipEnable ? 1 : 0;
 			outState.MultisampleEnable = inState.multisampleEnable ? 1 : 0;
 			outState.AntialiasedLineEnable = inState.antialiasedLineEnable ? 1 : 0;
-			outState.ConservativeRaster = inState.conservativeRasterEnable ? D3D12_CONSERVATIVE_RASTERIZATION_MODE.ON : D3D12_CONSERVATIVE_RASTERIZATION_MODE.OFF;
+			outState.ConservativeRaster = inState.conservativeRasterEnable ? D3D12_CONSERVATIVE_RASTERIZATION_MODE.D3D12_CONSERVATIVE_RASTERIZATION_MODE_ON : D3D12_CONSERVATIVE_RASTERIZATION_MODE.D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
 			outState.ForcedSampleCount = inState.forcedSampleCount;
 		}
 
@@ -554,7 +555,7 @@ namespace nvrhi.d3d12
 		    {
 		    case TextureDimension.Texture1D: fallthrough;
 		    case TextureDimension.Texture1DArray:
-		        desc.Dimension = D3D12_RESOURCE_DIMENSION.TEXTURE1D;
+		        desc.Dimension = D3D12_RESOURCE_DIMENSION.D3D12_RESOURCE_DIMENSION_TEXTURE1D;
 		        desc.DepthOrArraySize = uint16(d.arraySize);
 		        break;
 		    case TextureDimension.Texture2D: fallthrough;
@@ -563,11 +564,11 @@ namespace nvrhi.d3d12
 		    case TextureDimension.TextureCubeArray: fallthrough;
 		    case TextureDimension.Texture2DMS: fallthrough;
 		    case TextureDimension.Texture2DMSArray:
-		        desc.Dimension = D3D12_RESOURCE_DIMENSION.TEXTURE2D;
+		        desc.Dimension = D3D12_RESOURCE_DIMENSION.D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 		        desc.DepthOrArraySize = uint16(d.arraySize);
 		        break;
 		    case TextureDimension.Texture3D:
-		        desc.Dimension = D3D12_RESOURCE_DIMENSION.TEXTURE3D;
+		        desc.Dimension = D3D12_RESOURCE_DIMENSION.D3D12_RESOURCE_DIMENSION_TEXTURE3D;
 		        desc.DepthOrArraySize = uint16(d.depth);
 		        break;
 		    case TextureDimension.Unknown: fallthrough;
@@ -579,13 +580,13 @@ namespace nvrhi.d3d12
 		    if (d.isRenderTarget)
 		    {
 		        if (formatInfo.hasDepth || formatInfo.hasStencil)
-		            desc.Flags |= D3D12_RESOURCE_FLAGS.ALLOW_DEPTH_STENCIL;
+		            desc.Flags |= D3D12_RESOURCE_FLAGS.D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
 		        else
-		            desc.Flags |= D3D12_RESOURCE_FLAGS.ALLOW_RENDER_TARGET;
+		            desc.Flags |= D3D12_RESOURCE_FLAGS.D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
 		    }
 
 		    if (d.isUAV)
-		        desc.Flags |= D3D12_RESOURCE_FLAGS.ALLOW_UNORDERED_ACCESS;
+		        desc.Flags |= D3D12_RESOURCE_FLAGS.D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
 
 		    return desc;
 		}
@@ -629,9 +630,9 @@ namespace nvrhi.d3d12
 			((D3D12_FILTER)(
 				(D3D12_FILTER)D3D12_ANISOTROPIC_FILTERING_BIT |
 				D3D12_ENCODE_BASIC_FILTER!(
-				(uint32)D3D12_FILTER_TYPE.LINEAR,
-				(uint32)D3D12_FILTER_TYPE.LINEAR,
-				(uint32)D3D12_FILTER_TYPE.LINEAR,
+				(uint32)D3D12_FILTER_TYPE.D3D12_FILTER_TYPE_LINEAR,
+				(uint32)D3D12_FILTER_TYPE.D3D12_FILTER_TYPE_LINEAR,
+				(uint32)D3D12_FILTER_TYPE.D3D12_FILTER_TYPE_LINEAR,
 				reduction)))
 		}
 		public static mixin D3D12_DECODE_MIN_FILTER(var D3D12Filter)
@@ -660,15 +661,15 @@ namespace nvrhi.d3d12
 
 		public static mixin D3D12_DECODE_IS_COMPARISON_FILTER(var D3D12Filter)
 		{
-			(D3D12_DECODE_FILTER_REDUCTION!(D3D12Filter) == D3D12_FILTER_REDUCTION_TYPE.COMPARISON)
+			(D3D12_DECODE_FILTER_REDUCTION!(D3D12Filter) == D3D12_FILTER_REDUCTION_TYPE.D3D12_FILTER_REDUCTION_TYPE_COMPARISON)
 		}
 
 		public static mixin D3D12_DECODE_IS_ANISOTROPIC_FILTER(var D3D12Filter)
 		{
 			(((D3D12Filter) & D3D12_ANISOTROPIC_FILTERING_BIT) &&
-				(D3D12_FILTER_TYPE.LINEAR == D3D12_DECODE_MIN_FILTER!(D3D12Filter)) &&
-				(D3D12_FILTER_TYPE.LINEAR == D3D12_DECODE_MAG_FILTER!(D3D12Filter)) &&
-				(D3D12_FILTER_TYPE.LINEAR == D3D12_DECODE_MIP_FILTER!(D3D12Filter)))
+				(D3D12_FILTER_TYPE.D3D12_FILTER_TYPE_LINEAR == D3D12_DECODE_MIN_FILTER!(D3D12Filter)) &&
+				(D3D12_FILTER_TYPE.D3D12_FILTER_TYPE_LINEAR == D3D12_DECODE_MAG_FILTER!(D3D12Filter)) &&
+				(D3D12_FILTER_TYPE.D3D12_FILTER_TYPE_LINEAR == D3D12_DECODE_MIP_FILTER!(D3D12Filter)))
 		}
 	}
 }

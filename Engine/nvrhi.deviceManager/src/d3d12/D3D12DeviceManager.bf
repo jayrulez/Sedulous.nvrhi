@@ -1,6 +1,7 @@
 using nvrhi.d3d12;
 using System;
 using Win32.Graphics.Dxgi;
+using Win32.Graphics.Dxgi.Common;
 using Win32.Graphics.Direct3D12;
 using Win32.Foundation;
 using System.Collections;
@@ -28,7 +29,7 @@ namespace nvrhi.deviceManager
 	{
 		public IDXGIAdapter* adapter = null;
 		public DXGI_USAGE swapChainUsage = .SHADER_INPUT | .RENDER_TARGET_OUTPUT;
-		public D3D_FEATURE_LEVEL featureLevel = D3D_FEATURE_LEVEL._11_1;
+		public D3D_FEATURE_LEVEL featureLevel = D3D_FEATURE_LEVEL.D3D_FEATURE_LEVEL_11_1;
 	}
 }
 
@@ -50,12 +51,12 @@ namespace nvrhi.deviceManager.d3d12
 			while (SUCCEEDED(hres))
 			{
 				IDXGIOutput* pOutput = null;
-				hres = targetAdapter.EnumOutputs(outputNo++, out pOutput);
+				hres = targetAdapter.EnumOutputs(outputNo++, &pOutput);
 
 				if (SUCCEEDED(hres) && pOutput != null)
 				{
-					DXGI_OUTPUT_DESC OutputDesc;
-					pOutput.GetDesc(out OutputDesc);
+					DXGI_OUTPUT_DESC OutputDesc = .();
+					pOutput.GetDesc(&OutputDesc);
 					readonly RECT desktop = OutputDesc.DesktopCoordinates;
 					readonly int32 centreX = (int32)desktop.left + (int32)(desktop.right - desktop.left) / 2;
 					readonly int32 centreY = (int32)desktop.top + (int32)(desktop.bottom - desktop.top) / 2;
@@ -93,13 +94,13 @@ namespace nvrhi.deviceManager.d3d12
 			uint32 adapterNo = 0;
 			while (SUCCEEDED(hres))
 			{
-				D3D12RefCountPtr<IDXGIAdapter> pAdapter;
-				hres = DXGIFactory.EnumAdapters(adapterNo, out pAdapter);
+				D3D12RefCountPtr<IDXGIAdapter> pAdapter = null;
+				hres = DXGIFactory.EnumAdapters(adapterNo, &pAdapter);
 
 				if (SUCCEEDED(hres))
 				{
 					DXGI_ADAPTER_DESC aDesc = .();
-					pAdapter.GetDesc(out aDesc);
+					pAdapter.GetDesc(&aDesc);
 
 					// If no name is specified, return the first adapater.  This is the same behaviour as the
 					// default specified for D3D11CreateDevice when no adapter is specified.
@@ -109,7 +110,7 @@ namespace nvrhi.deviceManager.d3d12
 						break;
 					}
 
-					String aName = scope String(aDesc.Description);
+					String aName = scope String(&aDesc.Description);
 
 					if (aName.Contains(targetName))
 					{
@@ -138,7 +139,7 @@ namespace nvrhi.deviceManager.d3d12
 
 			delegate HRESULT(uint32, ref IDXGIAdapter1*) GetNextAdapter = scope [&] (adapterIndex, adapter) =>
 				{
-					return m_dxgi_factory.EnumAdapters1(adapterIndex, out adapter);
+					return m_dxgi_factory.EnumAdapters1(adapterIndex, &adapter);
 				};
 
 			IDXGIAdapter1* adapter = null;
@@ -188,13 +189,13 @@ namespace nvrhi.deviceManager.d3d12
 		protected override bool CreateDeviceAndSwapChain()
 		{
 			WINDOW_STYLE windowStyle = m_DeviceParams.startFullscreen
-				? (.POPUP | .SYSMENU | .VISIBLE)
+				? (.WS_POPUP | .WS_SYSMENU | .WS_VISIBLE)
 				: m_DeviceParams.startMaximized
-				? (.OVERLAPPEDWINDOW | .VISIBLE | .MAXIMIZE)
-				: (.OVERLAPPEDWINDOW | .VISIBLE);
+				? (.WS_OVERLAPPEDWINDOW | .WS_VISIBLE | .WS_MAXIMIZE)
+				: (.WS_OVERLAPPEDWINDOW | .WS_VISIBLE);
 
 			RECT rect = .() { left = 0, top = 0, right = (.)(m_DeviceParams.backBufferWidth),  bottom = (.)(m_DeviceParams.backBufferHeight) };
-			AdjustWindowRect(out rect, windowStyle, 0);
+			AdjustWindowRect(&rect, windowStyle, 0);
 
 			D3D12RefCountPtr<IDXGIAdapter> targetAdapter = null;
 
@@ -221,7 +222,7 @@ namespace nvrhi.deviceManager.d3d12
 			}
 			{
 				DXGI_ADAPTER_DESC aDesc = .();
-				targetAdapter.GetDesc(out aDesc);
+				targetAdapter.GetDesc(&aDesc);
 
 				m_RendererString = new String(&aDesc.Description);
 			}
@@ -235,8 +236,8 @@ namespace nvrhi.deviceManager.d3d12
 
 			HRESULT hr = E_FAIL;
 
-			RECT clientRect;
-			GetClientRect(m_hWnd, out clientRect);
+			RECT clientRect = .();
+			GetClientRect(m_hWnd, &clientRect);
 			int32 width = clientRect.right - clientRect.left;
 			int32 height = clientRect.bottom - clientRect.top;
 
@@ -248,8 +249,8 @@ namespace nvrhi.deviceManager.d3d12
 			m_SwapChainDesc.SampleDesc.Quality = 0;
 			m_SwapChainDesc.BufferUsage = (.)m_DeviceParams.swapChainUsage;
 			m_SwapChainDesc.BufferCount = m_DeviceParams.swapChainBufferCount;
-			m_SwapChainDesc.SwapEffect = (.)DXGI_SWAP_EFFECT.FLIP_DISCARD;
-			m_SwapChainDesc.Flags = m_DeviceParams.allowModeSwitch ? (.)DXGI_SWAP_CHAIN_FLAG.ALLOW_MODE_SWITCH : 0;
+			m_SwapChainDesc.SwapEffect = (.)DXGI_SWAP_EFFECT.DXGI_SWAP_EFFECT_FLIP_DISCARD;
+			m_SwapChainDesc.Flags = m_DeviceParams.allowModeSwitch ? (.)DXGI_SWAP_CHAIN_FLAG.DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH : 0;
 
 			// Special processing for sRGB swap chain formats.
 			// DXGI will not create a swap chain with an sRGB format, but its contents will be interpreted as sRGB.
@@ -257,10 +258,10 @@ namespace nvrhi.deviceManager.d3d12
 			switch (m_DeviceParams.swapChainFormat) // NOLINT(clang-diagnostic-switch-enum)
 			{
 			case nvrhi.Format.SRGBA8_UNORM:
-				m_SwapChainDesc.Format = DXGI_FORMAT.R8G8B8A8_UNORM;
+				m_SwapChainDesc.Format = DXGI_FORMAT.DXGI_FORMAT_R8G8B8A8_UNORM;
 				break;
 			case nvrhi.Format.SBGRA8_UNORM:
-				m_SwapChainDesc.Format = DXGI_FORMAT.B8G8R8A8_UNORM;
+				m_SwapChainDesc.Format = DXGI_FORMAT.DXGI_FORMAT_B8G8R8A8_UNORM;
 				break;
 			default:
 				m_SwapChainDesc.Format = nvrhi.d3d12.convertFormat(m_DeviceParams.swapChainFormat);
@@ -285,13 +286,13 @@ namespace nvrhi.deviceManager.d3d12
 			if (SUCCEEDED(pDxgiFactory.QueryInterface(IDXGIFactory5.IID, (void**)(&pDxgiFactory5))))
 			{
 				BOOL supported = 0;
-				if (SUCCEEDED(pDxgiFactory5.CheckFeatureSupport(DXGI_FEATURE.FEATURE_PRESENT_ALLOW_TEARING, &supported, sizeof(decltype(supported)))))
+				if (SUCCEEDED(pDxgiFactory5.CheckFeatureSupport(DXGI_FEATURE.DXGI_FEATURE_PRESENT_ALLOW_TEARING, &supported, sizeof(decltype(supported)))))
 					m_TearingSupported = (supported != 0);
 			}
 
 			if (m_TearingSupported)
 			{
-				m_SwapChainDesc.Flags |= (.)DXGI_SWAP_CHAIN_FLAG.ALLOW_TEARING;
+				m_SwapChainDesc.Flags |= (.)DXGI_SWAP_CHAIN_FLAG.DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
 			}
 
 			hr = D3D12CreateDevice(
@@ -309,19 +310,19 @@ namespace nvrhi.deviceManager.d3d12
 				if (pInfoQueue != null)
 				{
 #if DEBUG
-					pInfoQueue.SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY.CORRUPTION, 1);
-					pInfoQueue.SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY.ERROR, 1);
+					pInfoQueue.SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY.D3D12_MESSAGE_SEVERITY_CORRUPTION, 1);
+					pInfoQueue.SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY.D3D12_MESSAGE_SEVERITY_ERROR, 1);
 #endif
 
 					D3D12_MESSAGE_ID[?] disableMessageIDs = .(
-						D3D12_MESSAGE_ID.CLEARDEPTHSTENCILVIEW_MISMATCHINGCLEARVALUE,
-						D3D12_MESSAGE_ID.COMMAND_LIST_STATIC_DESCRIPTOR_RESOURCE_DIMENSION_MISMATCH // descriptor validation doesn't understand acceleration structures
+						D3D12_MESSAGE_ID.D3D12_MESSAGE_ID_CLEARDEPTHSTENCILVIEW_MISMATCHINGCLEARVALUE,
+						D3D12_MESSAGE_ID.D3D12_MESSAGE_ID_COMMAND_LIST_STATIC_DESCRIPTOR_RESOURCE_DIMENSION_MISMATCH // descriptor validation doesn't understand acceleration structures
 						);
 
 					D3D12_INFO_QUEUE_FILTER filter = .();
 					filter.DenyList.pIDList = &disableMessageIDs;
 					filter.DenyList.NumIDs = sizeof(decltype(disableMessageIDs)) / sizeof(decltype(disableMessageIDs[0]));
-					pInfoQueue.AddStorageFilterEntries(ref filter);
+					pInfoQueue.AddStorageFilterEntries(&filter);
 				}
 			}
 
@@ -329,25 +330,25 @@ namespace nvrhi.deviceManager.d3d12
 
 			D3D12_COMMAND_QUEUE_DESC queueDesc = .();
 			//ZeroMemory(&queueDesc, sizeof(decltype(queueDesc)));
-			queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAGS.NONE;
-			queueDesc.Type = D3D12_COMMAND_LIST_TYPE.DIRECT;
+			queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAGS.D3D12_COMMAND_QUEUE_FLAG_NONE;
+			queueDesc.Type = D3D12_COMMAND_LIST_TYPE.D3D12_COMMAND_LIST_TYPE_DIRECT;
 			queueDesc.NodeMask = 1;
-			hr = m_Device12.CreateCommandQueue(queueDesc, ID3D12CommandQueue.IID, (void**)(&m_GraphicsQueue));
+			hr = m_Device12.CreateCommandQueue(&queueDesc, ID3D12CommandQueue.IID, (void**)(&m_GraphicsQueue));
 			HR_RETURN!(hr);
 			m_GraphicsQueue.SetName("Graphics Queue".ToScopedNativeWChar!::());
 
 			if (m_DeviceParams.enableComputeQueue)
 			{
-				queueDesc.Type = D3D12_COMMAND_LIST_TYPE.COMPUTE;
-				hr = m_Device12.CreateCommandQueue(queueDesc, ID3D12CommandQueue.IID, (void**)(&m_ComputeQueue));
+				queueDesc.Type = D3D12_COMMAND_LIST_TYPE.D3D12_COMMAND_LIST_TYPE_COMPUTE;
+				hr = m_Device12.CreateCommandQueue(&queueDesc, ID3D12CommandQueue.IID, (void**)(&m_ComputeQueue));
 				HR_RETURN!(hr);
 				m_ComputeQueue.SetName("Compute Queue".ToScopedNativeWChar!::());
 			}
 
 			if (m_DeviceParams.enableCopyQueue)
 			{
-				queueDesc.Type = D3D12_COMMAND_LIST_TYPE.COPY;
-				hr = m_Device12.CreateCommandQueue(queueDesc, ID3D12CommandQueue.IID, (void**)(&m_CopyQueue));
+				queueDesc.Type = D3D12_COMMAND_LIST_TYPE.D3D12_COMMAND_LIST_TYPE_COPY;
+				hr = m_Device12.CreateCommandQueue(&queueDesc, ID3D12CommandQueue.IID, (void**)(&m_CopyQueue));
 				HR_RETURN!(hr);
 				m_CopyQueue.SetName("Copy Queue".ToScopedNativeWChar!::());
 			}
@@ -355,12 +356,12 @@ namespace nvrhi.deviceManager.d3d12
 			m_FullScreenDesc = .();
 			m_FullScreenDesc.RefreshRate.Numerator = m_DeviceParams.refreshRate;
 			m_FullScreenDesc.RefreshRate.Denominator = 1;
-			m_FullScreenDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER.PROGRESSIVE;
-			m_FullScreenDesc.Scaling = DXGI_MODE_SCALING.UNSPECIFIED;
+			m_FullScreenDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER.DXGI_MODE_SCANLINE_ORDER_PROGRESSIVE;
+			m_FullScreenDesc.Scaling = DXGI_MODE_SCALING.DXGI_MODE_SCALING_UNSPECIFIED;
 			m_FullScreenDesc.Windowed = m_DeviceParams.startFullscreen ? 0 : 1;
 
 			D3D12RefCountPtr<IDXGISwapChain1> pSwapChain1 = null;
-			hr = pDxgiFactory.CreateSwapChainForHwnd(ref *m_GraphicsQueue, m_hWnd, m_SwapChainDesc, &m_FullScreenDesc, null, out pSwapChain1);
+			hr = pDxgiFactory.CreateSwapChainForHwnd(m_GraphicsQueue, m_hWnd, &m_SwapChainDesc, &m_FullScreenDesc, null, &pSwapChain1);
 			HR_RETURN!(hr);
 
 			hr = pSwapChain1.QueryInterface(IDXGISwapChain3.IID, (void**)(&m_SwapChain));
@@ -383,7 +384,7 @@ namespace nvrhi.deviceManager.d3d12
 			if (!CreateRenderTargets())
 				return false;
 
-			hr = m_Device12.CreateFence(0, D3D12_FENCE_FLAGS.NONE, ID3D12Fence.IID, (void**)(&m_FrameFence));
+			hr = m_Device12.CreateFence(0, D3D12_FENCE_FLAGS.D3D12_FENCE_FLAG_NONE, ID3D12Fence.IID, (void**)(&m_FrameFence));
 			HR_RETURN!(hr);
 
 			for (UINT bufferIndex = 0; bufferIndex < m_SwapChainDesc.BufferCount; bufferIndex++)
@@ -463,8 +464,8 @@ namespace nvrhi.deviceManager.d3d12
 		protected override void BeginFrame()
 		{
 			DXGI_SWAP_CHAIN_DESC1 newSwapChainDesc = .();
-			DXGI_SWAP_CHAIN_FULLSCREEN_DESC newFullScreenDesc;
-			if (SUCCEEDED(m_SwapChain.GetDesc1(out newSwapChainDesc)) && SUCCEEDED(m_SwapChain.GetFullscreenDesc(out newFullScreenDesc)))
+			DXGI_SWAP_CHAIN_FULLSCREEN_DESC newFullScreenDesc = .();
+			if (SUCCEEDED(m_SwapChain.GetDesc1(&newSwapChainDesc)) && SUCCEEDED(m_SwapChain.GetFullscreenDesc(&newFullScreenDesc)))
 			{
 				if (m_FullScreenDesc.Windowed != newFullScreenDesc.Windowed)
 				{
@@ -504,7 +505,7 @@ namespace nvrhi.deviceManager.d3d12
 			m_SwapChain.Present(m_DeviceParams.vsyncEnabled ? 1 : 0, presentFlags);
 
 			m_FrameFence.SetEventOnCompletion(m_FrameCount, m_FrameFenceEvents[bufferIndex]);
-			m_GraphicsQueue.Signal(ref *m_FrameFence, m_FrameCount);
+			m_GraphicsQueue.Signal(m_FrameFence, m_FrameCount);
 			m_FrameCount++;
 		}
 

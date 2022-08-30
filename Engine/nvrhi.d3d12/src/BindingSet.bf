@@ -96,7 +96,7 @@ namespace nvrhi.d3d12
 						{
 							// Create a default sampler
 							D3D12_SAMPLER_DESC samplerDesc = .();
-							m_Context.device.CreateSampler(samplerDesc, descriptorHandle);
+							m_Context.device.CreateSampler(&samplerDesc, descriptorHandle);
 						}
 					}
 				}
@@ -131,7 +131,7 @@ namespace nvrhi.d3d12
 
 							readonly var bindingType = GetNormalizedResourceType(binding.type);
 
-							if (range.RangeType == D3D12_DESCRIPTOR_RANGE_TYPE.SRV && bindingType == ResourceType.TypedBuffer_SRV)
+							if (range.RangeType == D3D12_DESCRIPTOR_RANGE_TYPE.D3D12_DESCRIPTOR_RANGE_TYPE_SRV && bindingType == ResourceType.TypedBuffer_SRV)
 							{
 								if (binding.resourceHandle != null)
 								{
@@ -154,7 +154,7 @@ namespace nvrhi.d3d12
 								found = true;
 								break;
 							}
-							else if (range.RangeType == D3D12_DESCRIPTOR_RANGE_TYPE.UAV && bindingType == ResourceType.TypedBuffer_UAV)
+							else if (range.RangeType == D3D12_DESCRIPTOR_RANGE_TYPE.D3D12_DESCRIPTOR_RANGE_TYPE_UAV && bindingType == ResourceType.TypedBuffer_UAV)
 							{
 								if (binding.resourceHandle != null)
 								{
@@ -178,7 +178,7 @@ namespace nvrhi.d3d12
 								found = true;
 								break;
 							}
-							else if (range.RangeType == D3D12_DESCRIPTOR_RANGE_TYPE.SRV && bindingType == ResourceType.Texture_SRV)
+							else if (range.RangeType == D3D12_DESCRIPTOR_RANGE_TYPE.D3D12_DESCRIPTOR_RANGE_TYPE_SRV && bindingType == ResourceType.Texture_SRV)
 							{
 								Texture texture = checked_cast<Texture, IResource>(binding.resourceHandle);
 
@@ -196,7 +196,7 @@ namespace nvrhi.d3d12
 								found = true;
 								break;
 							}
-							else if (range.RangeType == D3D12_DESCRIPTOR_RANGE_TYPE.UAV && bindingType == ResourceType.Texture_UAV)
+							else if (range.RangeType == D3D12_DESCRIPTOR_RANGE_TYPE.D3D12_DESCRIPTOR_RANGE_TYPE_UAV && bindingType == ResourceType.Texture_UAV)
 							{
 								Texture texture = checked_cast<Texture, IResource>(binding.resourceHandle);
 
@@ -215,7 +215,7 @@ namespace nvrhi.d3d12
 								found = true;
 								break;
 							}
-							else if (range.RangeType == D3D12_DESCRIPTOR_RANGE_TYPE.SRV && bindingType == ResourceType.RayTracingAccelStruct)
+							else if (range.RangeType == D3D12_DESCRIPTOR_RANGE_TYPE.D3D12_DESCRIPTOR_RANGE_TYPE_SRV && bindingType == ResourceType.RayTracingAccelStruct)
 							{
 								AccelStruct accelStruct = checked_cast<AccelStruct, IResource>(binding.resourceHandle);
 								accelStruct.createSRV((.)descriptorHandle.ptr);
@@ -226,7 +226,7 @@ namespace nvrhi.d3d12
 								found = true;
 								break;
 							}
-							else if (range.RangeType == D3D12_DESCRIPTOR_RANGE_TYPE.CBV && bindingType == ResourceType.ConstantBuffer)
+							else if (range.RangeType == D3D12_DESCRIPTOR_RANGE_TYPE.D3D12_DESCRIPTOR_RANGE_TYPE_CBV && bindingType == ResourceType.ConstantBuffer)
 							{
 								Buffer buffer = checked_cast<Buffer, IResource>(binding.resourceHandle);
 
@@ -265,19 +265,19 @@ namespace nvrhi.d3d12
 
 							switch (range.RangeType)
 							{
-							case D3D12_DESCRIPTOR_RANGE_TYPE.SRV:
+							case D3D12_DESCRIPTOR_RANGE_TYPE.D3D12_DESCRIPTOR_RANGE_TYPE_SRV:
 								Buffer.createNullSRV((.)descriptorHandle.ptr, Format.UNKNOWN, m_Context);
 								break;
 
-							case D3D12_DESCRIPTOR_RANGE_TYPE.UAV:
+							case D3D12_DESCRIPTOR_RANGE_TYPE.D3D12_DESCRIPTOR_RANGE_TYPE_UAV:
 								Buffer.createNullUAV((.)descriptorHandle.ptr, Format.UNKNOWN, m_Context);
 								break;
 
-							case D3D12_DESCRIPTOR_RANGE_TYPE.CBV:
+							case D3D12_DESCRIPTOR_RANGE_TYPE.D3D12_DESCRIPTOR_RANGE_TYPE_CBV:
 								m_Context.device.CreateConstantBufferView(null, descriptorHandle);
 								break;
 
-							case D3D12_DESCRIPTOR_RANGE_TYPE.SAMPLER: fallthrough;
+							case D3D12_DESCRIPTOR_RANGE_TYPE.D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER: fallthrough;
 							default:
 								nvrhi.utils.InvalidEnum();
 								break;

@@ -10,6 +10,7 @@ using System;
 using nvrhi.d3dcommon;
 using nvrhi.rt;
 using Win32.Graphics.Direct3D;
+using Win32.Graphics.Dxgi.Common;
 namespace nvrhi.d3d12;
 
 class Device : RefCounter<nvrhi.d3d12.IDevice>
@@ -28,20 +29,20 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 		if (desc.pCopyCommandQueue != null)
 			m_Queues[int32(CommandQueue.Copy)] = new Queue(m_Context, desc.pCopyCommandQueue);
 
-		m_Resources.depthStencilViewHeap.allocateResources(D3D12_DESCRIPTOR_HEAP_TYPE.DSV, desc.depthStencilViewHeapSize, false);
-		m_Resources.renderTargetViewHeap.allocateResources(D3D12_DESCRIPTOR_HEAP_TYPE.RTV, desc.renderTargetViewHeapSize, false);
-		m_Resources.shaderResourceViewHeap.allocateResources(D3D12_DESCRIPTOR_HEAP_TYPE.CBV_SRV_UAV, desc.shaderResourceViewHeapSize, true);
-		m_Resources.samplerHeap.allocateResources(D3D12_DESCRIPTOR_HEAP_TYPE.SAMPLER, desc.samplerHeapSize, true);
+		m_Resources.depthStencilViewHeap.allocateResources(D3D12_DESCRIPTOR_HEAP_TYPE.D3D12_DESCRIPTOR_HEAP_TYPE_DSV, desc.depthStencilViewHeapSize, false);
+		m_Resources.renderTargetViewHeap.allocateResources(D3D12_DESCRIPTOR_HEAP_TYPE.D3D12_DESCRIPTOR_HEAP_TYPE_RTV, desc.renderTargetViewHeapSize, false);
+		m_Resources.shaderResourceViewHeap.allocateResources(D3D12_DESCRIPTOR_HEAP_TYPE.D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, desc.shaderResourceViewHeapSize, true);
+		m_Resources.samplerHeap.allocateResources(D3D12_DESCRIPTOR_HEAP_TYPE.D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER, desc.samplerHeapSize, true);
 
-		m_Context.device.CheckFeatureSupport(D3D12_FEATURE.D3D12_OPTIONS, &m_Options, sizeof(decltype(m_Options)));
-		bool hasOptions5 = SUCCEEDED(m_Context.device.CheckFeatureSupport(D3D12_FEATURE.D3D12_OPTIONS5, &m_Options5, sizeof(decltype(m_Options5))));
-		bool hasOptions6 = SUCCEEDED(m_Context.device.CheckFeatureSupport(D3D12_FEATURE.D3D12_OPTIONS6, &m_Options6, sizeof(decltype(m_Options6))));
-		bool hasOptions7 = SUCCEEDED(m_Context.device.CheckFeatureSupport(D3D12_FEATURE.D3D12_OPTIONS7, &m_Options7, sizeof(decltype(m_Options7))));
+		m_Context.device.CheckFeatureSupport(D3D12_FEATURE.D3D12_FEATURE_D3D12_OPTIONS, &m_Options, sizeof(decltype(m_Options)));
+		bool hasOptions5 = SUCCEEDED(m_Context.device.CheckFeatureSupport(D3D12_FEATURE.D3D12_FEATURE_D3D12_OPTIONS5, &m_Options5, sizeof(decltype(m_Options5))));
+		bool hasOptions6 = SUCCEEDED(m_Context.device.CheckFeatureSupport(D3D12_FEATURE.D3D12_FEATURE_D3D12_OPTIONS6, &m_Options6, sizeof(decltype(m_Options6))));
+		bool hasOptions7 = SUCCEEDED(m_Context.device.CheckFeatureSupport(D3D12_FEATURE.D3D12_FEATURE_D3D12_OPTIONS7, &m_Options7, sizeof(decltype(m_Options7))));
 
 		if (SUCCEEDED(m_Context.device.QueryInterface(ID3D12Device5.IID, (void**)&m_Context.device5)) && hasOptions5)
 		{
-			m_RayTracingSupported = m_Options5.RaytracingTier >= D3D12_RAYTRACING_TIER._1_0;
-			m_TraceRayInlineSupported = m_Options5.RaytracingTier >= D3D12_RAYTRACING_TIER._1_1;
+			m_RayTracingSupported = m_Options5.RaytracingTier >= D3D12_RAYTRACING_TIER.D3D12_RAYTRACING_TIER_1_0;
+			m_TraceRayInlineSupported = m_Options5.RaytracingTier >= D3D12_RAYTRACING_TIER.D3D12_RAYTRACING_TIER_1_1;
 
 #if NVRHI_WITH_RTXMU
 			if (m_RayTracingSupported)
@@ -56,12 +57,12 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 
 		if (SUCCEEDED(m_Context.device.QueryInterface(ID3D12Device2.IID, (void**)&m_Context.device2)) && hasOptions7)
 		{
-			m_MeshletsSupported = m_Options7.MeshShaderTier >= D3D12_MESH_SHADER_TIER._1;
+			m_MeshletsSupported = m_Options7.MeshShaderTier >= D3D12_MESH_SHADER_TIER.D3D12_MESH_SHADER_TIER_1;
 		}
 
 		if (hasOptions6)
 		{
-			m_VariableRateShadingSupported = m_Options6.VariableShadingRateTier >= D3D12_VARIABLE_SHADING_RATE_TIER._2;
+			m_VariableRateShadingSupported = m_Options6.VariableShadingRateTier >= D3D12_VARIABLE_SHADING_RATE_TIER.D3D12_VARIABLE_SHADING_RATE_TIER_2;
 		}
 		{
 			D3D12_INDIRECT_ARGUMENT_DESC argDesc = .();
@@ -70,12 +71,12 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 			csDesc.pArgumentDescs = &argDesc;
 
 			csDesc.ByteStride = 16;
-			argDesc.Type = D3D12_INDIRECT_ARGUMENT_TYPE.DRAW;
-			m_Context.device.CreateCommandSignature(csDesc, null, ID3D12CommandSignature.IID, (void**)&m_Context.drawIndirectSignature);
+			argDesc.Type = D3D12_INDIRECT_ARGUMENT_TYPE.D3D12_INDIRECT_ARGUMENT_TYPE_DRAW;
+			m_Context.device.CreateCommandSignature(&csDesc, null, ID3D12CommandSignature.IID, (void**)&m_Context.drawIndirectSignature);
 
 			csDesc.ByteStride = 12;
-			argDesc.Type = D3D12_INDIRECT_ARGUMENT_TYPE.DISPATCH;
-			m_Context.device.CreateCommandSignature(csDesc, null, ID3D12CommandSignature.IID, (void**)&m_Context.dispatchIndirectSignature);
+			argDesc.Type = D3D12_INDIRECT_ARGUMENT_TYPE.D3D12_INDIRECT_ARGUMENT_TYPE_DISPATCH;
+			m_Context.device.CreateCommandSignature(&csDesc, null, ID3D12CommandSignature.IID, (void**)&m_Context.dispatchIndirectSignature);
 		}
 
 		m_FenceEvent = CreateEventA(null, 0, 0, null);
@@ -140,26 +141,26 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 		D3D12_HEAP_DESC heapDesc;
 		heapDesc.SizeInBytes = d.capacity;
 		heapDesc.Alignment = D3D12_DEFAULT_MSAA_RESOURCE_PLACEMENT_ALIGNMENT;
-		heapDesc.Properties.MemoryPoolPreference = D3D12_MEMORY_POOL.UNKNOWN;
-		heapDesc.Properties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY.UNKNOWN;
+		heapDesc.Properties.MemoryPoolPreference = D3D12_MEMORY_POOL.D3D12_MEMORY_POOL_UNKNOWN;
+		heapDesc.Properties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY.D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
 		heapDesc.Properties.CreationNodeMask = 1; // no mGPU support in nvrhi so far
 		heapDesc.Properties.VisibleNodeMask = 1;
 
-		if (m_Options.ResourceHeapTier == D3D12_RESOURCE_HEAP_TIER._1)
-			heapDesc.Flags = D3D12_HEAP_FLAGS.ALLOW_ONLY_RT_DS_TEXTURES;
+		if (m_Options.ResourceHeapTier == D3D12_RESOURCE_HEAP_TIER.D3D12_RESOURCE_HEAP_TIER_1)
+			heapDesc.Flags = D3D12_HEAP_FLAGS.D3D12_HEAP_FLAG_ALLOW_ONLY_RT_DS_TEXTURES;
 		else
-			heapDesc.Flags = D3D12_HEAP_FLAGS.ALLOW_ALL_BUFFERS_AND_TEXTURES;
+			heapDesc.Flags = D3D12_HEAP_FLAGS.D3D12_HEAP_FLAG_ALLOW_ALL_BUFFERS_AND_TEXTURES;
 
 		switch (d.type)
 		{
 		case HeapType.DeviceLocal:
-			heapDesc.Properties.Type = D3D12_HEAP_TYPE.DEFAULT;
+			heapDesc.Properties.Type = D3D12_HEAP_TYPE.D3D12_HEAP_TYPE_DEFAULT;
 			break;
 		case HeapType.Upload:
-			heapDesc.Properties.Type = D3D12_HEAP_TYPE.UPLOAD;
+			heapDesc.Properties.Type = D3D12_HEAP_TYPE.D3D12_HEAP_TYPE_UPLOAD;
 			break;
 		case HeapType.Readback:
-			heapDesc.Properties.Type = D3D12_HEAP_TYPE.READBACK;
+			heapDesc.Properties.Type = D3D12_HEAP_TYPE.D3D12_HEAP_TYPE_READBACK;
 			break;
 		default:
 			nvrhi.utils.InvalidEnum();
@@ -167,7 +168,7 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 		}
 
 		D3D12RefCountPtr<ID3D12Heap> d3dHeap = null;
-		readonly HRESULT res = m_Context.device.CreateHeap(heapDesc, ID3D12Heap.IID, (void**)&d3dHeap);
+		readonly HRESULT res = m_Context.device.CreateHeap(&heapDesc, ID3D12Heap.IID, (void**)&d3dHeap);
 
 		if (FAILED(res))
 		{
@@ -192,14 +193,14 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 	{
 		D3D12_RESOURCE_DESC rd = convertTextureDesc(d);
 		D3D12_HEAP_PROPERTIES heapProps = .();
-		D3D12_HEAP_FLAGS heapFlags = D3D12_HEAP_FLAGS.NONE;
+		D3D12_HEAP_FLAGS heapFlags = D3D12_HEAP_FLAGS.D3D12_HEAP_FLAG_NONE;
 
 		if ((d.sharedResourceFlags & SharedResourceFlags.Shared) != 0)
-			heapFlags |= D3D12_HEAP_FLAGS.SHARED;
+			heapFlags |= D3D12_HEAP_FLAGS.D3D12_HEAP_FLAG_SHARED;
 		if ((d.sharedResourceFlags & SharedResourceFlags.Shared_CrossAdapter) != 0)
 		{
-			rd.Flags |= D3D12_RESOURCE_FLAGS.ALLOW_CROSS_ADAPTER;
-			heapFlags |= D3D12_HEAP_FLAGS.SHARED_CROSS_ADAPTER;
+			rd.Flags |= D3D12_RESOURCE_FLAGS.D3D12_RESOURCE_FLAG_ALLOW_CROSS_ADAPTER;
+			heapFlags |= D3D12_HEAP_FLAGS.D3D12_HEAP_FLAG_SHARED_CROSS_ADAPTER;
 		}
 
 		Texture texture = new Texture(m_Context, m_Resources, d, rd);
@@ -210,14 +211,14 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 			return TextureHandle.Attach(texture);
 		}
 
-		heapProps.Type = D3D12_HEAP_TYPE.DEFAULT;
+		heapProps.Type = D3D12_HEAP_TYPE.D3D12_HEAP_TYPE_DEFAULT;
 
 		D3D12_CLEAR_VALUE clearValue = convertTextureClearValue(d);
 
 		HRESULT hr = m_Context.device.CreateCommittedResource(
-			heapProps,
+			&heapProps,
 			heapFlags,
-			texture.resourceDesc,
+			&texture.resourceDesc,
 			convertResourceStates(d.initialState),
 			d.useClearValue ? &clearValue : null,
 			ID3D12Resource.IID,
@@ -263,8 +264,8 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 		D3D12_CLEAR_VALUE clearValue = convertTextureClearValue(texture.desc);
 
 		HRESULT hr = m_Context.device.CreatePlacedResource(
-			ref *heap.heap, offset,
-			texture.resourceDesc,
+			heap.heap, offset,
+			&texture.resourceDesc,
 			convertResourceStates(texture.desc.initialState),
 			texture.desc.useClearValue ? &clearValue : null,
 			ID3D12Resource.IID,
@@ -417,14 +418,14 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 		resourceDesc.Height = 1;
 		resourceDesc.DepthOrArraySize = 1;
 		resourceDesc.MipLevels = 1;
-		resourceDesc.Format = DXGI_FORMAT.UNKNOWN;
+		resourceDesc.Format = DXGI_FORMAT.DXGI_FORMAT_UNKNOWN;
 		resourceDesc.SampleDesc.Count = 1;
 		resourceDesc.SampleDesc.Quality = 0;
-		resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION.BUFFER;
-		resourceDesc.Layout = D3D12_TEXTURE_LAYOUT.ROW_MAJOR;
+		resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION.D3D12_RESOURCE_DIMENSION_BUFFER;
+		resourceDesc.Layout = D3D12_TEXTURE_LAYOUT.D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 
 		if (buffer.desc.canHaveUAVs)
-			resourceDesc.Flags |= D3D12_RESOURCE_FLAGS.ALLOW_UNORDERED_ACCESS;
+			resourceDesc.Flags |= D3D12_RESOURCE_FLAGS.D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
 
 		if (d.isVirtual)
 		{
@@ -432,39 +433,39 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 		}
 
 		D3D12_HEAP_PROPERTIES heapProps = .();
-		D3D12_HEAP_FLAGS heapFlags = D3D12_HEAP_FLAGS.NONE;
-		D3D12_RESOURCE_STATES initialState = D3D12_RESOURCE_STATES.COMMON;
+		D3D12_HEAP_FLAGS heapFlags = D3D12_HEAP_FLAGS.D3D12_HEAP_FLAG_NONE;
+		D3D12_RESOURCE_STATES initialState = D3D12_RESOURCE_STATES.D3D12_RESOURCE_STATE_COMMON;
 
 		if ((d.sharedResourceFlags & SharedResourceFlags.Shared) != 0)
-			heapFlags |= D3D12_HEAP_FLAGS.SHARED;
+			heapFlags |= D3D12_HEAP_FLAGS.D3D12_HEAP_FLAG_SHARED;
 		if ((d.sharedResourceFlags & SharedResourceFlags.Shared_CrossAdapter) != 0)
 		{
-			resourceDesc.Flags |= D3D12_RESOURCE_FLAGS.ALLOW_CROSS_ADAPTER;
-			heapFlags |= D3D12_HEAP_FLAGS.SHARED_CROSS_ADAPTER;
+			resourceDesc.Flags |= D3D12_RESOURCE_FLAGS.D3D12_RESOURCE_FLAG_ALLOW_CROSS_ADAPTER;
+			heapFlags |= D3D12_HEAP_FLAGS.D3D12_HEAP_FLAG_SHARED_CROSS_ADAPTER;
 		}
 
 		switch (buffer.desc.cpuAccess)
 		{
 		case CpuAccessMode.None:
-			heapProps.Type = D3D12_HEAP_TYPE.DEFAULT;
+			heapProps.Type = D3D12_HEAP_TYPE.D3D12_HEAP_TYPE_DEFAULT;
 			initialState = convertResourceStates(d.initialState);
 			break;
 
 		case CpuAccessMode.Read:
-			heapProps.Type = D3D12_HEAP_TYPE.READBACK;
-			initialState = D3D12_RESOURCE_STATES.COPY_DEST;
+			heapProps.Type = D3D12_HEAP_TYPE.D3D12_HEAP_TYPE_READBACK;
+			initialState = D3D12_RESOURCE_STATES.D3D12_RESOURCE_STATE_COPY_DEST;
 			break;
 
 		case CpuAccessMode.Write:
-			heapProps.Type = D3D12_HEAP_TYPE.UPLOAD;
-			initialState = D3D12_RESOURCE_STATES.GENERIC_READ;
+			heapProps.Type = D3D12_HEAP_TYPE.D3D12_HEAP_TYPE_UPLOAD;
+			initialState = D3D12_RESOURCE_STATES.D3D12_RESOURCE_STATE_GENERIC_READ;
 			break;
 		}
 
 		HRESULT res = m_Context.device.CreateCommittedResource(
-			heapProps,
+			&heapProps,
 			heapFlags,
-			resourceDesc,
+			&resourceDesc,
 			initialState,
 			null,
 			ID3D12Resource.IID,
@@ -546,8 +547,8 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 			return false; // not supported
 
 		HRESULT hr = m_Context.device.CreatePlacedResource(
-			ref *heap.heap, offset,
-			buffer.resourceDesc,
+			heap.heap, offset,
+			&buffer.resourceDesc,
 			convertResourceStates(buffer.desc.initialState),
 			null,
 			ID3D12Resource.IID,
@@ -789,12 +790,12 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 
 				if (attr.isInstanced)
 				{
-					desc.InputSlotClass = D3D12_INPUT_CLASSIFICATION.INSTANCE_DATA;
+					desc.InputSlotClass = D3D12_INPUT_CLASSIFICATION.D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA;
 					desc.InstanceDataStepRate = 1;
 				}
 				else
 				{
-					desc.InputSlotClass = D3D12_INPUT_CLASSIFICATION.VERTEX_DATA;
+					desc.InputSlotClass = D3D12_INPUT_CLASSIFICATION.D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
 					desc.InstanceDataStepRate = 0;
 				}
 
@@ -878,9 +879,9 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 			if (m_Context.timerQueryHeap == null)
 			{
 				D3D12_QUERY_HEAP_DESC queryHeapDesc = .();
-				queryHeapDesc.Type = D3D12_QUERY_HEAP_TYPE.TIMESTAMP;
+				queryHeapDesc.Type = D3D12_QUERY_HEAP_TYPE.D3D12_QUERY_HEAP_TYPE_TIMESTAMP;
 				queryHeapDesc.Count = uint32(m_Resources.timerQueries.getCapacity()) * 2; // Use 2 D3D12 queries per 1 TimerQuery
-				m_Context.device.CreateQueryHeap(queryHeapDesc, ID3D12QueryHeap.IID, (void**)(&m_Context.timerQueryHeap));
+				m_Context.device.CreateQueryHeap(&queryHeapDesc, ID3D12QueryHeap.IID, (void**)(&m_Context.timerQueryHeap));
 
 				BufferDesc qbDesc = .();
 				qbDesc.byteSize = queryHeapDesc.Count * 8;
@@ -935,7 +936,7 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 			}
 
 			uint64 frequency = 0;
-			getQueue(CommandQueue.Graphics).queue.GetTimestampFrequency(out frequency);
+			getQueue(CommandQueue.Graphics).queue.GetTimestampFrequency(&frequency);
 
 			D3D12_RANGE bufferReadRange = .()
 				{
@@ -1150,7 +1151,7 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 				{
 					// No - add it to the corresponding library, come up with a new name for it.
 
-					const void* pBlob = null;
+					void* pBlob = null;
 					int blobSize = 0;
 					shader.getBytecode(&pBlob, &blobSize);
 
@@ -1194,9 +1195,9 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 				d3dHitGroupDesc.IntersectionShaderImport = hitGroupShaderNames[hitGroupDesc.intersectionShader];
 
 			if (hitGroupDesc.isProceduralPrimitive)
-				d3dHitGroupDesc.Type = D3D12_HIT_GROUP_TYPE.PROCEDURAL_PRIMITIVE;
+				d3dHitGroupDesc.Type = D3D12_HIT_GROUP_TYPE.D3D12_HIT_GROUP_TYPE_PROCEDURAL_PRIMITIVE;
 			else
-				d3dHitGroupDesc.Type = D3D12_HIT_GROUP_TYPE.TRIANGLES;
+				d3dHitGroupDesc.Type = D3D12_HIT_GROUP_TYPE.D3D12_HIT_GROUP_TYPE_TRIANGLES;
 
 			char16* hitGroupExportName = hitGroupDesc.exportName.ToScopedNativeWChar!::();
 			hitGroupExportNames.Add(hitGroupExportName); // store the wstring so that it's not deallocated
@@ -1217,7 +1218,7 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 				D3D12_EXPORT_DESC d3dExportDesc = .();
 				d3dExportDesc.ExportToRename = exportNames.key;
 				d3dExportDesc.Name = exportNames.value;
-				d3dExportDesc.Flags = D3D12_EXPORT_FLAGS.FLAG_NONE;
+				d3dExportDesc.Flags = D3D12_EXPORT_FLAGS.D3D12_EXPORT_FLAG_NONE;
 				library.d3dExports.Add(d3dExportDesc);
 			}
 
@@ -1243,7 +1244,7 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 		d3dShaderConfig.MaxAttributeSizeInBytes = desc.maxAttributeSize;
 		d3dShaderConfig.MaxPayloadSizeInBytes = desc.maxPayloadSize;
 
-		d3dSubobject.Type = D3D12_STATE_SUBOBJECT_TYPE.RAYTRACING_SHADER_CONFIG;
+		d3dSubobject.Type = D3D12_STATE_SUBOBJECT_TYPE.D3D12_STATE_SUBOBJECT_TYPE_RAYTRACING_SHADER_CONFIG;
 		d3dSubobject.pDesc = &d3dShaderConfig;
 		d3dSubobjects.Add(d3dSubobject);
 
@@ -1252,24 +1253,24 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 		D3D12_RAYTRACING_PIPELINE_CONFIG d3dPipelineConfig = .();
 		d3dPipelineConfig.MaxTraceRecursionDepth = desc.maxRecursionDepth;
 
-		d3dSubobject.Type = D3D12_STATE_SUBOBJECT_TYPE.RAYTRACING_PIPELINE_CONFIG;
+		d3dSubobject.Type = D3D12_STATE_SUBOBJECT_TYPE.D3D12_STATE_SUBOBJECT_TYPE_RAYTRACING_PIPELINE_CONFIG;
 		d3dSubobject.pDesc = &d3dPipelineConfig;
 		d3dSubobjects.Add(d3dSubobject);
 
 		// Subobjects: DXIL libraries
 
-		for (readonly ref D3D12_DXIL_LIBRARY_DESC d3dLibraryDesc in ref d3dDxilLibraries)
+		for (/*readonly*/ ref D3D12_DXIL_LIBRARY_DESC d3dLibraryDesc in ref d3dDxilLibraries)
 		{
-			d3dSubobject.Type = D3D12_STATE_SUBOBJECT_TYPE.DXIL_LIBRARY;
+			d3dSubobject.Type = D3D12_STATE_SUBOBJECT_TYPE.D3D12_STATE_SUBOBJECT_TYPE_DXIL_LIBRARY;
 			d3dSubobject.pDesc = &d3dLibraryDesc;
 			d3dSubobjects.Add(d3dSubobject);
 		}
 
 		// Subobjects: hit groups
 
-		for (readonly ref D3D12_HIT_GROUP_DESC d3dHitGroupDesc in ref d3dHitGroups)
+		for (/*readonly*/ ref D3D12_HIT_GROUP_DESC d3dHitGroupDesc in ref d3dHitGroups)
 		{
-			d3dSubobject.Type = D3D12_STATE_SUBOBJECT_TYPE.HIT_GROUP;
+			d3dSubobject.Type = D3D12_STATE_SUBOBJECT_TYPE.D3D12_STATE_SUBOBJECT_TYPE_HIT_GROUP;
 			d3dSubobject.pDesc = &d3dHitGroupDesc;
 			d3dSubobjects.Add(d3dSubobject);
 		}
@@ -1284,7 +1285,7 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 			pso.globalRootSignature = checked_cast<RootSignature, IRootSignature>(rootSignature.Get<IRootSignature>());
 			d3dGlobalRootSignature.pGlobalRootSignature = (ID3D12RootSignature*)pso.globalRootSignature.getNativeObject(ObjectType.D3D12_RootSignature).pointer;
 
-			d3dSubobject.Type = D3D12_STATE_SUBOBJECT_TYPE.GLOBAL_ROOT_SIGNATURE;
+			d3dSubobject.Type = D3D12_STATE_SUBOBJECT_TYPE.D3D12_STATE_SUBOBJECT_TYPE_GLOBAL_ROOT_SIGNATURE;
 			d3dSubobject.pDesc = &d3dGlobalRootSignature;
 			d3dSubobjects.Add(d3dSubobject);
 		}
@@ -1307,7 +1308,7 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 			var d3dLocalRootSignature = NEW_ON_STACK!<D3D12_LOCAL_ROOT_SIGNATURE>();
 			d3dLocalRootSignature.pLocalRootSignature = (ID3D12RootSignature*)it.value.getNativeObject(ObjectType.D3D12_RootSignature).pointer;
 
-			d3dSubobject.Type = D3D12_STATE_SUBOBJECT_TYPE.LOCAL_ROOT_SIGNATURE;
+			d3dSubobject.Type = D3D12_STATE_SUBOBJECT_TYPE.D3D12_STATE_SUBOBJECT_TYPE_LOCAL_ROOT_SIGNATURE;
 			d3dSubobject.pDesc = d3dLocalRootSignature;
 			d3dSubobjects.Add(d3dSubobject);
 
@@ -1339,7 +1340,7 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 
 			d3dAssociation.pExports = &d3dAssociationExportsCStr[firstExportIndex];
 
-			d3dSubobject.Type = D3D12_STATE_SUBOBJECT_TYPE.SUBOBJECT_TO_EXPORTS_ASSOCIATION;
+			d3dSubobject.Type = D3D12_STATE_SUBOBJECT_TYPE.D3D12_STATE_SUBOBJECT_TYPE_SUBOBJECT_TO_EXPORTS_ASSOCIATION;
 			d3dSubobject.pDesc = d3dAssociation;
 			d3dSubobjects.Add(d3dSubobject);
 		}
@@ -1347,11 +1348,11 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 		// Top-level PSO descriptor structure
 
 		D3D12_STATE_OBJECT_DESC pipelineDesc = .();
-		pipelineDesc.Type = D3D12_STATE_OBJECT_TYPE.RAYTRACING_PIPELINE;
+		pipelineDesc.Type = D3D12_STATE_OBJECT_TYPE.D3D12_STATE_OBJECT_TYPE_RAYTRACING_PIPELINE;
 		pipelineDesc.NumSubobjects = (UINT)(d3dSubobjects.Count);
 		pipelineDesc.pSubobjects = d3dSubobjects.Ptr;
 
-		HRESULT hr = m_Context.device5.CreateStateObject(pipelineDesc, ID3D12StateObject.IID, (void**)(&pso.pipelineState));
+		HRESULT hr = m_Context.device5.CreateStateObject(&pipelineDesc, ID3D12StateObject.IID, (void**)(&pso.pipelineState));
 		if (FAILED(hr))
 		{
 			m_Context.error("Failed to create a DXR pipeline state object");
@@ -1456,12 +1457,12 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 			m_Context.device.CopyDescriptorsSimple(descriptorTable.capacity,
 				m_Resources.shaderResourceViewHeap.getCpuHandle(descriptorTable.firstDescriptor),
 				m_Resources.shaderResourceViewHeap.getCpuHandle(originalFirst),
-				D3D12_DESCRIPTOR_HEAP_TYPE.CBV_SRV_UAV);
+				D3D12_DESCRIPTOR_HEAP_TYPE.D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 			m_Context.device.CopyDescriptorsSimple(descriptorTable.capacity,
 				m_Resources.shaderResourceViewHeap.getCpuHandleShaderVisible(descriptorTable.firstDescriptor),
 				m_Resources.shaderResourceViewHeap.getCpuHandle(originalFirst),
-				D3D12_DESCRIPTOR_HEAP_TYPE.CBV_SRV_UAV);
+				D3D12_DESCRIPTOR_HEAP_TYPE.D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 			m_Resources.shaderResourceViewHeap.releaseDescriptors(originalFirst, descriptorTable.capacity);
 		}
@@ -1547,7 +1548,7 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 		D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS ASInputs;
 		if (desc.isTopLevel)
 		{
-			ASInputs.Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE.TOP_LEVEL;
+			ASInputs.Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE.D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL;
 			ASInputs.InstanceDescs = 0;
 			ASInputs.NumDescs = UINT(desc.topLevelMaxInstances);
 		}
@@ -1558,16 +1559,16 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 				fillD3dGeometryDesc(ref d3dGeometryDescs[i], desc.bottomLevelGeometries[i]);
 			}
 
-			ASInputs.Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE.BOTTOM_LEVEL;
+			ASInputs.Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE.D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL;
 			ASInputs.pGeometryDescs = d3dGeometryDescs.Ptr;
 			ASInputs.NumDescs = UINT(d3dGeometryDescs.Count);
 		}
 
-		ASInputs.DescsLayout = D3D12_ELEMENTS_LAYOUT.ARRAY;
+		ASInputs.DescsLayout = D3D12_ELEMENTS_LAYOUT.D3D12_ELEMENTS_LAYOUT_ARRAY;
 		ASInputs.Flags = (D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAGS)desc.buildFlags;
 
 		D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO ASPreBuildInfo = .();
-		m_Context.device5.GetRaytracingAccelerationStructurePrebuildInfo(ASInputs, out ASPreBuildInfo);
+		m_Context.device5.GetRaytracingAccelerationStructurePrebuildInfo(&ASInputs, &ASPreBuildInfo);
 
 		AccelStruct @as = new AccelStruct(m_Context);
 		@as.desc = desc;
@@ -1649,7 +1650,7 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 
 		pQueue.queue.ExecuteCommandLists(uint32(m_CommandListsToExecute.Count), m_CommandListsToExecute.Ptr);
 		pQueue.lastSubmittedInstance++;
-		pQueue.queue.Signal(ref *pQueue.fence, pQueue.lastSubmittedInstance);
+		pQueue.queue.Signal(pQueue.fence, pQueue.lastSubmittedInstance);
 
 		for (int i = 0; i < numCommandLists; i++)
 		{
@@ -1671,7 +1672,7 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 		Queue pExecutionQueue = getQueue(executionQueue);
 		Runtime.Assert(instanceID <= pExecutionQueue.lastSubmittedInstance);
 
-		pWaitQueue.queue.Wait(ref *pExecutionQueue.fence, instanceID);
+		pWaitQueue.queue.Wait(pExecutionQueue.fence, instanceID);
 	}
 
 	public override void waitForIdle()
@@ -1779,17 +1780,17 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 		D3D12_FEATURE_DATA_FORMAT_SUPPORT featureData = .();
 		featureData.Format = formatMapping.rtvFormat;
 
-		m_Context.device.CheckFeatureSupport(D3D12_FEATURE.FORMAT_SUPPORT, &featureData, sizeof(decltype(featureData)));
+		m_Context.device.CheckFeatureSupport(D3D12_FEATURE.D3D12_FEATURE_FORMAT_SUPPORT, &featureData, sizeof(decltype(featureData)));
 
-		if (featureData.Support1 & D3D12_FORMAT_SUPPORT1.BUFFER != 0)
+		if (featureData.Support1 & D3D12_FORMAT_SUPPORT1.D3D12_FORMAT_SUPPORT1_BUFFER != 0)
 			result = result | FormatSupport.Buffer;
-		if (featureData.Support1 & (D3D12_FORMAT_SUPPORT1.TEXTURE1D | D3D12_FORMAT_SUPPORT1.TEXTURE2D | D3D12_FORMAT_SUPPORT1.TEXTURE3D | D3D12_FORMAT_SUPPORT1.TEXTURECUBE) != 0)
+		if (featureData.Support1 & (D3D12_FORMAT_SUPPORT1.D3D12_FORMAT_SUPPORT1_TEXTURE1D | D3D12_FORMAT_SUPPORT1.D3D12_FORMAT_SUPPORT1_TEXTURE2D | D3D12_FORMAT_SUPPORT1.D3D12_FORMAT_SUPPORT1_TEXTURE3D | D3D12_FORMAT_SUPPORT1.D3D12_FORMAT_SUPPORT1_TEXTURECUBE) != 0)
 			result = result | FormatSupport.Texture;
-		if (featureData.Support1 & D3D12_FORMAT_SUPPORT1.DEPTH_STENCIL != 0)
+		if (featureData.Support1 & D3D12_FORMAT_SUPPORT1.D3D12_FORMAT_SUPPORT1_DEPTH_STENCIL != 0)
 			result = result | FormatSupport.DepthStencil;
-		if (featureData.Support1 & D3D12_FORMAT_SUPPORT1.RENDER_TARGET != 0)
+		if (featureData.Support1 & D3D12_FORMAT_SUPPORT1.D3D12_FORMAT_SUPPORT1_RENDER_TARGET != 0)
 			result = result | FormatSupport.RenderTarget;
-		if (featureData.Support1 & D3D12_FORMAT_SUPPORT1.BLENDABLE != 0)
+		if (featureData.Support1 & D3D12_FORMAT_SUPPORT1.D3D12_FORMAT_SUPPORT1_BLENDABLE != 0)
 			result = result | FormatSupport.Blendable;
 
 		if (formatMapping.srvFormat != featureData.Format)
@@ -1797,22 +1798,22 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 			featureData.Format = formatMapping.srvFormat;
 			featureData.Support1 = (D3D12_FORMAT_SUPPORT1)0;
 			featureData.Support2 = (D3D12_FORMAT_SUPPORT2)0;
-			m_Context.device.CheckFeatureSupport(D3D12_FEATURE.FORMAT_SUPPORT, &featureData, sizeof(decltype(featureData)));
+			m_Context.device.CheckFeatureSupport(D3D12_FEATURE.D3D12_FEATURE_FORMAT_SUPPORT, &featureData, sizeof(decltype(featureData)));
 		}
 
-		if (featureData.Support1 & D3D12_FORMAT_SUPPORT1.IA_INDEX_BUFFER != 0)
+		if (featureData.Support1 & D3D12_FORMAT_SUPPORT1.D3D12_FORMAT_SUPPORT1_IA_INDEX_BUFFER != 0)
 			result = result | FormatSupport.IndexBuffer;
-		if (featureData.Support1 & D3D12_FORMAT_SUPPORT1.IA_VERTEX_BUFFER != 0)
+		if (featureData.Support1 & D3D12_FORMAT_SUPPORT1.D3D12_FORMAT_SUPPORT1_IA_VERTEX_BUFFER != 0)
 			result = result | FormatSupport.VertexBuffer;
-		if (featureData.Support1 & D3D12_FORMAT_SUPPORT1.SHADER_LOAD != 0)
+		if (featureData.Support1 & D3D12_FORMAT_SUPPORT1.D3D12_FORMAT_SUPPORT1_SHADER_LOAD != 0)
 			result = result | FormatSupport.ShaderLoad;
-		if (featureData.Support1 & D3D12_FORMAT_SUPPORT1.SHADER_SAMPLE != 0)
+		if (featureData.Support1 & D3D12_FORMAT_SUPPORT1.D3D12_FORMAT_SUPPORT1_SHADER_SAMPLE != 0)
 			result = result | FormatSupport.ShaderSample;
-		if (featureData.Support2 & D3D12_FORMAT_SUPPORT2.UAV_ATOMIC_ADD != 0)
+		if (featureData.Support2 & D3D12_FORMAT_SUPPORT2.D3D12_FORMAT_SUPPORT2_UAV_ATOMIC_ADD != 0)
 			result = result | FormatSupport.ShaderAtomic;
-		if (featureData.Support2 & D3D12_FORMAT_SUPPORT2.UAV_TYPED_LOAD != 0)
+		if (featureData.Support2 & D3D12_FORMAT_SUPPORT2.D3D12_FORMAT_SUPPORT2_UAV_TYPED_LOAD != 0)
 			result = result | FormatSupport.ShaderUavLoad;
-		if (featureData.Support2 & D3D12_FORMAT_SUPPORT2.UAV_TYPED_STORE != 0)
+		if (featureData.Support2 & D3D12_FORMAT_SUPPORT2.D3D12_FORMAT_SUPPORT2_UAV_TYPED_STORE != 0)
 			result = result | FormatSupport.ShaderUavStore;
 
 		return result;
@@ -1884,15 +1885,15 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 		// Build the description structure
 
 		D3D12_VERSIONED_ROOT_SIGNATURE_DESC rsDesc = .();
-		rsDesc.Version = D3D_ROOT_SIGNATURE_VERSION._1_1;
+		rsDesc.Version = D3D_ROOT_SIGNATURE_VERSION.D3D_ROOT_SIGNATURE_VERSION_1_1;
 
 		if (allowInputLayout)
 		{
-			rsDesc.Desc_1_1.Flags |= D3D12_ROOT_SIGNATURE_FLAGS.ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+			rsDesc.Desc_1_1.Flags |= D3D12_ROOT_SIGNATURE_FLAGS.D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 		}
 		if (isLocal)
 		{
-			rsDesc.Desc_1_1.Flags |= D3D12_ROOT_SIGNATURE_FLAGS.LOCAL_ROOT_SIGNATURE;
+			rsDesc.Desc_1_1.Flags |= D3D12_ROOT_SIGNATURE_FLAGS.D3D12_ROOT_SIGNATURE_FLAG_LOCAL_ROOT_SIGNATURE;
 		}
 
 		if (!rootParameters.IsEmpty)
@@ -1905,7 +1906,7 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 
 		D3D12RefCountPtr<ID3DBlob> rsBlob = null;
 		D3D12RefCountPtr<ID3DBlob> errorBlob = null;
-		res = D3D12SerializeVersionedRootSignature(rsDesc, out rsBlob, &errorBlob);
+		res = D3D12SerializeVersionedRootSignature(&rsDesc, &rsBlob, &errorBlob);
 
 		if (FAILED(res))
 		{
@@ -2086,17 +2087,17 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 		switch (state.primType)
 		{
 		case PrimitiveType.PointList:
-			desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE.POINT;
+			desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE.D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
 			break;
 		case PrimitiveType.LineList:
-			desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE.LINE;
+			desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE.D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
 			break;
 		case PrimitiveType.TriangleList: fallthrough;
 		case PrimitiveType.TriangleStrip:
-			desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE.TRIANGLE;
+			desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE.D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 			break;
 		case PrimitiveType.PatchList:
-			desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE.PATCH;
+			desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE.D3D12_PRIMITIVE_TOPOLOGY_TYPE_PATCH;
 			break;
 		default: break;
 		}
@@ -2162,7 +2163,7 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 		}
 #endif
 
-		readonly HRESULT hr = m_Context.device.CreateGraphicsPipelineState(desc, ID3D12PipelineState.IID, (void**)(&pipelineState));
+		readonly HRESULT hr = m_Context.device.CreateGraphicsPipelineState(&desc, ID3D12PipelineState.IID, (void**)(&pipelineState));
 
 		if (FAILED(hr))
 		{
@@ -2198,7 +2199,7 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 		}
 #endif
 
-		readonly HRESULT hr = m_Context.device.CreateComputePipelineState(desc, ID3D12PipelineState.IID, (void**)(&pipelineState));
+		readonly HRESULT hr = m_Context.device.CreateComputePipelineState(&desc, ID3D12PipelineState.IID, (void**)(&pipelineState));
 
 		if (FAILED(hr))
 		{
@@ -2234,18 +2235,18 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 		PSO_STREAM psoDesc = .();
 //#pragma warning(pop)
 
-		psoDesc.RootSignature_Type = D3D12_PIPELINE_STATE_SUBOBJECT_TYPE.ROOT_SIGNATURE;
-		psoDesc.PrimitiveTopology_Type = D3D12_PIPELINE_STATE_SUBOBJECT_TYPE.PRIMITIVE_TOPOLOGY;
-		psoDesc.AmplificationShader_Type = D3D12_PIPELINE_STATE_SUBOBJECT_TYPE.AS;
-		psoDesc.MeshShader_Type = D3D12_PIPELINE_STATE_SUBOBJECT_TYPE.MS;
-		psoDesc.PixelShader_Type = D3D12_PIPELINE_STATE_SUBOBJECT_TYPE.PS;
-		psoDesc.RasterizerState_Type = D3D12_PIPELINE_STATE_SUBOBJECT_TYPE.RASTERIZER;
-		psoDesc.DepthStencilState_Type = D3D12_PIPELINE_STATE_SUBOBJECT_TYPE.DEPTH_STENCIL;
-		psoDesc.BlendState_Type = D3D12_PIPELINE_STATE_SUBOBJECT_TYPE.BLEND;
-		psoDesc.SampleDesc_Type = D3D12_PIPELINE_STATE_SUBOBJECT_TYPE.SAMPLE_DESC;
-		psoDesc.SampleMask_Type = D3D12_PIPELINE_STATE_SUBOBJECT_TYPE.SAMPLE_MASK;
-		psoDesc.RenderTargets_Type = D3D12_PIPELINE_STATE_SUBOBJECT_TYPE.RENDER_TARGET_FORMATS;
-		psoDesc.DSVFormat_Type = D3D12_PIPELINE_STATE_SUBOBJECT_TYPE.DEPTH_STENCIL_FORMAT;
+		psoDesc.RootSignature_Type = D3D12_PIPELINE_STATE_SUBOBJECT_TYPE.D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_ROOT_SIGNATURE;
+		psoDesc.PrimitiveTopology_Type = D3D12_PIPELINE_STATE_SUBOBJECT_TYPE.D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_PRIMITIVE_TOPOLOGY;
+		psoDesc.AmplificationShader_Type = D3D12_PIPELINE_STATE_SUBOBJECT_TYPE.D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_AS;
+		psoDesc.MeshShader_Type = D3D12_PIPELINE_STATE_SUBOBJECT_TYPE.D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_MS;
+		psoDesc.PixelShader_Type = D3D12_PIPELINE_STATE_SUBOBJECT_TYPE.D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_PS;
+		psoDesc.RasterizerState_Type = D3D12_PIPELINE_STATE_SUBOBJECT_TYPE.D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_RASTERIZER;
+		psoDesc.DepthStencilState_Type = D3D12_PIPELINE_STATE_SUBOBJECT_TYPE.D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_DEPTH_STENCIL;
+		psoDesc.BlendState_Type = D3D12_PIPELINE_STATE_SUBOBJECT_TYPE.D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_BLEND;
+		psoDesc.SampleDesc_Type = D3D12_PIPELINE_STATE_SUBOBJECT_TYPE.D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_SAMPLE_DESC;
+		psoDesc.SampleMask_Type = D3D12_PIPELINE_STATE_SUBOBJECT_TYPE.D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_SAMPLE_MASK;
+		psoDesc.RenderTargets_Type = D3D12_PIPELINE_STATE_SUBOBJECT_TYPE.D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_RENDER_TARGET_FORMATS;
+		psoDesc.DSVFormat_Type = D3D12_PIPELINE_STATE_SUBOBJECT_TYPE.D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_DEPTH_STENCIL_FORMAT;
 
 		psoDesc.RootSignature = pRS.handle;
 
@@ -2266,14 +2267,14 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 		switch (state.primType)
 		{
 		case PrimitiveType.PointList:
-			psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE.POINT;
+			psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE.D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
 			break;
 		case PrimitiveType.LineList:
-			psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE.LINE;
+			psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE.D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
 			break;
 		case PrimitiveType.TriangleList: fallthrough;
 		case PrimitiveType.TriangleStrip:
-			psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE.TRIANGLE;
+			psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE.D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 			break;
 		case PrimitiveType.PatchList:
 			m_Context.error("Unsupported primitive topology for meshlets");
@@ -2314,7 +2315,7 @@ class Device : RefCounter<nvrhi.d3d12.IDevice>
 		streamDesc.pPipelineStateSubobjectStream = &psoDesc;
 		streamDesc.SizeInBytes = sizeof(decltype(psoDesc));
 
-		HRESULT hr = m_Context.device2.CreatePipelineState(streamDesc, ID3D12PipelineState.IID, (void**)(&pipelineState));
+		HRESULT hr = m_Context.device2.CreatePipelineState(&streamDesc, ID3D12PipelineState.IID, (void**)(&pipelineState));
 		if (FAILED(hr))
 		{
 			m_Context.error("Failed to create a meshlet pipeline state object");

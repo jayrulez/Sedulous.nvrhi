@@ -10,7 +10,7 @@ namespace nvrhi.d3d12
 		private Context* m_Context;
 		private D3D12RefCountPtr<ID3D12DescriptorHeap> m_Heap;
 		private D3D12RefCountPtr<ID3D12DescriptorHeap> m_ShaderVisibleHeap;
-		private D3D12_DESCRIPTOR_HEAP_TYPE m_HeapType = D3D12_DESCRIPTOR_HEAP_TYPE.CBV_SRV_UAV;
+		private D3D12_DESCRIPTOR_HEAP_TYPE m_HeapType = D3D12_DESCRIPTOR_HEAP_TYPE.D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 		private D3D12_CPU_DESCRIPTOR_HANDLE m_StartCpuHandle = .();
 		private D3D12_CPU_DESCRIPTOR_HANDLE m_StartCpuHandleShaderVisible = .();
 		private D3D12_GPU_DESCRIPTOR_HANDLE m_StartGpuHandleShaderVisible = .();
@@ -71,18 +71,18 @@ namespace nvrhi.d3d12
 			D3D12_DESCRIPTOR_HEAP_DESC heapDesc = .();
 			heapDesc.Type = heapType;
 			heapDesc.NumDescriptors = numDescriptors;
-			heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAGS.NONE;
+			heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAGS.D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 
-			HRESULT hr = m_Context.device.CreateDescriptorHeap(heapDesc, ID3D12DescriptorHeap.IID, (void**)&m_Heap);
+			HRESULT hr = m_Context.device.CreateDescriptorHeap(&heapDesc, ID3D12DescriptorHeap.IID, (void**)&m_Heap);
 
 			if (FAILED(hr))
 				return hr;
 
 			if (shaderVisible)
 			{
-				heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAGS.SHADER_VISIBLE;
+				heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAGS.D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 
-				hr = m_Context.device.CreateDescriptorHeap(heapDesc, ID3D12DescriptorHeap.IID, (void**)&m_ShaderVisibleHeap);
+				hr = m_Context.device.CreateDescriptorHeap(&heapDesc, ID3D12DescriptorHeap.IID, (void**)&m_ShaderVisibleHeap);
 
 				if (FAILED(hr))
 					return hr;

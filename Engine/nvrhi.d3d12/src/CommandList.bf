@@ -118,7 +118,7 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 			if (chunk.lastSubmittedInstance <= completedInstance)
 			{
 				chunk.allocator.Reset();
-				chunk.commandList.Reset(ref *chunk.allocator, null);
+				chunk.commandList.Reset(chunk.allocator, null);
 				m_CommandListPool.PopFront();
 			}
 			else
@@ -234,7 +234,7 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 				m_ActiveCommandList.commandList.ClearUnorderedAccessViewFloat(
 					m_Resources.shaderResourceViewHeap.getGpuHandle(index),
 					m_Resources.shaderResourceViewHeap.getCpuHandle(index),
-					ref *t.resource, clearColor.r, 0, null);
+					t.resource, clearColor.r, 0, null);
 			}
 		}
 	}
@@ -264,14 +264,14 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 		}
 		commitBarriers();
 
-		D3D12_CLEAR_FLAGS clearFlags = D3D12_CLEAR_FLAGS.DEPTH | D3D12_CLEAR_FLAGS.STENCIL;
+		D3D12_CLEAR_FLAGS clearFlags = D3D12_CLEAR_FLAGS.D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAGS.D3D12_CLEAR_FLAG_STENCIL;
 		if (!clearDepth)
 		{
-			clearFlags = D3D12_CLEAR_FLAGS.STENCIL;
+			clearFlags = D3D12_CLEAR_FLAGS.D3D12_CLEAR_FLAG_STENCIL;
 		}
 		else if (!clearStencil)
 		{
-			clearFlags = D3D12_CLEAR_FLAGS.DEPTH;
+			clearFlags = D3D12_CLEAR_FLAGS.D3D12_CLEAR_FLAG_DEPTH;
 		}
 
 		for (MipLevel mipLevel = subresources.baseMipLevel; mipLevel < subresources.baseMipLevel + subresources.numMipLevels; mipLevel++)
@@ -318,7 +318,7 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 				m_ActiveCommandList.commandList.ClearUnorderedAccessViewUint(
 					m_Resources.shaderResourceViewHeap.getGpuHandle(index),
 					m_Resources.shaderResourceViewHeap.getCpuHandle(index),
-					ref *t.resource, clearValues[0], 0, null);
+					t.resource, clearValues[0], 0, null);
 			}
 		}
 		else if (t.desc.isRenderTarget)
@@ -356,12 +356,12 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 
 		D3D12_TEXTURE_COPY_LOCATION dstLocation = .();
 		dstLocation.pResource = dst.resource;
-		dstLocation.Type = D3D12_TEXTURE_COPY_TYPE.SUBRESOURCE_INDEX;
+		dstLocation.Type = D3D12_TEXTURE_COPY_TYPE.D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
 		dstLocation.SubresourceIndex = dstSubresource;
 
 		D3D12_TEXTURE_COPY_LOCATION srcLocation = .();
 		srcLocation.pResource = src.resource;
-		srcLocation.Type = D3D12_TEXTURE_COPY_TYPE.SUBRESOURCE_INDEX;
+		srcLocation.Type = D3D12_TEXTURE_COPY_TYPE.D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
 		srcLocation.SubresourceIndex = srcSubresource;
 
 		D3D12_BOX srcBox = .();
@@ -382,11 +382,11 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 		m_Instance.referencedResources.Add(dst);
 		m_Instance.referencedResources.Add(src);
 
-		m_ActiveCommandList.commandList.CopyTextureRegion(dstLocation,
+		m_ActiveCommandList.commandList.CopyTextureRegion(&dstLocation,
 			resolvedDstSlice.x,
 			resolvedDstSlice.y,
 			resolvedDstSlice.z,
-			srcLocation,
+			&srcLocation,
 			&srcBox);
 	}
 	public override void copyTexture(IStagingTexture _dst, TextureSlice dstSlice, ITexture _src, TextureSlice srcSlice)
@@ -413,12 +413,12 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 
 		D3D12_TEXTURE_COPY_LOCATION dstLocation = .();
 		dstLocation.pResource = dst.buffer.resource;
-		dstLocation.Type = D3D12_TEXTURE_COPY_TYPE.PLACED_FOOTPRINT;
+		dstLocation.Type = D3D12_TEXTURE_COPY_TYPE.D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
 		dstLocation.PlacedFootprint = dstRegion.footprint;
 
 		D3D12_TEXTURE_COPY_LOCATION srcLocation = .();
 		srcLocation.pResource = src.resource;
-		srcLocation.Type = D3D12_TEXTURE_COPY_TYPE.SUBRESOURCE_INDEX;
+		srcLocation.Type = D3D12_TEXTURE_COPY_TYPE.D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
 		srcLocation.SubresourceIndex = srcSubresource;
 
 		D3D12_BOX srcBox = .();
@@ -429,8 +429,8 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 		srcBox.bottom = resolvedSrcSlice.y + resolvedSrcSlice.height;
 		srcBox.back = resolvedSrcSlice.z + resolvedSrcSlice.depth;
 
-		m_ActiveCommandList.commandList.CopyTextureRegion(dstLocation, resolvedDstSlice.x, resolvedDstSlice.y, resolvedDstSlice.z,
-			srcLocation, &srcBox);
+		m_ActiveCommandList.commandList.CopyTextureRegion(&dstLocation, resolvedDstSlice.x, resolvedDstSlice.y, resolvedDstSlice.z,
+			&srcLocation, &srcBox);
 	}
 	public override void copyTexture(ITexture _dst, TextureSlice dstSlice, IStagingTexture _src, TextureSlice srcSlice)
 	{
@@ -456,12 +456,12 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 
 		D3D12_TEXTURE_COPY_LOCATION dstLocation = .();
 		dstLocation.pResource = dst.resource;
-		dstLocation.Type = D3D12_TEXTURE_COPY_TYPE.SUBRESOURCE_INDEX;
+		dstLocation.Type = D3D12_TEXTURE_COPY_TYPE.D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
 		dstLocation.SubresourceIndex = dstSubresource;
 
 		D3D12_TEXTURE_COPY_LOCATION srcLocation = .();
 		srcLocation.pResource = src.buffer.resource;
-		srcLocation.Type = D3D12_TEXTURE_COPY_TYPE.PLACED_FOOTPRINT;
+		srcLocation.Type = D3D12_TEXTURE_COPY_TYPE.D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
 		srcLocation.PlacedFootprint = srcRegion.footprint;
 
 		D3D12_BOX srcBox = .();
@@ -472,8 +472,8 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 		srcBox.bottom = resolvedSrcSlice.y + resolvedSrcSlice.height;
 		srcBox.back = resolvedSrcSlice.z + resolvedSrcSlice.depth;
 
-		m_ActiveCommandList.commandList.CopyTextureRegion(dstLocation, resolvedDstSlice.x, resolvedDstSlice.y, resolvedDstSlice.z,
-			srcLocation, &srcBox);
+		m_ActiveCommandList.commandList.CopyTextureRegion(&dstLocation, resolvedDstSlice.x, resolvedDstSlice.y, resolvedDstSlice.z,
+			&srcLocation, &srcBox);
 	}
 	public override void writeTexture(ITexture _dest, uint32 arraySlice, uint32 mipLevel, void* data, int rowPitch, int depthPitch)
 	{
@@ -493,7 +493,7 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 		uint64 rowSizeInBytes = 0;
 		uint64 totalBytes = 0;
 
-		m_Context.device.GetCopyableFootprints(resourceDesc, subresource, 1, 0, &footprint, &numRows, &rowSizeInBytes, &totalBytes);
+		m_Context.device.GetCopyableFootprints(&resourceDesc, subresource, 1, 0, &footprint, &numRows, &rowSizeInBytes, &totalBytes);
 
 		void* cpuVA = null;
 		ID3D12Resource* uploadBuffer = null;
@@ -519,12 +519,12 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 		}
 
 		D3D12_TEXTURE_COPY_LOCATION destCopyLocation;
-		destCopyLocation.Type = D3D12_TEXTURE_COPY_TYPE.SUBRESOURCE_INDEX;
+		destCopyLocation.Type = D3D12_TEXTURE_COPY_TYPE.D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
 		destCopyLocation.SubresourceIndex = subresource;
 		destCopyLocation.pResource = dest.resource;
 
 		D3D12_TEXTURE_COPY_LOCATION srcCopyLocation;
-		srcCopyLocation.Type = D3D12_TEXTURE_COPY_TYPE.PLACED_FOOTPRINT;
+		srcCopyLocation.Type = D3D12_TEXTURE_COPY_TYPE.D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
 		srcCopyLocation.PlacedFootprint = footprint;
 		srcCopyLocation.pResource = uploadBuffer;
 
@@ -536,7 +536,7 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 			m_CurrentUploadBuffer = uploadBuffer;
 		}
 
-		m_ActiveCommandList.commandList.CopyTextureRegion(destCopyLocation, 0, 0, 0, srcCopyLocation, null);
+		m_ActiveCommandList.commandList.CopyTextureRegion(&destCopyLocation, 0, 0, 0, &srcCopyLocation, null);
 	}
 	public override void resolveTexture(ITexture _dest, TextureSubresourceSet dstSubresources, ITexture _src, TextureSubresourceSet srcSubresources)
 	{
@@ -567,7 +567,7 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 				{
 					uint32 dstSubresource = calcSubresource(mipLevel + dstSR.baseMipLevel, arrayIndex + dstSR.baseArraySlice, (.)plane, dest.desc.mipLevels, dest.desc.arraySize);
 					uint32 srcSubresource = calcSubresource(mipLevel + srcSR.baseMipLevel, arrayIndex + srcSR.baseArraySlice, (.)plane, src.desc.mipLevels, src.desc.arraySize);
-					m_ActiveCommandList.commandList.ResolveSubresource(ref *dest.resource, dstSubresource, ref *src.resource, srcSubresource, formatMapping.rtvFormat);
+					m_ActiveCommandList.commandList.ResolveSubresource(dest.resource, dstSubresource, src.resource, srcSubresource, formatMapping.rtvFormat);
 				}
 			}
 		}
@@ -611,7 +611,7 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 
 			m_Instance.referencedResources.Add(buffer);
 
-			m_ActiveCommandList.commandList.CopyBufferRegion(ref *buffer.resource, destOffsetBytes, ref *uploadBuffer, (.)offsetInUploadBuffer, (.)dataSize);
+			m_ActiveCommandList.commandList.CopyBufferRegion(buffer.resource, destOffsetBytes, uploadBuffer, (.)offsetInUploadBuffer, (.)dataSize);
 		}
 	}
 	public override void clearBufferUInt(IBuffer _b, uint32 clearValue)
@@ -640,7 +640,7 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 		m_ActiveCommandList.commandList.ClearUnorderedAccessViewUint(
 			m_Resources.shaderResourceViewHeap.getGpuHandle(clearUAV),
 			m_Resources.shaderResourceViewHeap.getCpuHandle(clearUAV),
-			ref *b.resource, values[0], 0, null);
+			b.resource, values[0], 0, null);
 	}
 	public override void copyBuffer(IBuffer _dest, uint64 destOffsetBytes, IBuffer _src, uint64 srcOffsetBytes, uint64 dataSizeBytes)
 	{
@@ -664,7 +664,7 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 		else
 			m_Instance.referencedResources.Add(dest);
 
-		m_ActiveCommandList.commandList.CopyBufferRegion(ref *dest.resource, destOffsetBytes, ref *src.resource, srcOffsetBytes, dataSizeBytes);
+		m_ActiveCommandList.commandList.CopyBufferRegion(dest.resource, destOffsetBytes, src.resource, srcOffsetBytes, dataSizeBytes);
 	}
 
 	public override void setPushConstants(void* data, int byteSize)
@@ -710,6 +710,7 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 
 	public override void setGraphicsState(GraphicsState state)
 	{
+		var state;
 		GraphicsPipeline pso = checked_cast<GraphicsPipeline, IGraphicsPipeline>(state.pipeline);
 		Framebuffer framebuffer = checked_cast<Framebuffer, IFramebuffer>(state.framebuffer);
 
@@ -850,7 +851,7 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 			else if (m_CurrentGraphicsStateValid && m_CurrentGraphicsState.shadingRateState.enabled)
 			{
 				// only call if the old state had VRS enabled and we need to disable it
-				m_ActiveCommandList.commandList6.RSSetShadingRate(D3D12_SHADING_RATE._1X1, null);
+				m_ActiveCommandList.commandList6.RSSetShadingRate(D3D12_SHADING_RATE.D3D12_SHADING_RATE_1X1, null);
 			}
 		}
 
@@ -914,7 +915,7 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 
 		updateGraphicsVolatileBuffers();
 
-		m_ActiveCommandList.commandList.ExecuteIndirect(ref *m_Context.drawIndirectSignature, 1, ref *indirectParams.resource, offsetBytes, null, 0);
+		m_ActiveCommandList.commandList.ExecuteIndirect(m_Context.drawIndirectSignature, 1, indirectParams.resource, offsetBytes, null, 0);
 	}
 
 	public override void setComputeState(ComputeState state)
@@ -944,7 +945,7 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 
 		if (updatePipeline)
 		{
-			m_ActiveCommandList.commandList.SetPipelineState(ref *pso.pipelineState);
+			m_ActiveCommandList.commandList.SetPipelineState(pso.pipelineState);
 
 			m_Instance.referencedResources.Add(pso);
 		}
@@ -974,11 +975,12 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 
 		updateComputeVolatileBuffers();
 
-		m_ActiveCommandList.commandList.ExecuteIndirect(ref *m_Context.dispatchIndirectSignature, 1, ref *indirectParams.resource, offsetBytes, null, 0);
+		m_ActiveCommandList.commandList.ExecuteIndirect(m_Context.dispatchIndirectSignature, 1, indirectParams.resource, offsetBytes, null, 0);
 	}
 
 	public override void setMeshletState(MeshletState state)
 	{
+		var state;
 		MeshletPipeline pso = checked_cast<MeshletPipeline, IMeshletPipeline>(state.pipeline);
 		Framebuffer framebuffer = checked_cast<Framebuffer, IFramebuffer>(state.framebuffer);
 
@@ -1185,7 +1187,7 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 
 		if (updatePipeline)
 		{
-			m_ActiveCommandList.commandList4.SetPipelineState1(ref *pso.pipelineState);
+			m_ActiveCommandList.commandList4.SetPipelineState1(pso.pipelineState);
 
 			m_Instance.referencedResources.Add(pso);
 		}
@@ -1218,7 +1220,7 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 		desc.Height = args.height;
 		desc.Depth = args.depth;
 
-		m_ActiveCommandList.commandList4.DispatchRays(desc);
+		m_ActiveCommandList.commandList4.DispatchRays(&desc);
 	}
 
 	public override void buildBottomLevelAccelStruct(nvrhi.rt.IAccelStruct _as, nvrhi.rt.GeometryDesc* pGeometries, int numGeometries, nvrhi.rt.AccelStructBuildFlags buildFlags)
@@ -1236,7 +1238,7 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 
 		for (uint32 i = 0; i < numGeometries; i++)
 		{
-			readonly var geometryDesc = ref pGeometries[i];
+			/*readonly*/ var geometryDesc = ref pGeometries[i];
 			var d3dGeometryDesc = ref d3dGeometryDescs[i];
 
 			fillD3dGeometryDesc(ref d3dGeometryDesc, geometryDesc);
@@ -1286,13 +1288,13 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 		commitBarriers();
 
 		D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS ASInputs;
-		ASInputs.Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE.BOTTOM_LEVEL;
-		ASInputs.DescsLayout = D3D12_ELEMENTS_LAYOUT.ARRAY;
+		ASInputs.Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE.D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL;
+		ASInputs.DescsLayout = D3D12_ELEMENTS_LAYOUT.D3D12_ELEMENTS_LAYOUT_ARRAY;
 		ASInputs.pGeometryDescs = d3dGeometryDescs.Ptr;
 		ASInputs.NumDescs = UINT(d3dGeometryDescs.Count);
 		ASInputs.Flags = (D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAGS)buildFlags;
 		if (@as.allowUpdate)
-			ASInputs.Flags |= D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAGS.ALLOW_UPDATE;
+			ASInputs.Flags |= D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAGS.D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_ALLOW_UPDATE;
 
 #if NVRHI_WITH_RTXMU
 		List<uint64> accelStructsToBuild;
@@ -1324,7 +1326,7 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 		}
 #else
 		D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO ASPreBuildInfo = .();
-		m_Context.device5.GetRaytracingAccelerationStructurePrebuildInfo(ASInputs, out ASPreBuildInfo);
+		m_Context.device5.GetRaytracingAccelerationStructurePrebuildInfo(&ASInputs, &ASPreBuildInfo);
 
 		if (ASPreBuildInfo.ResultDataMaxSizeInBytes > @as.dataBuffer.desc.byteSize)
 		{
@@ -1360,7 +1362,7 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 		}
 		commitBarriers();
 
-		m_ActiveCommandList.commandList4.BuildRaytracingAccelerationStructure(buildDesc, 0, null);
+		m_ActiveCommandList.commandList4.BuildRaytracingAccelerationStructure(&buildDesc, 0, null);
 
 #endif
 
@@ -1399,7 +1401,7 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 		// because doing it in GPU memory over PCIe is much slower.
 		for (uint32 i = 0; i < numInstances; i++)
 		{
-			readonly ref nvrhi.rt.InstanceDesc instance = ref pInstances[i];
+			/*readonly*/ ref nvrhi.rt.InstanceDesc instance = ref pInstances[i];
 			ref D3D12_RAYTRACING_INSTANCE_DESC dxrInstance = ref @as.dxrInstances[i];
 
 			AccelStruct blas = checked_cast<AccelStruct, IAccelStruct>(instance.bottomLevelAS);
@@ -1478,7 +1480,7 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 
 		m_Instance.referencedTimerQueries.Add(query);
 
-		m_ActiveCommandList.commandList.EndQuery(ref *m_Context.timerQueryHeap, D3D12_QUERY_TYPE.TIMESTAMP, query.beginQueryIndex);
+		m_ActiveCommandList.commandList.EndQuery(m_Context.timerQueryHeap, D3D12_QUERY_TYPE.D3D12_QUERY_TYPE_TIMESTAMP, query.beginQueryIndex);
 
 		// two timestamps within the same command list are always reliably comparable, so we avoid kicking off here
 		// (note: we don't call SetStablePowerState anymore)
@@ -1489,13 +1491,13 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 
 		m_Instance.referencedTimerQueries.Add(query);
 
-		m_ActiveCommandList.commandList.EndQuery(ref *m_Context.timerQueryHeap, D3D12_QUERY_TYPE.TIMESTAMP, query.endQueryIndex);
+		m_ActiveCommandList.commandList.EndQuery(m_Context.timerQueryHeap, D3D12_QUERY_TYPE.D3D12_QUERY_TYPE_TIMESTAMP, query.endQueryIndex);
 
-		m_ActiveCommandList.commandList.ResolveQueryData(ref *m_Context.timerQueryHeap,
-			D3D12_QUERY_TYPE.TIMESTAMP,
+		m_ActiveCommandList.commandList.ResolveQueryData(m_Context.timerQueryHeap,
+			D3D12_QUERY_TYPE.D3D12_QUERY_TYPE_TIMESTAMP,
 			query.beginQueryIndex,
 			2,
-			ref *m_Context.timerQueryResolveBuffer.resource,
+			m_Context.timerQueryResolveBuffer.resource,
 			query.beginQueryIndex * 8);
 	}
 
@@ -1644,7 +1646,7 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 			readonly D3D12_RESOURCE_STATES stateAfter = convertResourceStates(barrier.stateAfter);
 			if (stateBefore != stateAfter)
 			{
-				d3dbarrier.Type = D3D12_RESOURCE_BARRIER_TYPE.TRANSITION;
+				d3dbarrier.Type = D3D12_RESOURCE_BARRIER_TYPE.D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 				d3dbarrier.Transition.StateBefore = stateBefore;
 				d3dbarrier.Transition.StateAfter = stateAfter;
 				d3dbarrier.Transition.pResource = texture.resource;
@@ -1662,9 +1664,9 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 					}
 				}
 			}
-			else if (stateAfter & D3D12_RESOURCE_STATES.UNORDERED_ACCESS != 0)
+			else if (stateAfter & D3D12_RESOURCE_STATES.D3D12_RESOURCE_STATE_UNORDERED_ACCESS != 0)
 			{
-				d3dbarrier.Type = D3D12_RESOURCE_BARRIER_TYPE.UAV;
+				d3dbarrier.Type = D3D12_RESOURCE_BARRIER_TYPE.D3D12_RESOURCE_BARRIER_TYPE_UAV;
 				d3dbarrier.UAV.pResource = texture.resource;
 				m_D3DBarriers.Add(d3dbarrier);
 			}
@@ -1679,10 +1681,10 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 			readonly D3D12_RESOURCE_STATES stateBefore = convertResourceStates(barrier.stateBefore);
 			readonly D3D12_RESOURCE_STATES stateAfter = convertResourceStates(barrier.stateAfter);
 			if (stateBefore != stateAfter &&
-				(stateBefore & D3D12_RESOURCE_STATES.RAYTRACING_ACCELERATION_STRUCTURE) == 0 &&
-				(stateAfter & D3D12_RESOURCE_STATES.RAYTRACING_ACCELERATION_STRUCTURE) == 0)
+				(stateBefore & D3D12_RESOURCE_STATES.D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE) == 0 &&
+				(stateAfter & D3D12_RESOURCE_STATES.D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE) == 0)
 			{
-				d3dbarrier.Type = D3D12_RESOURCE_BARRIER_TYPE.TRANSITION;
+				d3dbarrier.Type = D3D12_RESOURCE_BARRIER_TYPE.D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 				d3dbarrier.Transition.StateBefore = stateBefore;
 				d3dbarrier.Transition.StateAfter = stateAfter;
 				d3dbarrier.Transition.pResource = buffer.resource;
@@ -1691,9 +1693,9 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 			}
 			else if ((barrier.stateBefore == ResourceStates.AccelStructWrite && (barrier.stateAfter & (ResourceStates.AccelStructRead | ResourceStates.AccelStructBuildBlas)) != 0) ||
 				(barrier.stateAfter == ResourceStates.AccelStructWrite && (barrier.stateBefore & (ResourceStates.AccelStructRead | ResourceStates.AccelStructBuildBlas)) != 0) ||
-				(stateAfter & D3D12_RESOURCE_STATES.UNORDERED_ACCESS) != 0)
+				(stateAfter & D3D12_RESOURCE_STATES.D3D12_RESOURCE_STATE_UNORDERED_ACCESS) != 0)
 			{
-				d3dbarrier.Type = D3D12_RESOURCE_BARRIER_TYPE.UAV;
+				d3dbarrier.Type = D3D12_RESOURCE_BARRIER_TYPE.D3D12_RESOURCE_BARRIER_TYPE_UAV;
 				d3dbarrier.UAV.pResource = buffer.resource;
 				m_D3DBarriers.Add(d3dbarrier);
 			}
@@ -2153,7 +2155,7 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 			m_ActiveCommandList.commandList.SetGraphicsRootSignature(pso.rootSignature.handle);
 		}
 
-		m_ActiveCommandList.commandList.SetPipelineState(ref *pso.pipelineState);
+		m_ActiveCommandList.commandList.SetPipelineState(pso.pipelineState);
 
 		m_ActiveCommandList.commandList.IASetPrimitiveTopology(convertPrimitiveType(pipelineDesc.primType, pipelineDesc.patchControlPoints));
 
@@ -2173,7 +2175,7 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 			commandList.SetGraphicsRootSignature(pso.rootSignature.handle);
 		}
 
-		commandList.SetPipelineState(ref *pso.pipelineState);
+		commandList.SetPipelineState(pso.pipelineState);
 
 		commandList.IASetPrimitiveTopology(convertPrimitiveType(state.primType, 0));
 
@@ -2216,7 +2218,7 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 		if (m_CurrentGraphicsStateValid && m_CurrentGraphicsState.shadingRateState.enabled)
 		{
 			m_ActiveCommandList.commandList6.RSSetShadingRateImage(null);
-			m_ActiveCommandList.commandList6.RSSetShadingRate(D3D12_SHADING_RATE._1X1, null);
+			m_ActiveCommandList.commandList6.RSSetShadingRate(D3D12_SHADING_RATE.D3D12_SHADING_RATE_1X1, null);
 			m_CurrentGraphicsState.shadingRateState.enabled = false;
 			m_CurrentGraphicsState.framebuffer = null;
 		}
@@ -2230,13 +2232,13 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 		switch (m_Desc.queueType)
 		{
 		case CommandQueue.Graphics:
-			d3dCommandListType = D3D12_COMMAND_LIST_TYPE.DIRECT;
+			d3dCommandListType = D3D12_COMMAND_LIST_TYPE.D3D12_COMMAND_LIST_TYPE_DIRECT;
 			break;
 		case CommandQueue.Compute:
-			d3dCommandListType = D3D12_COMMAND_LIST_TYPE.COMPUTE;
+			d3dCommandListType = D3D12_COMMAND_LIST_TYPE.D3D12_COMMAND_LIST_TYPE_COMPUTE;
 			break;
 		case CommandQueue.Copy:
-			d3dCommandListType = D3D12_COMMAND_LIST_TYPE.COPY;
+			d3dCommandListType = D3D12_COMMAND_LIST_TYPE.D3D12_COMMAND_LIST_TYPE_COPY;
 			break;
 
 		case CommandQueue.Count: fallthrough;
@@ -2246,7 +2248,7 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 		}
 
 		m_Context.device.CreateCommandAllocator(d3dCommandListType, ID3D12CommandAllocator.IID, (void**)&commandList.allocator);
-		m_Context.device.CreateCommandList(0, d3dCommandListType, ref *commandList.allocator, null, ID3D12GraphicsCommandList.IID, (void**)&commandList.commandList);
+		m_Context.device.CreateCommandList(0, d3dCommandListType, commandList.allocator, null, ID3D12GraphicsCommandList.IID, (void**)&commandList.commandList);
 
 		commandList.commandList.QueryInterface(ID3D12GraphicsCommandList4.IID, (void**)(&commandList.commandList4));
 		commandList.commandList.QueryInterface(ID3D12GraphicsCommandList6.IID, (void**)(&commandList.commandList6));
@@ -2265,16 +2267,16 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 		}
 
 		D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS ASInputs;
-		ASInputs.Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE.TOP_LEVEL;
-		ASInputs.DescsLayout = D3D12_ELEMENTS_LAYOUT.ARRAY;
+		ASInputs.Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE.D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL;
+		ASInputs.DescsLayout = D3D12_ELEMENTS_LAYOUT.D3D12_ELEMENTS_LAYOUT_ARRAY;
 		ASInputs.InstanceDescs = instanceData;
 		ASInputs.NumDescs = UINT(numInstances);
 		ASInputs.Flags = (D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAGS)buildFlags;
 		if (@as.allowUpdate)
-			ASInputs.Flags |= D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAGS.ALLOW_UPDATE;
+			ASInputs.Flags |= D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAGS.D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_ALLOW_UPDATE;
 
 		D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO ASPreBuildInfo = .();
-		m_Context.device5.GetRaytracingAccelerationStructurePrebuildInfo(ASInputs, out ASPreBuildInfo);
+		m_Context.device5.GetRaytracingAccelerationStructurePrebuildInfo(&ASInputs, &ASPreBuildInfo);
 
 		if (ASPreBuildInfo.ResultDataMaxSizeInBytes > @as.dataBuffer.desc.byteSize)
 		{
@@ -2304,6 +2306,6 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 		buildDesc.DestAccelerationStructureData = @as.dataBuffer.gpuVA;
 		buildDesc.SourceAccelerationStructureData = performUpdate ? @as.dataBuffer.gpuVA : 0;
 
-		m_ActiveCommandList.commandList4.BuildRaytracingAccelerationStructure(buildDesc, 0, null);
+		m_ActiveCommandList.commandList4.BuildRaytracingAccelerationStructure(&buildDesc, 0, null);
 	}
 }

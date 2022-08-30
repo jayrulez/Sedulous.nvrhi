@@ -36,7 +36,7 @@ class Queue
 		m_Context = context;
 
 		Runtime.Assert(queue != null);
-		m_Context.device.CreateFence(0, D3D12_FENCE_FLAGS.NONE, ID3D12Fence.IID, (void**)&fence);
+		m_Context.device.CreateFence(0, D3D12_FENCE_FLAGS.D3D12_FENCE_FLAG_NONE, ID3D12Fence.IID, (void**)&fence);
 	}
 
 	public uint64 updateLastCompletedInstance()

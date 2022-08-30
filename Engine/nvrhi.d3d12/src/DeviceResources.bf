@@ -1,6 +1,7 @@
 using System.Collections;
 using Win32.Graphics.Dxgi;
 using Win32.Graphics.Direct3D12;
+using Win32.Graphics.Dxgi.Common;
 namespace nvrhi.d3d12
 {
 	class DeviceResources
@@ -36,7 +37,7 @@ namespace nvrhi.d3d12
 			if (planeCount == 0)
 			{
 				D3D12_FEATURE_DATA_FORMAT_INFO formatInfo = .() { Format =  format, PlaneCount = 1 };
-				if (FAILED(m_Context.device.CheckFeatureSupport(D3D12_FEATURE.FORMAT_INFO, &formatInfo, sizeof(decltype(formatInfo)))))
+				if (FAILED(m_Context.device.CheckFeatureSupport(D3D12_FEATURE.D3D12_FEATURE_FORMAT_INFO, &formatInfo, sizeof(decltype(formatInfo)))))
 				{
 					// Format not supported - store a special value in the cache to avoid querying later
 					planeCount = 255;

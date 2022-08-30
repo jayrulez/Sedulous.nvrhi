@@ -39,7 +39,7 @@ namespace nvrhi.d3d12
 			        // A volatile CB can only be bound to a command list after it's been written into, and 
 			        // after that the data will not change until the command list has finished executing.
 			        // Subsequent writes will be made into a newly allocated portion of an upload buffer.
-			        rootDescriptor.Flags = D3D12_ROOT_DESCRIPTOR_FLAGS.DATA_STATIC;
+			        rootDescriptor.Flags = D3D12_ROOT_DESCRIPTOR_FLAGS.D3D12_ROOT_DESCRIPTOR_FLAG_DATA_STATIC;
 
 			        rootParametersVolatileCB.PushBack(((.)-1, rootDescriptor));
 			    }
@@ -59,12 +59,12 @@ namespace nvrhi.d3d12
 			            descriptorRangesSamplers.Resize(descriptorRangesSamplers.Count + 1);
 			            ref D3D12_DESCRIPTOR_RANGE1 range = ref descriptorRangesSamplers[descriptorRangesSamplers.Count - 1];
 
-			            range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE.SAMPLER;
+			            range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE.D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER;
 			            range.NumDescriptors = 1;
 			            range.BaseShaderRegister = binding.slot;
 			            range.RegisterSpace = desc.registerSpace;
 			            range.OffsetInDescriptorsFromTableStart = (.)descriptorTableSizeSamplers;
-			            range.Flags = D3D12_DESCRIPTOR_RANGE_FLAGS.NONE;
+			            range.Flags = D3D12_DESCRIPTOR_RANGE_FLAGS.D3D12_DESCRIPTOR_RANGE_FLAG_NONE;
 
 			            descriptorTableSizeSamplers += 1;
 			        }
@@ -80,18 +80,18 @@ namespace nvrhi.d3d12
 			            case ResourceType.StructuredBuffer_SRV: fallthrough;
 			            case ResourceType.RawBuffer_SRV: fallthrough;
 			            case ResourceType.RayTracingAccelStruct:
-			                range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE.SRV;
+			                range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE.D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 			                break;
 
 			            case ResourceType.Texture_UAV: fallthrough;
 			            case ResourceType.TypedBuffer_UAV: fallthrough;
 			            case ResourceType.StructuredBuffer_UAV: fallthrough;
 			            case ResourceType.RawBuffer_UAV:
-			                range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE.UAV;
+			                range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE.D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
 			                break;
 
 			            case ResourceType.ConstantBuffer:
-			                range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE.CBV;
+			                range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE.D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
 			                break;
 
 			            case ResourceType.None: fallthrough;
@@ -110,7 +110,7 @@ namespace nvrhi.d3d12
 
 			            // We don't know how apps will use resources referenced in a binding set. They may bind 
 			            // a buffer to the command list and then copy data into it.
-			            range.Flags = D3D12_DESCRIPTOR_RANGE_FLAGS.DATA_VOLATILE;
+			            range.Flags = D3D12_DESCRIPTOR_RANGE_FLAGS.D3D12_DESCRIPTOR_RANGE_FLAG_DATA_VOLATILE;
 
 			            descriptorTableSizeSRVetc += 1;
 
@@ -157,7 +157,7 @@ namespace nvrhi.d3d12
 			    //D3D12_ROOT_PARAMETER1& param = rootParameters.emplace_back();
 				D3D12_ROOT_PARAMETER1 param= .();
 
-			    param.ParameterType = D3D12_ROOT_PARAMETER_TYPE._32BIT_CONSTANTS;
+			    param.ParameterType = D3D12_ROOT_PARAMETER_TYPE.D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
 			    param.Constants = rootConstants;
 
 				rootParameters.PushBack(param);
@@ -170,7 +170,7 @@ namespace nvrhi.d3d12
 			    rootParameters.Resize(rootParameters.Count + 1);
 			    ref D3D12_ROOT_PARAMETER1 param = ref rootParameters[rootParameters.Count - 1];
 
-			    param.ParameterType = D3D12_ROOT_PARAMETER_TYPE.CBV;
+			    param.ParameterType = D3D12_ROOT_PARAMETER_TYPE.D3D12_ROOT_PARAMETER_TYPE_CBV;
 			    param.ShaderVisibility = convertShaderStage(desc.visibility);
 			    param.Descriptor = rootParameterVolatileCB.descriptor;
 
@@ -182,7 +182,7 @@ namespace nvrhi.d3d12
 			    rootParameters.Resize(rootParameters.Count + 1);
 			    ref D3D12_ROOT_PARAMETER1 param = ref rootParameters[rootParameters.Count - 1];
 
-			    param.ParameterType = D3D12_ROOT_PARAMETER_TYPE.DESCRIPTOR_TABLE;
+			    param.ParameterType = D3D12_ROOT_PARAMETER_TYPE.D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 			    param.ShaderVisibility = convertShaderStage(desc.visibility);
 			    param.DescriptorTable.NumDescriptorRanges = UINT(descriptorRangesSamplers.Count);
 			    param.DescriptorTable.pDescriptorRanges = &descriptorRangesSamplers[0];
@@ -195,7 +195,7 @@ namespace nvrhi.d3d12
 			    rootParameters.Resize(rootParameters.Count + 1);
 			    ref D3D12_ROOT_PARAMETER1 param = ref rootParameters[rootParameters.Count - 1];
 
-			    param.ParameterType = D3D12_ROOT_PARAMETER_TYPE.DESCRIPTOR_TABLE;
+			    param.ParameterType = D3D12_ROOT_PARAMETER_TYPE.D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 			    param.ShaderVisibility = convertShaderStage(desc.visibility);
 			    param.DescriptorTable.NumDescriptorRanges = UINT(descriptorRangesSRVetc.Count);
 			    param.DescriptorTable.pDescriptorRanges = &descriptorRangesSRVetc[0];

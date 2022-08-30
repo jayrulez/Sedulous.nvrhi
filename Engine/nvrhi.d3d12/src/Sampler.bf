@@ -19,9 +19,9 @@ namespace nvrhi.d3d12
 			else
 			{
 				m_d3d12desc.Filter = D3D12_ENCODE_BASIC_FILTER!(
-					m_Desc.minFilter ? D3D12_FILTER_TYPE.LINEAR : D3D12_FILTER_TYPE.POINT,
-					m_Desc.magFilter ? D3D12_FILTER_TYPE.LINEAR : D3D12_FILTER_TYPE.POINT,
-					m_Desc.mipFilter ? D3D12_FILTER_TYPE.LINEAR : D3D12_FILTER_TYPE.POINT,
+					m_Desc.minFilter ? D3D12_FILTER_TYPE.D3D12_FILTER_TYPE_LINEAR : D3D12_FILTER_TYPE.D3D12_FILTER_TYPE_POINT,
+					m_Desc.magFilter ? D3D12_FILTER_TYPE.D3D12_FILTER_TYPE_LINEAR : D3D12_FILTER_TYPE.D3D12_FILTER_TYPE_POINT,
+					m_Desc.mipFilter ? D3D12_FILTER_TYPE.D3D12_FILTER_TYPE_LINEAR : D3D12_FILTER_TYPE.D3D12_FILTER_TYPE_POINT,
 					reductionType);
 			}
 
@@ -31,7 +31,7 @@ namespace nvrhi.d3d12
 
 			m_d3d12desc.MipLODBias = m_Desc.mipBias;
 			m_d3d12desc.MaxAnisotropy = Math.Max((UINT)m_Desc.maxAnisotropy, 1U);
-			m_d3d12desc.ComparisonFunc = D3D12_COMPARISON_FUNC.LESS;
+			m_d3d12desc.ComparisonFunc = D3D12_COMPARISON_FUNC.D3D12_COMPARISON_FUNC_LESS;
 			m_d3d12desc.BorderColor[0] = m_Desc.borderColor.r;
 			m_d3d12desc.BorderColor[1] = m_Desc.borderColor.g;
 			m_d3d12desc.BorderColor[2] = m_Desc.borderColor.b;
@@ -42,7 +42,7 @@ namespace nvrhi.d3d12
 
 		public void createDescriptor(int descriptor)
 		{
-			m_Context.device.CreateSampler(m_d3d12desc, .() { ptr = (.)descriptor });
+			m_Context.device.CreateSampler(&m_d3d12desc, .() { ptr = (.)descriptor });
 		}
 
 		public override readonly ref SamplerDesc getDesc()  { return ref m_Desc; }

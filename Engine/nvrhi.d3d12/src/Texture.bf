@@ -3,6 +3,7 @@ using System.Collections;
 using System;
 using nvrhi.d3dcommon;
 using Win32.Graphics.Dxgi;
+using Win32.Graphics.Dxgi.Common;
 namespace nvrhi.d3d12
 {
 	class Texture : RefCounter<ITexture>, TextureStateExtension
@@ -177,30 +178,30 @@ namespace nvrhi.d3d12
 			viewDesc.Format = getDxgiFormatMapping(format == Format.UNKNOWN ? desc.format : format).srvFormat;
 			viewDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 
-			uint32 planeSlice = (viewDesc.Format == DXGI_FORMAT.X24_TYPELESS_G8_UINT) ? 1 : 0;
+			uint32 planeSlice = (viewDesc.Format == DXGI_FORMAT.DXGI_FORMAT_X24_TYPELESS_G8_UINT) ? 1 : 0;
 
 			switch (dimension)
 			{
 			case TextureDimension.Texture1D:
-				viewDesc.ViewDimension = D3D12_SRV_DIMENSION.TEXTURE1D;
+				viewDesc.ViewDimension = D3D12_SRV_DIMENSION.D3D12_SRV_DIMENSION_TEXTURE1D;
 				viewDesc.Texture1D.MostDetailedMip = subresources.baseMipLevel;
 				viewDesc.Texture1D.MipLevels = subresources.numMipLevels;
 				break;
 			case TextureDimension.Texture1DArray:
-				viewDesc.ViewDimension = D3D12_SRV_DIMENSION.TEXTURE1DARRAY;
+				viewDesc.ViewDimension = D3D12_SRV_DIMENSION.D3D12_SRV_DIMENSION_TEXTURE1DARRAY;
 				viewDesc.Texture1DArray.FirstArraySlice = subresources.baseArraySlice;
 				viewDesc.Texture1DArray.ArraySize = subresources.numArraySlices;
 				viewDesc.Texture1DArray.MostDetailedMip = subresources.baseMipLevel;
 				viewDesc.Texture1DArray.MipLevels = subresources.numMipLevels;
 				break;
 			case TextureDimension.Texture2D:
-				viewDesc.ViewDimension = D3D12_SRV_DIMENSION.TEXTURE2D;
+				viewDesc.ViewDimension = D3D12_SRV_DIMENSION.D3D12_SRV_DIMENSION_TEXTURE2D;
 				viewDesc.Texture2D.MostDetailedMip = subresources.baseMipLevel;
 				viewDesc.Texture2D.MipLevels = subresources.numMipLevels;
 				viewDesc.Texture2D.PlaneSlice = planeSlice;
 				break;
 			case TextureDimension.Texture2DArray:
-				viewDesc.ViewDimension = D3D12_SRV_DIMENSION.TEXTURE2DARRAY;
+				viewDesc.ViewDimension = D3D12_SRV_DIMENSION.D3D12_SRV_DIMENSION_TEXTURE2DARRAY;
 				viewDesc.Texture2DArray.FirstArraySlice = subresources.baseArraySlice;
 				viewDesc.Texture2DArray.ArraySize = subresources.numArraySlices;
 				viewDesc.Texture2DArray.MostDetailedMip = subresources.baseMipLevel;
@@ -208,27 +209,27 @@ namespace nvrhi.d3d12
 				viewDesc.Texture2DArray.PlaneSlice = planeSlice;
 				break;
 			case TextureDimension.TextureCube:
-				viewDesc.ViewDimension = D3D12_SRV_DIMENSION.TEXTURECUBE;
+				viewDesc.ViewDimension = D3D12_SRV_DIMENSION.D3D12_SRV_DIMENSION_TEXTURECUBE;
 				viewDesc.TextureCube.MostDetailedMip = subresources.baseMipLevel;
 				viewDesc.TextureCube.MipLevels = subresources.numMipLevels;
 				break;
 			case TextureDimension.TextureCubeArray:
-				viewDesc.ViewDimension = D3D12_SRV_DIMENSION.TEXTURECUBEARRAY;
+				viewDesc.ViewDimension = D3D12_SRV_DIMENSION.D3D12_SRV_DIMENSION_TEXTURECUBEARRAY;
 				viewDesc.TextureCubeArray.First2DArrayFace = subresources.baseArraySlice;
 				viewDesc.TextureCubeArray.NumCubes = subresources.numArraySlices / 6;
 				viewDesc.TextureCubeArray.MostDetailedMip = subresources.baseMipLevel;
 				viewDesc.TextureCubeArray.MipLevels = subresources.numMipLevels;
 				break;
 			case TextureDimension.Texture2DMS:
-				viewDesc.ViewDimension = D3D12_SRV_DIMENSION.TEXTURE2DMS;
+				viewDesc.ViewDimension = D3D12_SRV_DIMENSION.D3D12_SRV_DIMENSION_TEXTURE2DMS;
 				break;
 			case TextureDimension.Texture2DMSArray:
-				viewDesc.ViewDimension = D3D12_SRV_DIMENSION.TEXTURE2DMSARRAY;
+				viewDesc.ViewDimension = D3D12_SRV_DIMENSION.D3D12_SRV_DIMENSION_TEXTURE2DMSARRAY;
 				viewDesc.Texture2DMSArray.FirstArraySlice = subresources.baseArraySlice;
 				viewDesc.Texture2DMSArray.ArraySize = subresources.numArraySlices;
 				break;
 			case TextureDimension.Texture3D:
-				viewDesc.ViewDimension = D3D12_SRV_DIMENSION.TEXTURE3D;
+				viewDesc.ViewDimension = D3D12_SRV_DIMENSION.D3D12_SRV_DIMENSION_TEXTURE3D;
 				viewDesc.Texture3D.MostDetailedMip = subresources.baseMipLevel;
 				viewDesc.Texture3D.MipLevels = subresources.numMipLevels;
 				break;
@@ -257,29 +258,29 @@ namespace nvrhi.d3d12
 			switch (desc.dimension)
 			{
 			case TextureDimension.Texture1D:
-				viewDesc.ViewDimension = D3D12_UAV_DIMENSION.TEXTURE1D;
+				viewDesc.ViewDimension = D3D12_UAV_DIMENSION.D3D12_UAV_DIMENSION_TEXTURE1D;
 				viewDesc.Texture1D.MipSlice = subresources.baseMipLevel;
 				break;
 			case TextureDimension.Texture1DArray:
-				viewDesc.ViewDimension = D3D12_UAV_DIMENSION.TEXTURE1DARRAY;
+				viewDesc.ViewDimension = D3D12_UAV_DIMENSION.D3D12_UAV_DIMENSION_TEXTURE1DARRAY;
 				viewDesc.Texture1DArray.FirstArraySlice = subresources.baseArraySlice;
 				viewDesc.Texture1DArray.ArraySize = subresources.numArraySlices;
 				viewDesc.Texture1DArray.MipSlice = subresources.baseMipLevel;
 				break;
 			case TextureDimension.Texture2D:
-				viewDesc.ViewDimension = D3D12_UAV_DIMENSION.TEXTURE2D;
+				viewDesc.ViewDimension = D3D12_UAV_DIMENSION.D3D12_UAV_DIMENSION_TEXTURE2D;
 				viewDesc.Texture2D.MipSlice = subresources.baseMipLevel;
 				break;
 			case TextureDimension.Texture2DArray: fallthrough;
 			case TextureDimension.TextureCube: fallthrough;
 			case TextureDimension.TextureCubeArray:
-				viewDesc.ViewDimension = D3D12_UAV_DIMENSION.TEXTURE2DARRAY;
+				viewDesc.ViewDimension = D3D12_UAV_DIMENSION.D3D12_UAV_DIMENSION_TEXTURE2DARRAY;
 				viewDesc.Texture2DArray.FirstArraySlice = subresources.baseArraySlice;
 				viewDesc.Texture2DArray.ArraySize = subresources.numArraySlices;
 				viewDesc.Texture2DArray.MipSlice = subresources.baseMipLevel;
 				break;
 			case TextureDimension.Texture3D:
-				viewDesc.ViewDimension = D3D12_UAV_DIMENSION.TEXTURE3D;
+				viewDesc.ViewDimension = D3D12_UAV_DIMENSION.D3D12_UAV_DIMENSION_TEXTURE3D;
 				viewDesc.Texture3D.FirstWSlice = 0;
 				viewDesc.Texture3D.WSize = desc.depth;
 				viewDesc.Texture3D.MipSlice = subresources.baseMipLevel;
@@ -312,37 +313,37 @@ namespace nvrhi.d3d12
 			switch (desc.dimension)
 			{
 			case TextureDimension.Texture1D:
-				viewDesc.ViewDimension = D3D12_RTV_DIMENSION.TEXTURE1D;
+				viewDesc.ViewDimension = D3D12_RTV_DIMENSION.D3D12_RTV_DIMENSION_TEXTURE1D;
 				viewDesc.Texture1D.MipSlice = subresources.baseMipLevel;
 				break;
 			case TextureDimension.Texture1DArray:
-				viewDesc.ViewDimension = D3D12_RTV_DIMENSION.TEXTURE1DARRAY;
+				viewDesc.ViewDimension = D3D12_RTV_DIMENSION.D3D12_RTV_DIMENSION_TEXTURE1DARRAY;
 				viewDesc.Texture1DArray.FirstArraySlice = subresources.baseArraySlice;
 				viewDesc.Texture1DArray.ArraySize = subresources.numArraySlices;
 				viewDesc.Texture1DArray.MipSlice = subresources.baseMipLevel;
 				break;
 			case TextureDimension.Texture2D:
-				viewDesc.ViewDimension = D3D12_RTV_DIMENSION.TEXTURE2D;
+				viewDesc.ViewDimension = D3D12_RTV_DIMENSION.D3D12_RTV_DIMENSION_TEXTURE2D;
 				viewDesc.Texture2D.MipSlice = subresources.baseMipLevel;
 				break;
 			case TextureDimension.Texture2DArray: fallthrough;
 			case TextureDimension.TextureCube: fallthrough;
 			case TextureDimension.TextureCubeArray:
-				viewDesc.ViewDimension = D3D12_RTV_DIMENSION.TEXTURE2DARRAY;
+				viewDesc.ViewDimension = D3D12_RTV_DIMENSION.D3D12_RTV_DIMENSION_TEXTURE2DARRAY;
 				viewDesc.Texture2DArray.ArraySize = subresources.numArraySlices;
 				viewDesc.Texture2DArray.FirstArraySlice = subresources.baseArraySlice;
 				viewDesc.Texture2DArray.MipSlice = subresources.baseMipLevel;
 				break;
 			case TextureDimension.Texture2DMS:
-				viewDesc.ViewDimension = D3D12_RTV_DIMENSION.TEXTURE2DMS;
+				viewDesc.ViewDimension = D3D12_RTV_DIMENSION.D3D12_RTV_DIMENSION_TEXTURE2DMS;
 				break;
 			case TextureDimension.Texture2DMSArray:
-				viewDesc.ViewDimension = D3D12_RTV_DIMENSION.TEXTURE2DMSARRAY;
+				viewDesc.ViewDimension = D3D12_RTV_DIMENSION.D3D12_RTV_DIMENSION_TEXTURE2DMSARRAY;
 				viewDesc.Texture2DMSArray.FirstArraySlice = subresources.baseArraySlice;
 				viewDesc.Texture2DMSArray.ArraySize = subresources.numArraySlices;
 				break;
 			case TextureDimension.Texture3D:
-				viewDesc.ViewDimension = D3D12_RTV_DIMENSION.TEXTURE3D;
+				viewDesc.ViewDimension = D3D12_RTV_DIMENSION.D3D12_RTV_DIMENSION_TEXTURE3D;
 				viewDesc.Texture3D.FirstWSlice = subresources.baseArraySlice;
 				viewDesc.Texture3D.WSize = subresources.numArraySlices;
 				viewDesc.Texture3D.MipSlice = subresources.baseMipLevel;
@@ -367,40 +368,40 @@ namespace nvrhi.d3d12
 
 			if (isReadOnly)
 			{
-				viewDesc.Flags |= D3D12_DSV_FLAGS.READ_ONLY_DEPTH;
-				if (viewDesc.Format == DXGI_FORMAT.D24_UNORM_S8_UINT || viewDesc.Format == DXGI_FORMAT.D32_FLOAT_S8X24_UINT)
-					viewDesc.Flags |= D3D12_DSV_FLAGS.READ_ONLY_STENCIL;
+				viewDesc.Flags |= D3D12_DSV_FLAGS.D3D12_DSV_FLAG_READ_ONLY_DEPTH;
+				if (viewDesc.Format == DXGI_FORMAT.DXGI_FORMAT_D24_UNORM_S8_UINT || viewDesc.Format == DXGI_FORMAT.DXGI_FORMAT_D32_FLOAT_S8X24_UINT)
+					viewDesc.Flags |= D3D12_DSV_FLAGS.D3D12_DSV_FLAG_READ_ONLY_STENCIL;
 			}
 
 			switch (desc.dimension)
 			{
 			case TextureDimension.Texture1D:
-				viewDesc.ViewDimension = D3D12_DSV_DIMENSION.TEXTURE1D;
+				viewDesc.ViewDimension = D3D12_DSV_DIMENSION.D3D12_DSV_DIMENSION_TEXTURE1D;
 				viewDesc.Texture1D.MipSlice = subresources.baseMipLevel;
 				break;
 			case TextureDimension.Texture1DArray:
-				viewDesc.ViewDimension = D3D12_DSV_DIMENSION.TEXTURE1DARRAY;
+				viewDesc.ViewDimension = D3D12_DSV_DIMENSION.D3D12_DSV_DIMENSION_TEXTURE1DARRAY;
 				viewDesc.Texture1DArray.FirstArraySlice = subresources.baseArraySlice;
 				viewDesc.Texture1DArray.ArraySize = subresources.numArraySlices;
 				viewDesc.Texture1DArray.MipSlice = subresources.baseMipLevel;
 				break;
 			case TextureDimension.Texture2D:
-				viewDesc.ViewDimension = D3D12_DSV_DIMENSION.TEXTURE2D;
+				viewDesc.ViewDimension = D3D12_DSV_DIMENSION.D3D12_DSV_DIMENSION_TEXTURE2D;
 				viewDesc.Texture2D.MipSlice = subresources.baseMipLevel;
 				break;
 			case TextureDimension.Texture2DArray: fallthrough;
 			case TextureDimension.TextureCube: fallthrough;
 			case TextureDimension.TextureCubeArray:
-				viewDesc.ViewDimension = D3D12_DSV_DIMENSION.TEXTURE2DARRAY;
+				viewDesc.ViewDimension = D3D12_DSV_DIMENSION.D3D12_DSV_DIMENSION_TEXTURE2DARRAY;
 				viewDesc.Texture2DArray.ArraySize = subresources.numArraySlices;
 				viewDesc.Texture2DArray.FirstArraySlice = subresources.baseArraySlice;
 				viewDesc.Texture2DArray.MipSlice = subresources.baseMipLevel;
 				break;
 			case TextureDimension.Texture2DMS:
-				viewDesc.ViewDimension = D3D12_DSV_DIMENSION.TEXTURE2DMS;
+				viewDesc.ViewDimension = D3D12_DSV_DIMENSION.D3D12_DSV_DIMENSION_TEXTURE2DMS;
 				break;
 			case TextureDimension.Texture2DMSArray:
-				viewDesc.ViewDimension = D3D12_DSV_DIMENSION.TEXTURE2DMSARRAY;
+				viewDesc.ViewDimension = D3D12_DSV_DIMENSION.D3D12_DSV_DIMENSION_TEXTURE2DMSARRAY;
 				viewDesc.Texture2DMSArray.FirstArraySlice = subresources.baseArraySlice;
 				viewDesc.Texture2DMSArray.ArraySize = subresources.numArraySlices;
 				break;

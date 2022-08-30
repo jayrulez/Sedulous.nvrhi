@@ -2,6 +2,7 @@ using Win32.Graphics.Direct3D12;
 using System;
 using nvrhi.d3dcommon;
 using Win32.Graphics.Dxgi;
+using Win32.Graphics.Dxgi.Common;
 namespace nvrhi.d3d12
 {
 	class Buffer : RefCounter<IBuffer>, BufferStateExtension
@@ -86,7 +87,7 @@ namespace nvrhi.d3d12
 			var range;
 			D3D12_SHADER_RESOURCE_VIEW_DESC viewDesc = .();
 
-			viewDesc.ViewDimension = D3D12_SRV_DIMENSION.BUFFER;
+			viewDesc.ViewDimension = D3D12_SRV_DIMENSION.D3D12_SRV_DIMENSION_BUFFER;
 			viewDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 
 			if (format == Format.UNKNOWN)
@@ -100,17 +101,17 @@ namespace nvrhi.d3d12
 			{
 			case ResourceType.StructuredBuffer_SRV:
 				Runtime.Assert(desc.structStride != 0);
-				viewDesc.Format = DXGI_FORMAT.UNKNOWN;
+				viewDesc.Format = DXGI_FORMAT.DXGI_FORMAT_UNKNOWN;
 				viewDesc.Buffer.FirstElement = range.byteOffset / desc.structStride;
 				viewDesc.Buffer.NumElements = (UINT)(range.byteSize / desc.structStride);
 				viewDesc.Buffer.StructureByteStride = desc.structStride;
 				break;
 
 			case ResourceType.RawBuffer_SRV:
-				viewDesc.Format = DXGI_FORMAT.R32_TYPELESS;
+				viewDesc.Format = DXGI_FORMAT.DXGI_FORMAT_R32_TYPELESS;
 				viewDesc.Buffer.FirstElement = range.byteOffset / 4;
 				viewDesc.Buffer.NumElements = (UINT)(range.byteSize / 4);
-				viewDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAGS.RAW;
+				viewDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAGS.D3D12_BUFFER_SRV_FLAG_RAW;
 				break;
 
 			case ResourceType.TypedBuffer_SRV:
@@ -139,7 +140,7 @@ namespace nvrhi.d3d12
 			var range;
 			D3D12_UNORDERED_ACCESS_VIEW_DESC viewDesc = .();
 
-			viewDesc.ViewDimension = D3D12_UAV_DIMENSION.BUFFER;
+			viewDesc.ViewDimension = D3D12_UAV_DIMENSION.D3D12_UAV_DIMENSION_BUFFER;
 
 			if (format == Format.UNKNOWN)
 			{
@@ -152,17 +153,17 @@ namespace nvrhi.d3d12
 			{
 			case ResourceType.StructuredBuffer_UAV:
 				Runtime.Assert(desc.structStride != 0);
-				viewDesc.Format = DXGI_FORMAT.UNKNOWN;
+				viewDesc.Format = DXGI_FORMAT.DXGI_FORMAT_UNKNOWN;
 				viewDesc.Buffer.FirstElement = range.byteOffset / desc.structStride;
 				viewDesc.Buffer.NumElements = (UINT)(range.byteSize / desc.structStride);
 				viewDesc.Buffer.StructureByteStride = desc.structStride;
 				break;
 
 			case ResourceType.RawBuffer_UAV:
-				viewDesc.Format = DXGI_FORMAT.R32_TYPELESS;
+				viewDesc.Format = DXGI_FORMAT.DXGI_FORMAT_R32_TYPELESS;
 				viewDesc.Buffer.FirstElement = range.byteOffset / 4;
 				viewDesc.Buffer.NumElements = (UINT)(range.byteSize / 4);
-				viewDesc.Buffer.Flags = D3D12_BUFFER_UAV_FLAGS.RAW;
+				viewDesc.Buffer.Flags = D3D12_BUFFER_UAV_FLAGS.D3D12_BUFFER_UAV_FLAG_RAW;
 				break;
 
 			case ResourceType.TypedBuffer_UAV:
@@ -191,7 +192,7 @@ namespace nvrhi.d3d12
 
 			D3D12_SHADER_RESOURCE_VIEW_DESC viewDesc = .();
 			viewDesc.Format = mapping.srvFormat;
-			viewDesc.ViewDimension = D3D12_SRV_DIMENSION.BUFFER;
+			viewDesc.ViewDimension = D3D12_SRV_DIMENSION.D3D12_SRV_DIMENSION_BUFFER;
 			viewDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 			context.device.CreateShaderResourceView(null, &viewDesc, .() { ptr = (.)descriptor });
 		}
@@ -202,7 +203,7 @@ namespace nvrhi.d3d12
 
 			D3D12_UNORDERED_ACCESS_VIEW_DESC viewDesc = .();
 			viewDesc.Format = mapping.srvFormat;
-			viewDesc.ViewDimension = D3D12_UAV_DIMENSION.BUFFER;
+			viewDesc.ViewDimension = D3D12_UAV_DIMENSION.D3D12_UAV_DIMENSION_BUFFER;
 			context.device.CreateUnorderedAccessView(null, null, &viewDesc, .() { ptr = (.)descriptor });
 		}
 

@@ -24,22 +24,22 @@ namespace nvrhi.d3d12
 				case ResourceType.StructuredBuffer_SRV: fallthrough;
 				case ResourceType.RawBuffer_SRV: fallthrough;
 				case ResourceType.RayTracingAccelStruct:
-					rangeType = D3D12_DESCRIPTOR_RANGE_TYPE.SRV;
+					rangeType = D3D12_DESCRIPTOR_RANGE_TYPE.D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 					break;
 
 				case ResourceType.ConstantBuffer:
-					rangeType = D3D12_DESCRIPTOR_RANGE_TYPE.CBV;
+					rangeType = D3D12_DESCRIPTOR_RANGE_TYPE.D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
 					break;
 
 				case ResourceType.Texture_UAV: fallthrough;
 				case ResourceType.TypedBuffer_UAV: fallthrough;
 				case ResourceType.StructuredBuffer_UAV: fallthrough;
 				case ResourceType.RawBuffer_UAV:
-					rangeType = D3D12_DESCRIPTOR_RANGE_TYPE.UAV;
+					rangeType = D3D12_DESCRIPTOR_RANGE_TYPE.D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
 					break;
 
 				case ResourceType.Sampler:
-					rangeType = D3D12_DESCRIPTOR_RANGE_TYPE.SAMPLER;
+					rangeType = D3D12_DESCRIPTOR_RANGE_TYPE.D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER;
 					break;
 
 				case ResourceType.None: fallthrough;
@@ -57,11 +57,11 @@ namespace nvrhi.d3d12
 				descriptorRange.NumDescriptors = ~0u; // unbounded
 				descriptorRange.BaseShaderRegister = desc.firstSlot;
 				descriptorRange.RegisterSpace = item.slot;
-				descriptorRange.Flags = D3D12_DESCRIPTOR_RANGE_FLAGS.DESCRIPTORS_VOLATILE;
+				descriptorRange.Flags = D3D12_DESCRIPTOR_RANGE_FLAGS.D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE;
 				descriptorRange.OffsetInDescriptorsFromTableStart = 0;
 			}
 
-			rootParameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE.DESCRIPTOR_TABLE;
+			rootParameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE.D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 			rootParameter.ShaderVisibility = convertShaderStage(desc.visibility);
 			rootParameter.DescriptorTable.NumDescriptorRanges = uint32(descriptorRanges.Count);
 			rootParameter.DescriptorTable.pDescriptorRanges = &descriptorRanges[0];

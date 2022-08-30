@@ -129,7 +129,7 @@ class UploadManager
 
 					// Place a UAV barrier on the chunk.
 					D3D12_RESOURCE_BARRIER barrier = .();
-					barrier.Type = D3D12_RESOURCE_BARRIER_TYPE.UAV;
+					barrier.Type = D3D12_RESOURCE_BARRIER_TYPE.D3D12_RESOURCE_BARRIER_TYPE_UAV;
 					barrier.UAV.pResource = bestChunk.buffer;
 					pCommandList.ResourceBarrier(1, &barrier);
 				}
@@ -190,23 +190,23 @@ class UploadManager
 		size = align(size, (int)BufferChunk.c_sizeAlignment);
 
 		D3D12_HEAP_PROPERTIES heapProps = .();
-		heapProps.Type = m_IsScratchBuffer ? D3D12_HEAP_TYPE.DEFAULT : D3D12_HEAP_TYPE.UPLOAD;
+		heapProps.Type = m_IsScratchBuffer ? D3D12_HEAP_TYPE.D3D12_HEAP_TYPE_DEFAULT : D3D12_HEAP_TYPE.D3D12_HEAP_TYPE_UPLOAD;
 
 		D3D12_RESOURCE_DESC bufferDesc = .();
-		bufferDesc.Dimension = D3D12_RESOURCE_DIMENSION.BUFFER;
+		bufferDesc.Dimension = D3D12_RESOURCE_DIMENSION.D3D12_RESOURCE_DIMENSION_BUFFER;
 		bufferDesc.Width = (.)size;
 		bufferDesc.Height = 1;
 		bufferDesc.DepthOrArraySize = 1;
 		bufferDesc.MipLevels = 1;
 		bufferDesc.SampleDesc.Count = 1;
-		bufferDesc.Layout = D3D12_TEXTURE_LAYOUT.ROW_MAJOR;
-		if (m_IsScratchBuffer) bufferDesc.Flags = D3D12_RESOURCE_FLAGS.ALLOW_UNORDERED_ACCESS;
+		bufferDesc.Layout = D3D12_TEXTURE_LAYOUT.D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+		if (m_IsScratchBuffer) bufferDesc.Flags = D3D12_RESOURCE_FLAGS.D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
 
 		HRESULT hr = m_Context.device.CreateCommittedResource(
-			heapProps,
-			D3D12_HEAP_FLAGS.NONE,
-			bufferDesc,
-			m_IsScratchBuffer ? D3D12_RESOURCE_STATES.UNORDERED_ACCESS : D3D12_RESOURCE_STATES.GENERIC_READ,
+			&heapProps,
+			D3D12_HEAP_FLAGS.D3D12_HEAP_FLAG_NONE,
+			&bufferDesc,
+			m_IsScratchBuffer ? D3D12_RESOURCE_STATES.D3D12_RESOURCE_STATE_UNORDERED_ACCESS : D3D12_RESOURCE_STATES.D3D12_RESOURCE_STATE_GENERIC_READ,
 			null,
 			ID3D12Resource.IID, (void**)&chunk.buffer);
 
