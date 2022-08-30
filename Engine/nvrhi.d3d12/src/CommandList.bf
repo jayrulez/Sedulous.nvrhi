@@ -22,8 +22,6 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 	}
 
 	public ~this(){
-		
-		delete m_ActiveCommandList;
 	}
 
 	public CommandListInstance executed(Queue pQueue)
