@@ -11,6 +11,7 @@ using Win32.Graphics.Direct3D;
 using Win32.System.Memory;
 using Win32.System.WindowsProgramming;
 using System.Diagnostics;
+using nvrhi.d3dcommon;
 
 enum DXGI_USAGE : uint32
 {

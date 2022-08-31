@@ -3,6 +3,7 @@ using System.Collections;
 using System.Threading;
 using Win32.Foundation;
 using System;
+using nvrhi.d3dcommon;
 namespace nvrhi.d3d12
 {
 	class StaticDescriptorHeap : IDescriptorHeap

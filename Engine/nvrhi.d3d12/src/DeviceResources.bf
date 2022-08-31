@@ -2,6 +2,7 @@ using System.Collections;
 using Win32.Graphics.Dxgi;
 using Win32.Graphics.Direct3D12;
 using Win32.Graphics.Dxgi.Common;
+using nvrhi.d3dcommon;
 namespace nvrhi.d3d12
 {
 	class DeviceResources

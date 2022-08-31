@@ -2,6 +2,8 @@ using Win32.Graphics.Direct3D12;
 using System;
 using Win32.Foundation;
 using System.Collections;
+using nvrhi.d3dcommon;
+
 namespace nvrhi.d3d12;
 
 class UploadManager

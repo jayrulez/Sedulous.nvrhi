@@ -1,6 +1,7 @@
 using Win32.Graphics.Direct3D12;
 using System.Collections;
 using System;
+using nvrhi.d3dcommon;
 namespace nvrhi.d3d12
 {
 	class StagingTexture : RefCounter<IStagingTexture>

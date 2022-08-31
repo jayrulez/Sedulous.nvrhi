@@ -11,16 +11,6 @@ namespace nvrhi.d3d12
 {
 	public static
 	{
-		public static bool FAILED(HRESULT res)
-		{
-			return res != S_OK;
-		}
-
-		public static bool SUCCEEDED(HRESULT res)
-		{
-			return res == S_OK;
-		}
-
 		public static nvrhi.d3d12.DeviceHandle createDevice(DeviceDesc desc)
 		{
 			nvrhi.d3d12.Device device = new .(desc);

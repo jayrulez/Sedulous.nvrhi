@@ -3,6 +3,7 @@ using System;
 using Win32.Foundation;
 using System.Collections;
 using Win32.System.Com;
+using nvrhi.d3dcommon;
 
 namespace nvrhi
 {
@@ -29,9 +30,6 @@ namespace nvrhi
 namespace nvrhi.d3d12
 {
 	typealias D3D12_GPU_VIRTUAL_ADDRESS = uint64;
-	typealias UINT = uint32;
-	typealias UINT64 = uint64;
-	typealias LONG = int64;
 	typealias D3D12_RECT = RECT;
 
 	typealias D3D12RefCountPtr<T> = T*;
