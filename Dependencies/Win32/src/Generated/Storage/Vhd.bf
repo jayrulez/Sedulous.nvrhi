@@ -611,7 +611,7 @@ public struct GET_VIRTUAL_DISK_INFO
 		{
 			public BOOL ParentResolved;
 			public char16* ParentLocationBuffer mut => &ParentLocationBuffer_impl;
-			private char16[1] ParentLocationBuffer_impl;
+			private char16[ANYSIZE_ARRAY] ParentLocationBuffer_impl;
 		}
 		public _Size_e__Struct Size;
 		public Guid Identifier;

@@ -214,9 +214,11 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 			{
 				D3D12_CPU_DESCRIPTOR_HANDLE RTV = .() { ptr = t.getNativeView(ObjectType.D3D12_RenderTargetViewDescriptor, Format.UNKNOWN, subresources, TextureDimension.Unknown).integer };
 
+				float[4] color = .(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
+
 				m_ActiveCommandList.commandList.ClearRenderTargetView(
 					RTV,
-					clearColor.r,
+					&color,
 					0, null);
 			}
 		}
@@ -234,10 +236,12 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 
 				Runtime.Assert(index != c_InvalidDescriptorIndex);
 
+				float[4] color = .(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
+
 				m_ActiveCommandList.commandList.ClearUnorderedAccessViewFloat(
 					m_Resources.shaderResourceViewHeap.getGpuHandle(index),
 					m_Resources.shaderResourceViewHeap.getCpuHandle(index),
-					t.resource, clearColor.r, 0, null);
+					t.resource, &color, 0, null);
 			}
 		}
 	}
@@ -321,7 +325,7 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 				m_ActiveCommandList.commandList.ClearUnorderedAccessViewUint(
 					m_Resources.shaderResourceViewHeap.getGpuHandle(index),
 					m_Resources.shaderResourceViewHeap.getCpuHandle(index),
-					t.resource, clearValues[0], 0, null);
+					t.resource, &clearValues, 0, null);
 			}
 		}
 		else if (t.desc.isRenderTarget)
@@ -337,7 +341,7 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 				D3D12_CPU_DESCRIPTOR_HANDLE RTV = .() { ptr = t.getNativeView(ObjectType.D3D12_RenderTargetViewDescriptor, Format.UNKNOWN, subresources, TextureDimension.Unknown).integer };
 
 				float[4] floatColor = .((float)clearColor, (float)clearColor, (float)clearColor, (float)clearColor);
-				m_ActiveCommandList.commandList.ClearRenderTargetView(RTV, floatColor[0], 0, null);
+				m_ActiveCommandList.commandList.ClearRenderTargetView(RTV, &floatColor, 0, null);
 			}
 		}
 	}
@@ -639,11 +643,11 @@ class CommandList : RefCounter<nvrhi.d3d12.ICommandList>
 
 		m_Instance.referencedResources.Add(b);
 
-		readonly uint32[4] values = .(clearValue, clearValue, clearValue, clearValue);
+		uint32[4] values = .(clearValue, clearValue, clearValue, clearValue);
 		m_ActiveCommandList.commandList.ClearUnorderedAccessViewUint(
 			m_Resources.shaderResourceViewHeap.getGpuHandle(clearUAV),
 			m_Resources.shaderResourceViewHeap.getCpuHandle(clearUAV),
-			b.resource, values[0], 0, null);
+			b.resource, &values, 0, null);
 	}
 	public override void copyBuffer(IBuffer _dest, uint64 destOffsetBytes, IBuffer _src, uint64 srcOffsetBytes, uint64 dataSizeBytes)
 	{

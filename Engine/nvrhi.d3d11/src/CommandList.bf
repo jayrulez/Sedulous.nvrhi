@@ -83,18 +83,19 @@ class CommandList : RefCounter<ICommandList>
         for(MipLevel mipLevel = subresources.baseMipLevel; mipLevel < subresources.baseMipLevel + subresources.numMipLevels; mipLevel++)
         {
             TextureSubresourceSet currentMipSlice = TextureSubresourceSet(mipLevel, 1, subresources.baseArraySlice, subresources.numArraySlices);
-            
+
+			float[4] color = .(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
             if (texture.desc.isUAV)
             {
                 ID3D11UnorderedAccessView* uav = texture.getUAV(Format.UNKNOWN, currentMipSlice, TextureDimension.Unknown);
 
-                m_Context.immediateContext.ClearUnorderedAccessViewFloat(uav, &clearColor.r);
+                m_Context.immediateContext.ClearUnorderedAccessViewFloat(uav, &color);
             }
             else if (texture.desc.isRenderTarget)
             {
                 ID3D11RenderTargetView* rtv = texture.getRTV(Format.UNKNOWN, currentMipSlice);
 
-                m_Context.immediateContext.ClearRenderTargetView(rtv, &clearColor.r);
+                m_Context.immediateContext.ClearRenderTargetView(rtv, &color);
             }
             else
             {
@@ -284,7 +285,7 @@ class CommandList : RefCounter<ICommandList>
         ID3D11UnorderedAccessView* uav = checked_cast<Buffer, IBuffer>(buffer).getUAV(Format.UNKNOWN, EntireBuffer, viewType);
 
         UINT[4] clearValues = .(clearValue, clearValue, clearValue, clearValue );
-        m_Context.immediateContext.ClearUnorderedAccessViewUint(uav, clearValues);
+        m_Context.immediateContext.ClearUnorderedAccessViewUint(uav, &clearValues);
     }
     
     public override void copyBuffer(IBuffer _dest, uint64 destOffsetBytes, IBuffer _src, uint64 srcOffsetBytes, uint64 dataSizeBytes)
@@ -840,7 +841,7 @@ class CommandList : RefCounter<ICommandList>
 		for (var method in methods)
 		{
 			Compiler.EmitTypeBody(typeof(Self), scope $"""
-			private void D3D11_SET_ARRAY_{method}<T>(uint32 min, uint32 max, T array) where T : var
+			private void D3D11_SET_ARRAY_{method}<T>(uint32 min, uint32 max, ref T array) where T : var
 			{{
 				if ((max) >= (min))
 					m_Context.immediateContext.{method}(min, ((max) - (min) + 1), &(array)[min]);
@@ -917,37 +918,37 @@ class CommandList : RefCounter<ICommandList>
 
             if ((stagesToUnbind & ShaderType.Vertex) != 0)
             {
-                D3D11_SET_ARRAY_VSSetConstantBuffers(set.minConstantBufferSlot, set.maxConstantBufferSlot, NullCBs);
-                D3D11_SET_ARRAY_VSSetShaderResources(set.minSRVSlot, set.maxSRVSlot, NullSRVs);
-                D3D11_SET_ARRAY_VSSetSamplers(set.minSamplerSlot, set.maxSamplerSlot, NullSamplers);
+                D3D11_SET_ARRAY_VSSetConstantBuffers(set.minConstantBufferSlot, set.maxConstantBufferSlot, ref NullCBs);
+                D3D11_SET_ARRAY_VSSetShaderResources(set.minSRVSlot, set.maxSRVSlot, ref NullSRVs);
+                D3D11_SET_ARRAY_VSSetSamplers(set.minSamplerSlot, set.maxSamplerSlot, ref NullSamplers);
             }
 
             if ((stagesToUnbind & ShaderType.Hull) != 0)
             {
-                D3D11_SET_ARRAY_HSSetConstantBuffers(set.minConstantBufferSlot, set.maxConstantBufferSlot, NullCBs);
-                D3D11_SET_ARRAY_HSSetShaderResources(set.minSRVSlot, set.maxSRVSlot, NullSRVs);
-                D3D11_SET_ARRAY_HSSetSamplers(set.minSamplerSlot, set.maxSamplerSlot, NullSamplers);
+                D3D11_SET_ARRAY_HSSetConstantBuffers(set.minConstantBufferSlot, set.maxConstantBufferSlot, ref NullCBs);
+                D3D11_SET_ARRAY_HSSetShaderResources(set.minSRVSlot, set.maxSRVSlot, ref NullSRVs);
+                D3D11_SET_ARRAY_HSSetSamplers(set.minSamplerSlot, set.maxSamplerSlot, ref NullSamplers);
             }
 
             if ((stagesToUnbind & ShaderType.Domain) != 0)
             {
-                D3D11_SET_ARRAY_DSSetConstantBuffers(set.minConstantBufferSlot, set.maxConstantBufferSlot, NullCBs);
-                D3D11_SET_ARRAY_DSSetShaderResources(set.minSRVSlot, set.maxSRVSlot, NullSRVs);
-                D3D11_SET_ARRAY_DSSetSamplers(set.minSamplerSlot, set.maxSamplerSlot, NullSamplers);
+                D3D11_SET_ARRAY_DSSetConstantBuffers(set.minConstantBufferSlot, set.maxConstantBufferSlot, ref NullCBs);
+                D3D11_SET_ARRAY_DSSetShaderResources(set.minSRVSlot, set.maxSRVSlot, ref NullSRVs);
+                D3D11_SET_ARRAY_DSSetSamplers(set.minSamplerSlot, set.maxSamplerSlot, ref NullSamplers);
             }
 
             if ((stagesToUnbind & ShaderType.Geometry) != 0)
             {
-                D3D11_SET_ARRAY_GSSetConstantBuffers(set.minConstantBufferSlot, set.maxConstantBufferSlot, NullCBs);
-                D3D11_SET_ARRAY_GSSetShaderResources(set.minSRVSlot, set.maxSRVSlot, NullSRVs);
-                D3D11_SET_ARRAY_GSSetSamplers(set.minSamplerSlot, set.maxSamplerSlot, NullSamplers);
+                D3D11_SET_ARRAY_GSSetConstantBuffers(set.minConstantBufferSlot, set.maxConstantBufferSlot, ref NullCBs);
+                D3D11_SET_ARRAY_GSSetShaderResources(set.minSRVSlot, set.maxSRVSlot, ref NullSRVs);
+                D3D11_SET_ARRAY_GSSetSamplers(set.minSamplerSlot, set.maxSamplerSlot, ref NullSamplers);
             }
 
             if ((stagesToUnbind & ShaderType.Pixel) != 0)
             {
-                D3D11_SET_ARRAY_PSSetConstantBuffers(set.minConstantBufferSlot, set.maxConstantBufferSlot, NullCBs);
-                D3D11_SET_ARRAY_PSSetShaderResources(set.minSRVSlot, set.maxSRVSlot, NullSRVs);
-                D3D11_SET_ARRAY_PSSetSamplers(set.minSamplerSlot, set.maxSamplerSlot, NullSamplers);
+                D3D11_SET_ARRAY_PSSetConstantBuffers(set.minConstantBufferSlot, set.maxConstantBufferSlot, ref NullCBs);
+                D3D11_SET_ARRAY_PSSetShaderResources(set.minSRVSlot, set.maxSRVSlot, ref NullSRVs);
+                D3D11_SET_ARRAY_PSSetSamplers(set.minSamplerSlot, set.maxSamplerSlot, ref NullSamplers);
             }
         }
     }
@@ -966,37 +967,37 @@ class CommandList : RefCounter<ICommandList>
 
 		    if ((stagesToBind & ShaderType.Vertex) != 0)
 		    {
-		        D3D11_SET_ARRAY_VSSetConstantBuffers(set.minConstantBufferSlot, set.maxConstantBufferSlot, set.constantBuffers);
-		        D3D11_SET_ARRAY_VSSetShaderResources(set.minSRVSlot, set.maxSRVSlot, set.SRVs);
-		        D3D11_SET_ARRAY_VSSetSamplers(set.minSamplerSlot, set.maxSamplerSlot, set.samplers);
+		        D3D11_SET_ARRAY_VSSetConstantBuffers(set.minConstantBufferSlot, set.maxConstantBufferSlot, ref set.constantBuffers);
+		        D3D11_SET_ARRAY_VSSetShaderResources(set.minSRVSlot, set.maxSRVSlot, ref set.SRVs);
+		        D3D11_SET_ARRAY_VSSetSamplers(set.minSamplerSlot, set.maxSamplerSlot, ref set.samplers);
 		    }
 
 		    if ((stagesToBind & ShaderType.Hull) != 0)
 		    {
-		        D3D11_SET_ARRAY_HSSetConstantBuffers(set.minConstantBufferSlot, set.maxConstantBufferSlot, set.constantBuffers);
-		        D3D11_SET_ARRAY_HSSetShaderResources(set.minSRVSlot, set.maxSRVSlot, set.SRVs);
-		        D3D11_SET_ARRAY_HSSetSamplers(set.minSamplerSlot, set.maxSamplerSlot, set.samplers);
+		        D3D11_SET_ARRAY_HSSetConstantBuffers(set.minConstantBufferSlot, set.maxConstantBufferSlot, ref set.constantBuffers);
+		        D3D11_SET_ARRAY_HSSetShaderResources(set.minSRVSlot, set.maxSRVSlot, ref set.SRVs);
+		        D3D11_SET_ARRAY_HSSetSamplers(set.minSamplerSlot, set.maxSamplerSlot, ref set.samplers);
 		    }
 
 		    if ((stagesToBind & ShaderType.Domain) != 0)
 		    {
-		        D3D11_SET_ARRAY_DSSetConstantBuffers(set.minConstantBufferSlot, set.maxConstantBufferSlot, set.constantBuffers);
-		        D3D11_SET_ARRAY_DSSetShaderResources(set.minSRVSlot, set.maxSRVSlot, set.SRVs);
-		        D3D11_SET_ARRAY_DSSetSamplers(set.minSamplerSlot, set.maxSamplerSlot, set.samplers);
+		        D3D11_SET_ARRAY_DSSetConstantBuffers(set.minConstantBufferSlot, set.maxConstantBufferSlot, ref set.constantBuffers);
+		        D3D11_SET_ARRAY_DSSetShaderResources(set.minSRVSlot, set.maxSRVSlot, ref set.SRVs);
+		        D3D11_SET_ARRAY_DSSetSamplers(set.minSamplerSlot, set.maxSamplerSlot, ref set.samplers);
 		    }
 
 		    if ((stagesToBind & ShaderType.Geometry) != 0)
 		    {
-		        D3D11_SET_ARRAY_GSSetConstantBuffers(set.minConstantBufferSlot, set.maxConstantBufferSlot, set.constantBuffers);
-		        D3D11_SET_ARRAY_GSSetShaderResources(set.minSRVSlot, set.maxSRVSlot, set.SRVs);
-		        D3D11_SET_ARRAY_GSSetSamplers(set.minSamplerSlot, set.maxSamplerSlot, set.samplers);
+		        D3D11_SET_ARRAY_GSSetConstantBuffers(set.minConstantBufferSlot, set.maxConstantBufferSlot, ref set.constantBuffers);
+		        D3D11_SET_ARRAY_GSSetShaderResources(set.minSRVSlot, set.maxSRVSlot, ref set.SRVs);
+		        D3D11_SET_ARRAY_GSSetSamplers(set.minSamplerSlot, set.maxSamplerSlot, ref set.samplers);
 		    }
 
 		    if ((stagesToBind & ShaderType.Pixel) != 0)
 		    {
-		        D3D11_SET_ARRAY_PSSetConstantBuffers(set.minConstantBufferSlot, set.maxConstantBufferSlot, set.constantBuffers);
-		        D3D11_SET_ARRAY_PSSetShaderResources(set.minSRVSlot, set.maxSRVSlot, set.SRVs);
-		        D3D11_SET_ARRAY_PSSetSamplers(set.minSamplerSlot, set.maxSamplerSlot, set.samplers);
+		        D3D11_SET_ARRAY_PSSetConstantBuffers(set.minConstantBufferSlot, set.maxConstantBufferSlot, ref set.constantBuffers);
+		        D3D11_SET_ARRAY_PSSetShaderResources(set.minSRVSlot, set.maxSRVSlot, ref set.SRVs);
+		        D3D11_SET_ARRAY_PSSetSamplers(set.minSamplerSlot, set.maxSamplerSlot, ref set.samplers);
 		    }
 		}
 	}
@@ -1053,9 +1054,9 @@ class CommandList : RefCounter<ICommandList>
             if ((set.visibility & ShaderType.Compute) == 0)
                 continue;
 
-            D3D11_SET_ARRAY_CSSetConstantBuffers(set.minConstantBufferSlot, set.maxConstantBufferSlot, NullCBs);
-            D3D11_SET_ARRAY_CSSetShaderResources(set.minSRVSlot, set.maxSRVSlot, NullSRVs);
-            D3D11_SET_ARRAY_CSSetSamplers(set.minSamplerSlot, set.maxSamplerSlot, NullSamplers);
+            D3D11_SET_ARRAY_CSSetConstantBuffers(set.minConstantBufferSlot, set.maxConstantBufferSlot, ref NullCBs);
+            D3D11_SET_ARRAY_CSSetShaderResources(set.minSRVSlot, set.maxSRVSlot, ref NullSRVs);
+            D3D11_SET_ARRAY_CSSetSamplers(set.minSamplerSlot, set.maxSamplerSlot, ref NullSamplers);
 
             if (set.maxUAVSlot >= set.minUAVSlot)
             {
@@ -1074,9 +1075,9 @@ class CommandList : RefCounter<ICommandList>
         if ((set.visibility & ShaderType.Compute) == 0)
             continue;
 
-        D3D11_SET_ARRAY_CSSetConstantBuffers(set.minConstantBufferSlot, set.maxConstantBufferSlot, set.constantBuffers);
-        D3D11_SET_ARRAY_CSSetShaderResources(set.minSRVSlot, set.maxSRVSlot, set.SRVs);
-        D3D11_SET_ARRAY_CSSetSamplers(set.minSamplerSlot, set.maxSamplerSlot, set.samplers);
+        D3D11_SET_ARRAY_CSSetConstantBuffers(set.minConstantBufferSlot, set.maxConstantBufferSlot, ref set.constantBuffers);
+        D3D11_SET_ARRAY_CSSetShaderResources(set.minSRVSlot, set.maxSRVSlot, ref set.SRVs);
+        D3D11_SET_ARRAY_CSSetSamplers(set.minSamplerSlot, set.maxSamplerSlot, ref set.samplers);
 
         if (set.maxUAVSlot >= set.minUAVSlot)
         {
