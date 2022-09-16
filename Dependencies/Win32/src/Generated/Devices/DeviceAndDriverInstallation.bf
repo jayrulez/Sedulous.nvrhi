@@ -2541,7 +2541,7 @@ public struct CM_NOTIFY_EVENT_DATA
 		{
 			public Guid ClassGuid;
 			public char16* SymbolicLink mut => &SymbolicLink_impl;
-			private char16[1] SymbolicLink_impl;
+			private char16[ANYSIZE_ARRAY] SymbolicLink_impl;
 		}
 		[CRepr]
 		public struct _DeviceHandle_e__Struct
