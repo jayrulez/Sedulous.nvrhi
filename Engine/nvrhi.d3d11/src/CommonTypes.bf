@@ -32,7 +32,7 @@ namespace nvrhi.d3d11
 	    public D3D11_RECT[D3D11_VIEWPORT_AND_SCISSORRECT_MAX_INDEX] scissorRects = .();
 	}
 
-	struct DeviceDesc
+	struct D3D11DeviceDesc
 	{
 	    public IMessageCallback messageCallback = null;
 	    public ID3D11DeviceContext* context = null;

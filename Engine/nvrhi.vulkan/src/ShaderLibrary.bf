@@ -25,7 +25,7 @@ namespace nvrhi.vulkan
 	    }
 
 	    public override ShaderHandle getShader(char8* entryName, ShaderType shaderType) {
-			Shader newShader = new Shader(m_Context);
+			ShaderVK newShader = new ShaderVK(m_Context);
 			newShader.desc.entryName = new String(entryName);
 			newShader.desc.shaderType = shaderType;
 			newShader.shaderModule = shaderModule;

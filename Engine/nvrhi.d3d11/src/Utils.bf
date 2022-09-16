@@ -235,9 +235,9 @@ public static
 		return ret;
 	}
 
-	public static DeviceHandle createDevice(DeviceDesc desc)
+	public static DeviceHandle createDevice(D3D11DeviceDesc desc)
 	{
-		Device device = new Device(desc);
+		DeviceD3D11 device = new DeviceD3D11(desc);
 		return DeviceHandle.Attach(device);
 	}
 }

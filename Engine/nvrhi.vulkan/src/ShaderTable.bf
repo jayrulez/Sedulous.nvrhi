@@ -4,7 +4,7 @@ namespace nvrhi.vulkan
 {
 	class ShaderTable : RefCounter<nvrhi.rt.IShaderTable>
 	{
-		public RefCountPtr<RayTracingPipeline> pipeline;
+		public RefCountPtr<RayTracingPipelineVK> pipeline;
 
 		public int32 rayGenerationShader = -1;
 		public List<uint32> missShaders;
@@ -13,7 +13,7 @@ namespace nvrhi.vulkan
 
 		public uint32 version = 0;
 
-		public this(VulkanContext* context, RayTracingPipeline _pipeline)
+		public this(VulkanContext* context, RayTracingPipelineVK _pipeline)
 		{
 			pipeline = _pipeline;
 			m_Context = context;

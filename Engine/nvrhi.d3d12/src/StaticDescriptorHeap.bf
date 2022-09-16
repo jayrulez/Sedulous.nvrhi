@@ -8,7 +8,7 @@ namespace nvrhi.d3d12
 {
 	class StaticDescriptorHeap : IDescriptorHeap
 	{
-		private Context* m_Context;
+		private D3D12Context* m_Context;
 		private D3D12RefCountPtr<ID3D12DescriptorHeap> m_Heap;
 		private D3D12RefCountPtr<ID3D12DescriptorHeap> m_ShaderVisibleHeap;
 		private D3D12_DESCRIPTOR_HEAP_TYPE m_HeapType = D3D12_DESCRIPTOR_HEAP_TYPE.D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
@@ -59,7 +59,7 @@ namespace nvrhi.d3d12
 			return S_OK;
 		}
 
-		public this(Context* context)
+		public this(D3D12Context* context)
 		{
 			m_Context = context;
 		}

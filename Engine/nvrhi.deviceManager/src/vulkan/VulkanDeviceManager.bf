@@ -126,7 +126,7 @@ namespace nvrhi.deviceManager.vulkan
 			private List<SwapChainImage> m_SwapChainImages = new .() ~ delete _;
 			private uint32 m_SwapChainIndex = uint32(-1);
 
-			private nvrhi.vulkan.DeviceHandle m_NvrhiDevice;
+			private nvrhi.vulkan.IDeviceVK m_NvrhiDevice;
 			private nvrhi.DeviceHandle m_ValidationLayer;
 
 			private nvrhi.CommandListHandle m_BarrierCommandList;
