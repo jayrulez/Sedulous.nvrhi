@@ -39,6 +39,8 @@ namespace nvrhi.d3d12
 
 			for (var viewEntry in m_CustomUAVs)
 				m_Resources.shaderResourceViewHeap.releaseDescriptor(viewEntry.value);
+
+			resource.Release();
 		}
 
 		public override readonly ref TextureDesc getDesc() { return ref desc; }

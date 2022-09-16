@@ -470,7 +470,7 @@ namespace nvrhi.deviceManager.d3d12
 
 			if (FAILED(hr))
 			{
-				Debug.WriteLine("ResizeBuffers failed");
+				Debug.WriteLine("ResizeBuffers failed: 0x{0:X}", hr);
 			}
 
 			bool ret = CreateRenderTargets();
