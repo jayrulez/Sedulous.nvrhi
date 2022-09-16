@@ -234,4 +234,40 @@ public static
 
 		return ret;
 	}
+
+	public static DeviceHandle createDevice(DeviceDesc desc)
+	{
+		Device device = new Device(desc);
+		return DeviceHandle.Attach(device);
+	}
+}
+
+public static
+{
+	public const uint32 D3D11_FILTER_REDUCTION_TYPE_MASK = 0x3;
+	public const uint32 D3D11_FILTER_REDUCTION_TYPE_SHIFT = 7;
+	public const uint32 D3D11_FILTER_TYPE_MASK = 0x3;
+	public const uint32 D3D11_MIN_FILTER_SHIFT = 4;
+	public const uint32 D3D11_MAG_FILTER_SHIFT = 2;
+	public const uint32 D3D11_MIP_FILTER_SHIFT = 0;
+
+	public const uint32 D3D11_COMPARISON_FILTERING_BIT	= 0x80;
+
+	public const uint32 D3D11_ANISOTROPIC_FILTERING_BIT	= 0x40;
+
+	public static D3D11_FILTER D3D11_ENCODE_BASIC_FILTER(D3D11_FILTER_TYPE min, D3D11_FILTER_TYPE mag, D3D11_FILTER_TYPE mip, uint32 reduction)
+	{
+		return ((D3D11_FILTER)(
+			((((uint32)min) & D3D11_FILTER_TYPE_MASK) << D3D11_MIN_FILTER_SHIFT) |
+			((((uint32)mag) & D3D11_FILTER_TYPE_MASK) << D3D11_MAG_FILTER_SHIFT) |
+			((((uint32)mip) & D3D11_FILTER_TYPE_MASK) << D3D11_MIP_FILTER_SHIFT) |
+			(((reduction) & D3D11_FILTER_REDUCTION_TYPE_MASK) << D3D11_FILTER_REDUCTION_TYPE_SHIFT)));
+	}
+
+	public static D3D11_FILTER D3D11_ENCODE_ANISOTROPIC_FILTER(uint32 reduction)
+	{
+		return ((D3D11_FILTER)(
+			(.)D3D11_ANISOTROPIC_FILTERING_BIT |
+			D3D11_ENCODE_BASIC_FILTER(.D3D11_FILTER_TYPE_LINEAR, .D3D11_FILTER_TYPE_LINEAR, .D3D11_FILTER_TYPE_LINEAR, reduction)));
+	}
 }

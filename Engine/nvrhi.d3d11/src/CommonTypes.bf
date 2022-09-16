@@ -34,7 +34,7 @@ namespace nvrhi.d3d11
 
 	struct DeviceDesc
 	{
-	    IMessageCallback messageCallback = null;
-	    ID3D11DeviceContext* context = null;
+	    public IMessageCallback messageCallback = null;
+	    public ID3D11DeviceContext* context = null;
 	}
 }
