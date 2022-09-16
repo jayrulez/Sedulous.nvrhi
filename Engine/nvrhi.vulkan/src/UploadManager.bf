@@ -3,7 +3,7 @@ namespace nvrhi.vulkan
 {
 	class UploadManager
 	{
-		public this(Device pParent, uint64 defaultChunkSize, uint64 memoryLimit, bool isScratchBuffer)
+		public this(DeviceVK pParent, uint64 defaultChunkSize, uint64 memoryLimit, bool isScratchBuffer)
 		{
 			m_Device = pParent;
 			m_DefaultChunkSize = defaultChunkSize;
@@ -45,7 +45,7 @@ namespace nvrhi.vulkan
 			return chunk;
 		}
 
-		public bool suballocateBuffer(uint64 size, Buffer* pBuffer, uint64* pOffset, void** pCpuVA,
+		public bool suballocateBuffer(uint64 size, BufferVK* pBuffer, uint64* pOffset, void** pCpuVA,
 			uint64 currentVersion, uint32 alignment = 256)
 		{
 			BufferChunk* chunkToRetire = null;
@@ -59,7 +59,7 @@ namespace nvrhi.vulkan
 				{
 					m_CurrentChunk.writePointer = endOfDataInChunk;
 
-					*pBuffer = checked_cast<Buffer, IBuffer>(m_CurrentChunk.buffer.Get<IBuffer>());
+					*pBuffer = checked_cast<BufferVK, IBuffer>(m_CurrentChunk.buffer.Get<IBuffer>());
 					*pOffset = alignedOffset;
 					if (pCpuVA != null && m_CurrentChunk.mappedMemory != null)
 						*pCpuVA = (char8*)m_CurrentChunk.mappedMemory + alignedOffset;
@@ -110,7 +110,7 @@ namespace nvrhi.vulkan
 			m_CurrentChunk.version = currentVersion;
 			m_CurrentChunk.writePointer = size;
 
-			*pBuffer = checked_cast<Buffer, IBuffer>(m_CurrentChunk.buffer.Get<IBuffer>());
+			*pBuffer = checked_cast<BufferVK, IBuffer>(m_CurrentChunk.buffer.Get<IBuffer>());
 			*pOffset = 0;
 			if (pCpuVA != null)
 				*pCpuVA = m_CurrentChunk.mappedMemory;
@@ -132,7 +132,7 @@ namespace nvrhi.vulkan
 			}
 		}
 
-		private Device m_Device;
+		private DeviceVK m_Device;
 		private uint64 m_DefaultChunkSize = 0;
 		private uint64 m_MemoryLimit = 0;
 		private uint64 m_AllocatedMemory = 0;

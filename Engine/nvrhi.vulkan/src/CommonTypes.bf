@@ -34,7 +34,7 @@ namespace nvrhi
 
 namespace nvrhi.vulkan
 {
-	abstract class IDevice :  nvrhi.IDevice
+	abstract class IDeviceVK :  nvrhi.IDevice
 	{
 		// Additional Vulkan-specific public methods
 		public abstract VkSemaphore getQueueSemaphore(CommandQueue queue);
@@ -45,7 +45,7 @@ namespace nvrhi.vulkan
 			VkFramebuffer framebuffer, FramebufferDesc desc, bool transferOwnership);
 	}
 
-	typealias DeviceHandle = RefCounter<nvrhi.vulkan.IDevice>;
+	typealias DeviceHandle = RefCounter<nvrhi.vulkan.IDeviceVK>;
 
 	struct ResourceStateMapping : this(ResourceStates nvrhiState, VkPipelineStageFlags stageFlags, VkAccessFlags accessMask, VkImageLayout imageLayout)
 	{
@@ -61,13 +61,13 @@ namespace nvrhi.vulkan
 
 	struct TextureSubresourceView
 	{
-		public Texture texture;
+		public TextureVK texture;
 		public TextureSubresourceSet subresource = .();
 
 		public VkImageView view = null;
 		public VkImageSubresourceRange subresourceRange = .();
 
-		public this(Texture texture)
+		public this(TextureVK texture)
 		{
 			this.texture = texture;
 		}

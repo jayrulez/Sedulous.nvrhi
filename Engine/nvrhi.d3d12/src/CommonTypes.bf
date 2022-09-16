@@ -3,6 +3,7 @@ using System;
 using Win32.Foundation;
 using System.Collections;
 using Win32.System.Com;
+using nvrhi.d3dcommon;
 
 namespace nvrhi
 {
@@ -29,9 +30,6 @@ namespace nvrhi
 namespace nvrhi.d3d12
 {
 	typealias D3D12_GPU_VIRTUAL_ADDRESS = uint64;
-	typealias UINT = uint32;
-	typealias UINT64 = uint64;
-	typealias LONG = int64;
 	typealias D3D12_RECT = RECT;
 
 	typealias D3D12RefCountPtr<T> = T*;
@@ -41,7 +39,7 @@ namespace nvrhi.d3d12
 	}
 	typealias RootSignatureHandle = RefCountPtr<IRootSignature>;
 
-	abstract class ICommandList : nvrhi.ICommandList
+	abstract class ICommandListD3D12 : nvrhi.ICommandList
 	{
 		public abstract bool allocateUploadBuffer(int size, void** pCpuAddress, D3D12_GPU_VIRTUAL_ADDRESS* pGpuAddress);
 		public abstract bool commitDescriptorHeaps();
@@ -51,7 +49,7 @@ namespace nvrhi.d3d12
 		public abstract void updateComputeVolatileBuffers();
 	}
 
-	typealias CommandListHandle = RefCountPtr<nvrhi.d3d12.ICommandList>;
+	typealias CommandListHandle = RefCountPtr<nvrhi.d3d12.ICommandListD3D12>;
 
 	typealias DescriptorIndex = uint32;
 
@@ -76,7 +74,7 @@ namespace nvrhi.d3d12
 		Sampler
 	}
 
-	abstract class IDevice : nvrhi.IDevice
+	abstract class IDeviceD3D12 : nvrhi.IDevice
 	{
 		// D3D12-specific methods
 		public abstract RootSignatureHandle buildRootSignature(StaticVector<BindingLayoutHandle, const c_MaxBindingLayouts> pipelineLayouts, bool allowInputLayout, bool isLocal, D3D12_ROOT_PARAMETER1* pCustomParameters = null, uint32 numCustomParameters = 0);
@@ -85,9 +83,9 @@ namespace nvrhi.d3d12
 		[NoDiscard] public abstract IDescriptorHeap getDescriptorHeap(DescriptorHeapType heapType);
 	}
 
-	typealias DeviceHandle = RefCountPtr<nvrhi.d3d12.IDevice>;
+	typealias DeviceHandle = RefCountPtr<nvrhi.d3d12.IDeviceD3D12>;
 
-	struct DeviceDesc
+	struct D3D12DeviceDesc
 	{
 		public IMessageCallback errorCB = null;
 		public ID3D12Device* pDevice = null;
@@ -189,9 +187,9 @@ namespace nvrhi.d3d12
 	    public D3D12RefCountPtr<ID3D12CommandList> commandList;
 	    public List<RefCountPtr<IResource>> referencedResources = new .() ~ delete _;
 	    public List<RefCountPtr<IUnknown>> referencedNativeResources = new .() ~ delete _;
-	    public List<RefCountPtr<StagingTexture>> referencedStagingTextures = new .() ~ delete _;
-	    public List<RefCountPtr<Buffer>> referencedStagingBuffers = new .() ~ delete _;
-	    public List<RefCountPtr<TimerQuery>> referencedTimerQueries = new .() ~ delete _;
+	    public List<RefCountPtr<StagingTextureD3D12>> referencedStagingTextures = new .() ~ delete _;
+	    public List<RefCountPtr<BufferD3D12>> referencedStagingBuffers = new .() ~ delete _;
+	    public List<RefCountPtr<TimerQueryD3D12>> referencedTimerQueries = new .() ~ delete _;
 #if NVRHI_WITH_RTXMU
 	    public List<uint64> rtxmuBuildIds = new .() ~ delete _;
 	    public List<uint64> rtxmuCompactionIds = new .() ~ delete _;

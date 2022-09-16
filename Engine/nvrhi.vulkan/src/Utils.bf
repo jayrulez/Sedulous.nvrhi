@@ -14,9 +14,9 @@ namespace nvrhi.vulkan
 #endif
 		}
 
-		public static nvrhi.vulkan.DeviceHandle createDevice(DeviceDesc desc)
+		public static nvrhi.vulkan.IDeviceVK createDevice(DeviceDesc desc)
 		{
-			Device device = new Device(desc);
+			DeviceVK device = new DeviceVK(desc);
 			return nvrhi.vulkan.DeviceHandle.Attach(device);
 		}
 
@@ -562,7 +562,7 @@ namespace nvrhi.vulkan
 		}
 
 		public static void countSpecializationConstants(
-			Shader shader,
+			ShaderVK shader,
 			ref int numShaders,
 			ref int numShadersWithSpecializations,
 			ref int numSpecializationConstants)
@@ -580,7 +580,7 @@ namespace nvrhi.vulkan
 		}
 
 		public static VkPipelineShaderStageCreateInfo makeShaderStageCreateInfo(
-			Shader shader,
+			ShaderVK shader,
 			List<VkSpecializationInfo> specInfos,
 			List<VkSpecializationMapEntry> specMapEntries,
 			List<uint32> specData)
@@ -961,17 +961,17 @@ namespace nvrhi.vulkan
 		}
 
 		// a subresource usually shouldn't have both stencil and depth aspect flag bits set; this enforces that depending on viewType param
-		public static VkImageAspectFlags guessSubresourceImageAspectFlags(VkFormat format, Texture.TextureSubresourceViewType viewType)
+		public static VkImageAspectFlags guessSubresourceImageAspectFlags(VkFormat format, TextureVK.TextureSubresourceViewType viewType)
 		{
 			VkImageAspectFlags flags = guessImageAspectFlags(format);
 			if ((flags & (VkImageAspectFlags.eDepthBit | VkImageAspectFlags.eStencilBit))
 				== (VkImageAspectFlags.eDepthBit | VkImageAspectFlags.eStencilBit))
 			{
-				if (viewType == Texture.TextureSubresourceViewType.DepthOnly)
+				if (viewType == TextureVK.TextureSubresourceViewType.DepthOnly)
 				{
 					flags = flags & (~VkImageAspectFlags.eStencilBit);
 				}
-				else if (viewType == Texture.TextureSubresourceViewType.StencilOnly)
+				else if (viewType == TextureVK.TextureSubresourceViewType.StencilOnly)
 				{
 					flags = flags & (~VkImageAspectFlags.eDepthBit);
 				}
@@ -1004,7 +1004,7 @@ namespace nvrhi.vulkan
 		}
 
 		// fills out all info fields in Texture based on a TextureDesc
-		public static void fillTextureInfo(Texture texture, TextureDesc desc)
+		public static void fillTextureInfo(TextureVK texture, TextureDesc desc)
 		{
 			texture.desc = desc;
 
@@ -1040,7 +1040,7 @@ namespace nvrhi.vulkan
 			if (_buffer == null)
 				return VkDeviceOrHostAddressConstKHR();
 
-			Buffer buffer = checked_cast<Buffer, IBuffer>(_buffer);
+			BufferVK buffer = checked_cast<BufferVK, IBuffer>(_buffer);
 
 			return VkDeviceOrHostAddressConstKHR().setDeviceAddress(buffer.deviceAddress + int(offset));
 		}
@@ -1171,23 +1171,23 @@ namespace nvrhi.vulkan
 			return VkBorderColor.eFloatOpaqueBlack;
 		}
 
-		public static Texture.TextureSubresourceViewType getTextureViewType(Format bindingFormat, Format textureFormat)
+		public static TextureVK.TextureSubresourceViewType getTextureViewType(Format bindingFormat, Format textureFormat)
 		{
 			Format format = (bindingFormat == Format.UNKNOWN) ? textureFormat : bindingFormat;
 
 			readonly ref FormatInfo formatInfo = ref getFormatInfo(format);
 
 			if (formatInfo.hasDepth)
-				return Texture.TextureSubresourceViewType.DepthOnly;
+				return TextureVK.TextureSubresourceViewType.DepthOnly;
 			else if (formatInfo.hasStencil)
-				return Texture.TextureSubresourceViewType.StencilOnly;
+				return TextureVK.TextureSubresourceViewType.StencilOnly;
 			else
-				return Texture.TextureSubresourceViewType.AllAspects;
+				return TextureVK.TextureSubresourceViewType.AllAspects;
 		}
 
 		public static void registerShaderModule(
 			IShader _shader,
-			Dictionary<Shader, uint32> shaderStageIndices,
+			Dictionary<ShaderVK, uint32> shaderStageIndices,
 			ref int numShaders,
 			ref int numShadersWithSpecializations,
 			ref int numSpecializationConstants)
@@ -1195,7 +1195,7 @@ namespace nvrhi.vulkan
 			if (_shader == null)
 				return;
 
-			Shader shader = checked_cast<Shader, IShader>(_shader);
+			ShaderVK shader = checked_cast<ShaderVK, IShader>(_shader);
 			if (!shaderStageIndices.ContainsKey(shader))
 			{
 				countSpecializationConstants(shader, ref numShaders, ref numShadersWithSpecializations, ref numSpecializationConstants);
@@ -1246,9 +1246,9 @@ namespace nvrhi.vulkan
 				};
 		}
 
-		public static uint64 getQueueLastFinishedID(Device device, CommandQueue queueIndex)
+		public static uint64 getQueueLastFinishedID(DeviceVK device, CommandQueue queueIndex)
 		{
-			Queue queue = device.getQueue(queueIndex);
+			QueueVK queue = device.getQueue(queueIndex);
 			if (queue != null)
 				return queue.getLastFinishedID();
 			return 0;

@@ -8,7 +8,7 @@ namespace nvrhi.vulkan
 		public this(VulkanContext* context)
 			{ m_Context = context; }
 
-		public VkResult allocateBufferMemory(Buffer buffer, bool enableDeviceAddress)
+		public VkResult allocateBufferMemory(BufferVK buffer, bool enableDeviceAddress)
 		{
 			// figure out memory requirements
 			VkMemoryRequirements memRequirements = .();
@@ -22,12 +22,12 @@ namespace nvrhi.vulkan
 
 			return VkResult.eVkSuccess;
 		}
-		public void freeBufferMemory(Buffer buffer)
+		public void freeBufferMemory(BufferVK buffer)
 		{
 			freeMemory(buffer);
 		}
 
-		public VkResult allocateTextureMemory(Texture texture)
+		public VkResult allocateTextureMemory(TextureVK texture)
 		{
 			// grab the image memory requirements
 			VkMemoryRequirements memRequirements = .();
@@ -42,12 +42,12 @@ namespace nvrhi.vulkan
 
 			return VkResult.eVkSuccess;
 		}
-		public void freeTextureMemory(Texture texture)
+		public void freeTextureMemory(TextureVK texture)
 		{
 			freeMemory(texture);
 		}
 
-		public VkResult allocateMemory(MemoryResource res,
+		public VkResult allocateMemory(MemoryResourceVK res,
 			VkMemoryRequirements memRequirements,
 			VkMemoryPropertyFlags memPropertyFlags,
 			bool enableDeviceAddress = false)
@@ -86,7 +86,7 @@ namespace nvrhi.vulkan
 
 			return vkAllocateMemory(m_Context.device, &allocInfo, m_Context.allocationCallbacks, &res.memory);
 		}
-		public void freeMemory(MemoryResource res)
+		public void freeMemory(MemoryResourceVK res)
 		{
 			Runtime.Assert(res.managed);
 

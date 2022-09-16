@@ -11,19 +11,9 @@ namespace nvrhi.d3d12
 {
 	public static
 	{
-		public static bool FAILED(HRESULT res)
+		public static nvrhi.d3d12.IDeviceD3D12 createDevice(D3D12DeviceDesc desc)
 		{
-			return res != S_OK;
-		}
-
-		public static bool SUCCEEDED(HRESULT res)
-		{
-			return res == S_OK;
-		}
-
-		public static nvrhi.d3d12.DeviceHandle createDevice(DeviceDesc desc)
-		{
-			nvrhi.d3d12.Device device = new .(desc);
+			nvrhi.d3d12.DeviceD3D12 device = new .(desc);
 			return nvrhi.DeviceHandle.Attach(device);
 		}
 
@@ -380,12 +370,12 @@ namespace nvrhi.d3d12
 				outD3dGeometryDesc.Flags = (D3D12_RAYTRACING_GEOMETRY_FLAGS)geometryDesc.flags;
 
 				if (triangles.indexBuffer != null)
-					outD3dGeometryDesc.Triangles.IndexBuffer = checked_cast<Buffer, IBuffer>(triangles.indexBuffer).gpuVA + triangles.indexOffset;
+					outD3dGeometryDesc.Triangles.IndexBuffer = checked_cast<BufferD3D12, IBuffer>(triangles.indexBuffer).gpuVA + triangles.indexOffset;
 				else
 					outD3dGeometryDesc.Triangles.IndexBuffer = 0;
 
 				if (triangles.vertexBuffer != null)
-					outD3dGeometryDesc.Triangles.VertexBuffer.StartAddress = checked_cast<Buffer, IBuffer>(triangles.vertexBuffer).gpuVA + triangles.vertexOffset;
+					outD3dGeometryDesc.Triangles.VertexBuffer.StartAddress = checked_cast<BufferD3D12, IBuffer>(triangles.vertexBuffer).gpuVA + triangles.vertexOffset;
 				else
 					outD3dGeometryDesc.Triangles.VertexBuffer.StartAddress = 0;
 
@@ -403,7 +393,7 @@ namespace nvrhi.d3d12
 				outD3dGeometryDesc.Flags = (D3D12_RAYTRACING_GEOMETRY_FLAGS)geometryDesc.flags;
 
 				if (aabbs.buffer != null)
-					outD3dGeometryDesc.AABBs.AABBs.StartAddress = checked_cast<Buffer, IBuffer>(aabbs.buffer).gpuVA + aabbs.offset;
+					outD3dGeometryDesc.AABBs.AABBs.StartAddress = checked_cast<BufferD3D12, IBuffer>(aabbs.buffer).gpuVA + aabbs.offset;
 				else
 					outD3dGeometryDesc.AABBs.AABBs.StartAddress = 0;
 

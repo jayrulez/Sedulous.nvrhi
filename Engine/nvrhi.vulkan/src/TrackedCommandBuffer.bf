@@ -11,7 +11,7 @@ namespace nvrhi.vulkan
 		public VkCommandPool cmdPool = .Null;
 
 		public List<RefCountPtr<IResource>> referencedResources = new .() ~ delete _; // to keep them alive
-		public List<RefCountPtr<Buffer>> referencedStagingBuffers = new .() ~ delete _; // to allow synchronous mapBuffer
+		public List<RefCountPtr<BufferVK>> referencedStagingBuffers = new .() ~ delete _; // to allow synchronous mapBuffer
 
 		public uint64 recordingID = 0;
 		public uint64 submissionID = 0;

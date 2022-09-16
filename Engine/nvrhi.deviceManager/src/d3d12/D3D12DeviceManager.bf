@@ -11,6 +11,7 @@ using Win32.Graphics.Direct3D;
 using Win32.System.Memory;
 using Win32.System.WindowsProgramming;
 using System.Diagnostics;
+using nvrhi.d3dcommon;
 
 enum DXGI_USAGE : uint32
 {
@@ -178,7 +179,7 @@ namespace nvrhi.deviceManager.d3d12
 
 		private UINT64                                      m_FrameCount = 1;
 
-		private nvrhi.d3d12.DeviceHandle                         m_NvrhiDevice;
+		private nvrhi.d3d12.IDeviceD3D12                         m_NvrhiDevice;
 		private nvrhi.DeviceHandle                         m_ValidationLayer;
 
 		private String                                 m_RendererString;
@@ -368,7 +369,7 @@ namespace nvrhi.deviceManager.d3d12
 			hr = pSwapChain1.QueryInterface(IDXGISwapChain3.IID, (void**)(&m_SwapChain));
 			HR_RETURN!(hr);
 
-			nvrhi.d3d12.DeviceDesc deviceDesc = .();
+			nvrhi.d3d12.D3D12DeviceDesc deviceDesc = .();
 			//deviceDesc.errorCB = &DefaultMessageCallback.GetInstance();
 			deviceDesc.pDevice = m_Device12;
 			deviceDesc.pGraphicsCommandQueue = m_GraphicsQueue;

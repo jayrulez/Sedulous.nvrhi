@@ -2,6 +2,7 @@ using System.Collections;
 using Win32.Graphics.Dxgi;
 using Win32.Graphics.Direct3D12;
 using Win32.Graphics.Dxgi.Common;
+using nvrhi.d3dcommon;
 namespace nvrhi.d3d12
 {
 	class DeviceResources
@@ -24,7 +25,7 @@ namespace nvrhi.d3d12
 			delete _;
 		};
 
-		public this(Context* context, DeviceDesc desc)
+		public this(D3D12Context* context, D3D12DeviceDesc desc)
 		{
 			renderTargetViewHeap = new .(context);
 			depthStencilViewHeap = new .(context);
@@ -60,7 +61,7 @@ namespace nvrhi.d3d12
 			return planeCount;
 		}
 
-		private Context* m_Context;
+		private D3D12Context* m_Context;
 		private Dictionary<DXGI_FORMAT, uint8> m_DxgiFormatPlaneCounts = new .() ~ delete _;
 	}
 }

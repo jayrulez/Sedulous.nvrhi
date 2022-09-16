@@ -2,11 +2,13 @@ using Win32.Graphics.Direct3D12;
 using System;
 using Win32.Foundation;
 using System.Collections;
+using nvrhi.d3dcommon;
+
 namespace nvrhi.d3d12;
 
 class UploadManager
 {
-	public this(Context* context, Queue pQueue, int defaultChunkSize, uint64 memoryLimit, bool isScratchBuffer)
+	public this(D3D12Context* context, QueueD3D12 pQueue, int defaultChunkSize, uint64 memoryLimit, bool isScratchBuffer)
 	{
 		m_Context = context;
 		m_Queue = pQueue;
@@ -172,8 +174,8 @@ class UploadManager
 		}
 	}
 
-	private Context* m_Context;
-	private Queue m_Queue;
+	private D3D12Context* m_Context;
+	private QueueD3D12 m_Queue;
 	private int m_DefaultChunkSize = 0;
 	private uint64 m_MemoryLimit = 0;
 	private uint64 m_AllocatedMemory = 0;

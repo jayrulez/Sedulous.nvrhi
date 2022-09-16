@@ -5649,9 +5649,9 @@ public struct D3D12_PARAMETER_DESC
 		protected new function [CallingConvention(.Stdcall)] void(SelfOuter* self, uint32 StartSlot, uint32 NumViews, D3D12_STREAM_OUTPUT_BUFFER_VIEW* pViews) SOSetTargets;
 		protected new function [CallingConvention(.Stdcall)] void(SelfOuter* self, uint32 NumRenderTargetDescriptors, D3D12_CPU_DESCRIPTOR_HANDLE* pRenderTargetDescriptors, BOOL RTsSingleHandleToDescriptorRange, D3D12_CPU_DESCRIPTOR_HANDLE* pDepthStencilDescriptor) OMSetRenderTargets;
 		protected new function [CallingConvention(.Stdcall)] void(SelfOuter* self, D3D12_CPU_DESCRIPTOR_HANDLE DepthStencilView, D3D12_CLEAR_FLAGS ClearFlags, float Depth, uint8 Stencil, uint32 NumRects, RECT* pRects) ClearDepthStencilView;
-		protected new function [CallingConvention(.Stdcall)] void(SelfOuter* self, D3D12_CPU_DESCRIPTOR_HANDLE RenderTargetView, in float ColorRGBA, uint32 NumRects, RECT* pRects) ClearRenderTargetView;
-		protected new function [CallingConvention(.Stdcall)] void(SelfOuter* self, D3D12_GPU_DESCRIPTOR_HANDLE ViewGPUHandleInCurrentHeap, D3D12_CPU_DESCRIPTOR_HANDLE ViewCPUHandle, ID3D12Resource* pResource, in uint32 Values, uint32 NumRects, RECT* pRects) ClearUnorderedAccessViewUint;
-		protected new function [CallingConvention(.Stdcall)] void(SelfOuter* self, D3D12_GPU_DESCRIPTOR_HANDLE ViewGPUHandleInCurrentHeap, D3D12_CPU_DESCRIPTOR_HANDLE ViewCPUHandle, ID3D12Resource* pResource, in float Values, uint32 NumRects, RECT* pRects) ClearUnorderedAccessViewFloat;
+		protected new function [CallingConvention(.Stdcall)] void(SelfOuter* self, D3D12_CPU_DESCRIPTOR_HANDLE RenderTargetView, float* ColorRGBA, uint32 NumRects, RECT* pRects) ClearRenderTargetView;
+		protected new function [CallingConvention(.Stdcall)] void(SelfOuter* self, D3D12_GPU_DESCRIPTOR_HANDLE ViewGPUHandleInCurrentHeap, D3D12_CPU_DESCRIPTOR_HANDLE ViewCPUHandle, ID3D12Resource* pResource, uint32* Values, uint32 NumRects, RECT* pRects) ClearUnorderedAccessViewUint;
+		protected new function [CallingConvention(.Stdcall)] void(SelfOuter* self, D3D12_GPU_DESCRIPTOR_HANDLE ViewGPUHandleInCurrentHeap, D3D12_CPU_DESCRIPTOR_HANDLE ViewCPUHandle, ID3D12Resource* pResource, float* Values, uint32 NumRects, RECT* pRects) ClearUnorderedAccessViewFloat;
 		protected new function [CallingConvention(.Stdcall)] void(SelfOuter* self, ID3D12Resource* pResource, D3D12_DISCARD_REGION* pRegion) DiscardResource;
 		protected new function [CallingConvention(.Stdcall)] void(SelfOuter* self, ID3D12QueryHeap* pQueryHeap, D3D12_QUERY_TYPE Type, uint32 Index) BeginQuery;
 		protected new function [CallingConvention(.Stdcall)] void(SelfOuter* self, ID3D12QueryHeap* pQueryHeap, D3D12_QUERY_TYPE Type, uint32 Index) EndQuery;
@@ -5742,11 +5742,11 @@ public struct D3D12_PARAMETER_DESC
 
 	public void ClearDepthStencilView(D3D12_CPU_DESCRIPTOR_HANDLE DepthStencilView, D3D12_CLEAR_FLAGS ClearFlags, float Depth, uint8 Stencil, uint32 NumRects, RECT* pRects) mut => VT.[Friend]ClearDepthStencilView(&this, DepthStencilView, ClearFlags, Depth, Stencil, NumRects, pRects);
 
-	public void ClearRenderTargetView(D3D12_CPU_DESCRIPTOR_HANDLE RenderTargetView, in float ColorRGBA, uint32 NumRects, RECT* pRects) mut => VT.[Friend]ClearRenderTargetView(&this, RenderTargetView, ColorRGBA, NumRects, pRects);
+	public void ClearRenderTargetView(D3D12_CPU_DESCRIPTOR_HANDLE RenderTargetView, float* ColorRGBA, uint32 NumRects, RECT* pRects) mut => VT.[Friend]ClearRenderTargetView(&this, RenderTargetView, ColorRGBA, NumRects, pRects);
 
-	public void ClearUnorderedAccessViewUint(D3D12_GPU_DESCRIPTOR_HANDLE ViewGPUHandleInCurrentHeap, D3D12_CPU_DESCRIPTOR_HANDLE ViewCPUHandle, ID3D12Resource* pResource, in uint32 Values, uint32 NumRects, RECT* pRects) mut => VT.[Friend]ClearUnorderedAccessViewUint(&this, ViewGPUHandleInCurrentHeap, ViewCPUHandle, pResource, Values, NumRects, pRects);
+	public void ClearUnorderedAccessViewUint(D3D12_GPU_DESCRIPTOR_HANDLE ViewGPUHandleInCurrentHeap, D3D12_CPU_DESCRIPTOR_HANDLE ViewCPUHandle, ID3D12Resource* pResource, uint32* Values, uint32 NumRects, RECT* pRects) mut => VT.[Friend]ClearUnorderedAccessViewUint(&this, ViewGPUHandleInCurrentHeap, ViewCPUHandle, pResource, Values, NumRects, pRects);
 
-	public void ClearUnorderedAccessViewFloat(D3D12_GPU_DESCRIPTOR_HANDLE ViewGPUHandleInCurrentHeap, D3D12_CPU_DESCRIPTOR_HANDLE ViewCPUHandle, ID3D12Resource* pResource, in float Values, uint32 NumRects, RECT* pRects) mut => VT.[Friend]ClearUnorderedAccessViewFloat(&this, ViewGPUHandleInCurrentHeap, ViewCPUHandle, pResource, Values, NumRects, pRects);
+	public void ClearUnorderedAccessViewFloat(D3D12_GPU_DESCRIPTOR_HANDLE ViewGPUHandleInCurrentHeap, D3D12_CPU_DESCRIPTOR_HANDLE ViewCPUHandle, ID3D12Resource* pResource, float* Values, uint32 NumRects, RECT* pRects) mut => VT.[Friend]ClearUnorderedAccessViewFloat(&this, ViewGPUHandleInCurrentHeap, ViewCPUHandle, pResource, Values, NumRects, pRects);
 
 	public void DiscardResource(ID3D12Resource* pResource, D3D12_DISCARD_REGION* pRegion) mut => VT.[Friend]DiscardResource(&this, pResource, pRegion);
 

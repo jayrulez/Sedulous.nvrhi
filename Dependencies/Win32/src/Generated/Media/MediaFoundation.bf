@@ -20275,7 +20275,7 @@ public static
 	public static extern HRESULT MFConvertColorInfoFromDXVA(MFVIDEOFORMAT* pToFormat, uint32 dwFromDXVA);
 
 	[Import("MFPlat.lib"), CLink, CallingConvention(.Stdcall)]
-	public static extern HRESULT MFCopyImage(uint8* pDest, int32 lDestStride, in uint8 pSrc, int32 lSrcStride, uint32 dwWidthInBytes, uint32 dwLines);
+	public static extern HRESULT MFCopyImage(uint8* pDest, int32 lDestStride, uint8* pSrc, int32 lSrcStride, uint32 dwWidthInBytes, uint32 dwLines);
 
 	[Import("MFPlat.lib"), CLink, CallingConvention(.Stdcall)]
 	public static extern HRESULT MFConvertFromFP16Array(float* pDest, uint16* pSrc, uint32 dwCount);
