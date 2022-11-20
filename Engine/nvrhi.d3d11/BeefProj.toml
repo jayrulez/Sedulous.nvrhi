@@ -1,7 +1,0 @@
-FileVersion = 1
-Dependencies = {corlib = "*", nvrhi = "*", Win32 = "*", "nvrhi.d3dcommon" = "*"}
-
-[Project]
-Name = "nvrhi.d3d11"
-TargetType = "BeefLib"
-StartupObject = "nvrhi.d3d11.Program"

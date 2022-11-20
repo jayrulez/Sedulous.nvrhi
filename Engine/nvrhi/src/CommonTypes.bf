@@ -162,7 +162,6 @@ namespace nvrhi
 
 	enum GraphicsAPI : uint8
 	{
-		D3D11,
 		D3D12,
 		VULKAN
 	}

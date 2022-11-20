@@ -35,8 +35,6 @@ class SampleApplication : SDLApplication
 			mDeviceManager = new VulkanDeviceManager(@params);
 		else if (mGraphicsAPI == .D3D12)
 			mDeviceManager = new D3D12DeviceManager(@params);
-		else if (mGraphicsAPI == .D3D11)
-			mDeviceManager = null;
 		else
 			return .Err;
 
