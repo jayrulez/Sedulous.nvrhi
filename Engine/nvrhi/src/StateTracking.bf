@@ -62,7 +62,7 @@ namespace nvrhi
 		{
 			if ((permanentState & requiredState) != requiredState)
 			{
-				String message = scope $"Permanent {(isTexture ? "texture" : "buffer")} {utils.DebugNameToString(debugName)} doesn't have the right state bits. Required: 0x{uint32(requiredState)/*todo:hex*/}, present: 0x{uint32(permanentState)/*todo: hex*/}" ;
+				String message = scope $"Permanent {(isTexture ? "texture" : "buffer")} {utils.DebugNameToString(debugName)} doesn't have the right state bits. Required: 0x{uint32(requiredState):X}, present: 0x{uint32(permanentState):X}" ;
 		        messageCallback.message(MessageSeverity.Error, message);
 		        return false;
 		    }
@@ -92,6 +92,7 @@ namespace nvrhi
 	        tracking.enableUavBarriers = enableBarriers;
 	        tracking.firstUavBarrierPlaced = false;
 	    }
+
 	    public void setEnableUavBarriersForBuffer(BufferStateExtension buffer, bool enableBarriers)
 	    {
 	        BufferState* tracking = getBufferStateTracking(buffer, true);
@@ -159,6 +160,7 @@ namespace nvrhi
 	            getTextureStateTracking(texture, true).permanentTransition = true;
 	        }
 	    }
+
 	    public void endTrackingBufferState(BufferStateExtension buffer, ResourceStates stateBits, bool permanent)
 	    {
 	        requireBufferState(buffer, stateBits);
@@ -477,6 +479,7 @@ namespace nvrhi
 	
 	        return tracking;
 	    }
+
 	    private BufferState* getBufferStateTracking(BufferStateExtension buffer, bool allowCreate)
 	    {
 	        if (m_BufferStates.ContainsKey(buffer))

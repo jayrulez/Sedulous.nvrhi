@@ -453,19 +453,19 @@ namespace nvrhi.validation
 						duplicates.UAV |= bindings.UAV & bindingsPerLayout[layoutIndex].UAV;
 						duplicates.CB |= bindings.CB & bindingsPerLayout[layoutIndex].CB;*/
 
-						duplicates.SRV.orEqual(bindings.SRV.and(bindingsPerLayout[layoutIndex].SRV));
-						duplicates.Sampler.orEqual(bindings.Sampler.and(bindingsPerLayout[layoutIndex].Sampler));
-						duplicates.UAV.orEqual(bindings.UAV.and(bindingsPerLayout[layoutIndex].UAV));
-						duplicates.CB.orEqual(bindings.CB.and(bindingsPerLayout[layoutIndex].CB));
+						duplicates.SRV |= bindings.SRV & bindingsPerLayout[layoutIndex].SRV;
+						duplicates.Sampler |= bindings.Sampler & bindingsPerLayout[layoutIndex].Sampler;
+						duplicates.UAV |= bindings.UAV & bindingsPerLayout[layoutIndex].UAV;
+						duplicates.CB |= bindings.CB & bindingsPerLayout[layoutIndex].CB;
 
 						/*bindings.SRV |= bindingsPerLayout[layoutIndex].SRV;
 						bindings.Sampler |= bindingsPerLayout[layoutIndex].Sampler;
 						bindings.UAV |= bindingsPerLayout[layoutIndex].UAV;
 						bindings.CB |= bindingsPerLayout[layoutIndex].CB;*/
-						bindings.SRV.orEqual(bindingsPerLayout[layoutIndex].SRV);
-						bindings.Sampler.orEqual(bindingsPerLayout[layoutIndex].Sampler);
-						bindings.UAV.orEqual(bindingsPerLayout[layoutIndex].UAV);
-						bindings.CB.orEqual(bindingsPerLayout[layoutIndex].CB);
+						bindings.SRV |= bindingsPerLayout[layoutIndex].SRV;
+						bindings.Sampler |= bindingsPerLayout[layoutIndex].Sampler;
+						bindings.UAV |= bindingsPerLayout[layoutIndex].UAV;
+						bindings.CB |= bindingsPerLayout[layoutIndex].CB;
 					}
 
 					if (duplicates.any())
@@ -1411,15 +1411,15 @@ namespace nvrhi.validation
 			ShaderBindingSet declaredNotBound = .();
 			ShaderBindingSet boundNotDeclared = .();
 
-			declaredNotBound.SRV = layoutBindings.SRV.and(setBindings.SRV.complement());
-			declaredNotBound.Sampler = layoutBindings.Sampler.and(setBindings.Sampler.complement());
-			declaredNotBound.UAV = layoutBindings.UAV.and(setBindings.UAV.complement());
-			declaredNotBound.CB = layoutBindings.CB.and(setBindings.CB.complement());
+			declaredNotBound.SRV = layoutBindings.SRV & ~setBindings.SRV;
+			declaredNotBound.Sampler = layoutBindings.Sampler & ~setBindings.Sampler;
+			declaredNotBound.UAV = layoutBindings.UAV & ~setBindings.UAV;
+			declaredNotBound.CB = layoutBindings.CB & ~setBindings.CB;
 
-			boundNotDeclared.SRV = layoutBindings.SRV.complement().and(setBindings.SRV);
-			boundNotDeclared.Sampler = layoutBindings.Sampler.complement().and(setBindings.Sampler);
-			boundNotDeclared.UAV = layoutBindings.UAV.complement().and(setBindings.UAV);
-			boundNotDeclared.CB = layoutBindings.CB.complement().and(setBindings.CB);
+			boundNotDeclared.SRV = ~layoutBindings.SRV & setBindings.SRV;
+			boundNotDeclared.Sampler = ~layoutBindings.Sampler & setBindings.Sampler;
+			boundNotDeclared.UAV = ~layoutBindings.UAV & setBindings.UAV;
+			boundNotDeclared.CB = ~layoutBindings.CB & setBindings.CB;
 
 			if (declaredNotBound.any())
 			{

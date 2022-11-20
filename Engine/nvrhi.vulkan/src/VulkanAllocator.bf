@@ -22,6 +22,7 @@ namespace nvrhi.vulkan
 
 			return VkResult.eVkSuccess;
 		}
+
 		public void freeBufferMemory(BufferVK buffer)
 		{
 			freeMemory(buffer);
@@ -42,6 +43,7 @@ namespace nvrhi.vulkan
 
 			return VkResult.eVkSuccess;
 		}
+
 		public void freeTextureMemory(TextureVK texture)
 		{
 			freeMemory(texture);
@@ -86,6 +88,7 @@ namespace nvrhi.vulkan
 
 			return vkAllocateMemory(m_Context.device, &allocInfo, m_Context.allocationCallbacks, &res.memory);
 		}
+
 		public void freeMemory(MemoryResourceVK res)
 		{
 			Runtime.Assert(res.managed);

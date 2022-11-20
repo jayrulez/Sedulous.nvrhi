@@ -484,6 +484,7 @@ namespace nvrhi.vulkan
 				.setAlphaBlendOp(convertBlendOp(state.blendOpAlpha))
 				.setColorWriteMask(convertColorMask(state.colorWriteMask));
 		}
+
 		public static VkBuildAccelerationStructureFlagsKHR convertAccelStructBuildFlags(nvrhi.rt.AccelStructBuildFlags buildFlags)
 		{
 			VkBuildAccelerationStructureFlagsKHR flags = (VkBuildAccelerationStructureFlagsKHR)0;
@@ -499,6 +500,7 @@ namespace nvrhi.vulkan
 				flags |= VkBuildAccelerationStructureFlagsKHR.eLowMemoryBitKHR;
 			return flags;
 		}
+
 		public static VkGeometryInstanceFlagsKHR convertInstanceFlags(nvrhi.rt.InstanceFlags instanceFlags)
 		{
 #if ENABLE_SHORTCUT_CONVERSIONS
@@ -521,6 +523,7 @@ namespace nvrhi.vulkan
 			return flags;
 #endif
 		}
+
 		public static VkExtent2D convertFragmentShadingRate(VariableShadingRate shadingRate)
 		{
 			switch (shadingRate)

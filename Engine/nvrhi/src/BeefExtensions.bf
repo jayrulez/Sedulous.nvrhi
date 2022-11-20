@@ -2,16 +2,9 @@ namespace System.Collections
 {
 	extension List<T> where T : struct
 	{
-		public void Fill(T fillValue)
-		{
-			for (int i = 0; i < Count; i++)
-			{
-				this[i] = fillValue;
-			}
-		}
-
 		public void Assign(T* ptr, int count)
 		{
+			//Set(Span<T>(ptr, count));
 			Resize(count);
 
 			for (int i = 0; i < Count; i++)

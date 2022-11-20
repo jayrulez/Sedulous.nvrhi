@@ -222,7 +222,7 @@ namespace nvrhi.vulkan
 				.setBindingCount(uint32(vulkanLayoutBindings.Count))
 				.setPBindings(vulkanLayoutBindings.Ptr);
 
-			List<VkDescriptorBindingFlags> bindFlag = scope .() { Count = vulkanLayoutBindings.Count }..Fill(VkDescriptorBindingFlags.ePartiallyBoundBit);
+			List<VkDescriptorBindingFlags> bindFlag = scope .() { Count = vulkanLayoutBindings.Count }..SetAll(VkDescriptorBindingFlags.ePartiallyBoundBit);
 
 			var extendedInfo = VkDescriptorSetLayoutBindingFlagsCreateInfo()
 				.setBindingCount(uint32(vulkanLayoutBindings.Count))

@@ -426,9 +426,9 @@ namespace nvrhi
 		public HeapType type;
 		public String debugName;
 
-		public readonly ref HeapDesc setCapacity(uint64 value) mut { capacity = value; return ref this; }
-		public readonly ref HeapDesc setType(HeapType value) mut { type = value; return ref this; }
-		public readonly ref HeapDesc setDebugName(String value) mut { debugName = value; return ref this; }
+		public ref HeapDesc setCapacity(uint64 value) mut { capacity = value; return ref this; }
+		public ref HeapDesc setType(HeapType value) mut { type = value; return ref this; }
+		public ref HeapDesc setDebugName(String value) mut { debugName = value; return ref this; }
 	}
 
 	struct MemoryRequirements
@@ -547,24 +547,24 @@ namespace nvrhi
 		// on command list close.
 		public bool keepInitialState = false;
 
-		public readonly ref TextureDesc setWidth(uint32 value) mut { width = value; return ref this; }
-		public readonly ref TextureDesc setHeight(uint32 value) mut { height = value; return ref this; }
-		public readonly ref TextureDesc setDepth(uint32 value) mut { depth = value; return ref this; }
-		public readonly ref TextureDesc setArraySize(uint32 value) mut { arraySize = value; return ref this; }
-		public readonly ref TextureDesc setMipLevels(uint32 value) mut { mipLevels = value; return ref this; }
-		public readonly ref TextureDesc setSampleCount(uint32 value) mut { sampleCount = value; return ref this; }
-		public readonly ref TextureDesc setSampleQuality(uint32 value) mut { sampleQuality = value; return ref this; }
-		public readonly ref TextureDesc setFormat(Format value) mut { format = value; return ref this; }
-		public readonly ref TextureDesc setDimension(TextureDimension value) mut { dimension = value; return ref this; }
-		public readonly ref TextureDesc setDebugName(String value) mut { debugName = value; return ref this; }
-		public readonly ref TextureDesc setIsRenderTarget(bool value) mut { isRenderTarget = value; return ref this; }
-		public readonly ref TextureDesc setIsUAV(bool value) mut { isUAV = value; return ref this; }
-		public readonly ref TextureDesc setIsTypeless(bool value) mut { isTypeless = value; return ref this; }
-		public readonly ref TextureDesc setIsVirtual(bool value) mut { isVirtual = value; return ref this; }
-		public readonly ref TextureDesc setClearValue(Color value) mut { clearValue = value; useClearValue = true; return ref this; }
-		public readonly ref TextureDesc setUseClearValue(bool value) mut { useClearValue = value; return ref this; }
-		public readonly ref TextureDesc setInitialState(ResourceStates value) mut { initialState = value; return ref this; }
-		public readonly ref TextureDesc setKeepInitialState(bool value) mut { keepInitialState = value; return ref this; }
+		public ref TextureDesc setWidth(uint32 value) mut { width = value; return ref this; }
+		public ref TextureDesc setHeight(uint32 value) mut { height = value; return ref this; }
+		public ref TextureDesc setDepth(uint32 value) mut { depth = value; return ref this; }
+		public ref TextureDesc setArraySize(uint32 value) mut { arraySize = value; return ref this; }
+		public ref TextureDesc setMipLevels(uint32 value) mut { mipLevels = value; return ref this; }
+		public ref TextureDesc setSampleCount(uint32 value) mut { sampleCount = value; return ref this; }
+		public ref TextureDesc setSampleQuality(uint32 value) mut { sampleQuality = value; return ref this; }
+		public ref TextureDesc setFormat(Format value) mut { format = value; return ref this; }
+		public ref TextureDesc setDimension(TextureDimension value) mut { dimension = value; return ref this; }
+		public ref TextureDesc setDebugName(String value) mut { debugName = value; return ref this; }
+		public ref TextureDesc setIsRenderTarget(bool value) mut { isRenderTarget = value; return ref this; }
+		public ref TextureDesc setIsUAV(bool value) mut { isUAV = value; return ref this; }
+		public ref TextureDesc setIsTypeless(bool value) mut { isTypeless = value; return ref this; }
+		public ref TextureDesc setIsVirtual(bool value) mut { isVirtual = value; return ref this; }
+		public ref TextureDesc setClearValue(Color value) mut { clearValue = value; useClearValue = true; return ref this; }
+		public ref TextureDesc setUseClearValue(bool value) mut { useClearValue = value; return ref this; }
+		public ref TextureDesc setInitialState(ResourceStates value) mut { initialState = value; return ref this; }
+		public ref TextureDesc setKeepInitialState(bool value) mut { keepInitialState = value; return ref this; }
 	}
 
 	// describes a 2D section of a single mip level + single slice of a texture
@@ -605,13 +605,13 @@ namespace nvrhi
 			return ret;
 		}
 
-		public readonly ref TextureSlice setOrigin(uint32 vx = 0, uint32 vy = 0, uint32 vz = 0) mut { x = vx; y = vy; z = vz; return ref this; }
-		public readonly ref TextureSlice setWidth(uint32 value) mut { width = value; return ref this; }
-		public readonly ref TextureSlice setHeight(uint32 value) mut { height = value; return ref this; }
-		public readonly ref TextureSlice setDepth(uint32 value) mut { depth = value; return ref this; }
-		public readonly ref TextureSlice setSize(uint32 vx = uint32(-1), uint32 vy = uint32(-1), uint32 vz = uint32(-1)) mut { width = vx; height = vy; depth = vz; return ref this; }
-		public readonly ref TextureSlice setMipLevel(MipLevel level) mut { mipLevel = level; return ref this; }
-		public readonly ref TextureSlice setArraySlice(ArraySlice slice) mut { arraySlice = slice; return ref this; }
+		public ref TextureSlice setOrigin(uint32 vx = 0, uint32 vy = 0, uint32 vz = 0) mut { x = vx; y = vy; z = vz; return ref this; }
+		public ref TextureSlice setWidth(uint32 value) mut { width = value; return ref this; }
+		public ref TextureSlice setHeight(uint32 value) mut { height = value; return ref this; }
+		public ref TextureSlice setDepth(uint32 value) mut { depth = value; return ref this; }
+		public ref TextureSlice setSize(uint32 vx = uint32(-1), uint32 vy = uint32(-1), uint32 vz = uint32(-1)) mut { width = vx; height = vy; depth = vz; return ref this; }
+		public ref TextureSlice setMipLevel(MipLevel level) mut { mipLevel = level; return ref this; }
+		public ref TextureSlice setArraySlice(ArraySlice slice) mut { arraySlice = slice; return ref this; }
 	}
 
 	struct TextureSubresourceSet : IHashable
@@ -659,10 +659,10 @@ namespace nvrhi
 
 			switch (desc.dimension)
 			{
-			case TextureDimension.Texture1DArray:
-			case TextureDimension.Texture2DArray:
-			case TextureDimension.TextureCube:
-			case TextureDimension.TextureCubeArray:
+			case TextureDimension.Texture1DArray: fallthrough;
+			case TextureDimension.Texture2DArray: fallthrough;
+			case TextureDimension.TextureCube: fallthrough;
+			case TextureDimension.TextureCubeArray: fallthrough;
 			case TextureDimension.Texture2DMSArray:
 				{
 					ret.baseArraySlice = baseArraySlice;
@@ -709,12 +709,12 @@ namespace nvrhi
 
 		public static bool operator !=(TextureSubresourceSet a, TextureSubresourceSet other) { return !(a == other); }
 
-		public readonly ref TextureSubresourceSet setBaseMipLevel(MipLevel value) mut { baseMipLevel = value; return ref this; }
-		public readonly ref TextureSubresourceSet setNumMipLevels(MipLevel value) mut { numMipLevels = value; return ref this; }
-		public readonly ref TextureSubresourceSet setMipLevels(MipLevel @base, MipLevel num) mut { baseMipLevel = @base; numMipLevels = num; return ref this; }
-		public readonly ref TextureSubresourceSet setBaseArraySlice(ArraySlice value) mut { baseArraySlice = value; return ref this; }
-		public readonly ref TextureSubresourceSet setNumArraySlices(ArraySlice value) mut { numArraySlices = value; return ref this; }
-		public readonly ref TextureSubresourceSet setArraySlices(ArraySlice @base, ArraySlice num) mut { baseArraySlice = @base; numArraySlices = num; return ref this; }
+		public ref TextureSubresourceSet setBaseMipLevel(MipLevel value) mut { baseMipLevel = value; return ref this; }
+		public ref TextureSubresourceSet setNumMipLevels(MipLevel value) mut { numMipLevels = value; return ref this; }
+		public ref TextureSubresourceSet setMipLevels(MipLevel @base, MipLevel num) mut { baseMipLevel = @base; numMipLevels = num; return ref this; }
+		public ref TextureSubresourceSet setBaseArraySlice(ArraySlice value) mut { baseArraySlice = value; return ref this; }
+		public ref TextureSubresourceSet setNumArraySlices(ArraySlice value) mut { numArraySlices = value; return ref this; }
+		public ref TextureSubresourceSet setArraySlices(ArraySlice @base, ArraySlice num) mut { baseArraySlice = @base; numArraySlices = num; return ref this; }
 
 		// see the bottom of this file for a specialization of std::hash<TextureSubresourceSet>
 		public int GetHashCode()
@@ -748,13 +748,13 @@ namespace nvrhi
 		public uint32 elementStride = 0;
 		public bool isInstanced = false;
 
-		public readonly ref VertexAttributeDesc setName(String value) mut { name = value; return ref this; }
-		public readonly ref VertexAttributeDesc setFormat(Format value) mut { format = value; return ref this; }
-		public readonly ref VertexAttributeDesc setArraySize(uint32 value) mut { arraySize = value; return ref this; }
-		public readonly ref VertexAttributeDesc setBufferIndex(uint32 value) mut { bufferIndex = value; return ref this; }
-		public readonly ref VertexAttributeDesc setOffset(uint32 value) mut { offset = value; return ref this; }
-		public readonly ref VertexAttributeDesc setElementStride(uint32 value) mut { elementStride = value; return ref this; }
-		public readonly ref VertexAttributeDesc setIsInstanced(bool value) mut { isInstanced = value; return ref this; }
+		public ref VertexAttributeDesc setName(String value) mut { name = value; return ref this; }
+		public ref VertexAttributeDesc setFormat(Format value) mut { format = value; return ref this; }
+		public ref VertexAttributeDesc setArraySize(uint32 value) mut { arraySize = value; return ref this; }
+		public ref VertexAttributeDesc setBufferIndex(uint32 value) mut { bufferIndex = value; return ref this; }
+		public ref VertexAttributeDesc setOffset(uint32 value) mut { offset = value; return ref this; }
+		public ref VertexAttributeDesc setElementStride(uint32 value) mut { elementStride = value; return ref this; }
+		public ref VertexAttributeDesc setIsInstanced(bool value) mut { isInstanced = value; return ref this; }
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -795,25 +795,25 @@ namespace nvrhi
 
 		public SharedResourceFlags sharedResourceFlags = SharedResourceFlags.None;
 
-		public readonly ref BufferDesc setByteSize(uint64 value) mut { byteSize = value; return ref this; }
-		public readonly ref BufferDesc setStructStride(uint32 value) mut { structStride = value; return ref this; }
-		public readonly ref BufferDesc setMaxVersions(uint32 value) mut { maxVersions = value; return ref this; }
-		public readonly ref BufferDesc setDebugName(String value) mut { debugName = value; return ref this; }
-		public readonly ref BufferDesc setFormat(Format value) mut { format = value; return ref this; }
-		public readonly ref BufferDesc setCanHaveUAVs(bool value) mut { canHaveUAVs = value; return ref this; }
-		public readonly ref BufferDesc setCanHaveTypedViews(bool value) mut { canHaveTypedViews = value; return ref this; }
-		public readonly ref BufferDesc setCanHaveRawViews(bool value) mut { canHaveRawViews = value; return ref this; }
-		public readonly ref BufferDesc setIsVertexBuffer(bool value) mut { isVertexBuffer = value; return ref this; }
-		public readonly ref BufferDesc setIsIndexBuffer(bool value) mut { isIndexBuffer = value; return ref this; }
-		public readonly ref BufferDesc setIsConstantBuffer(bool value) mut { isConstantBuffer = value; return ref this; }
-		public readonly ref BufferDesc setIsDrawIndirectArgs(bool value) mut { isDrawIndirectArgs = value; return ref this; }
-		public readonly ref BufferDesc setIsAccelStructBuildInput(bool value) mut { isAccelStructBuildInput = value; return ref this; }
-		public readonly ref BufferDesc setIsAccelStructStorage(bool value) mut { isAccelStructStorage = value; return ref this; }
-		public readonly ref BufferDesc setIsVolatile(bool value) mut { isVolatile = value; return ref this; }
-		public readonly ref BufferDesc setIsVirtual(bool value) mut { isVirtual = value; return ref this; }
-		public readonly ref BufferDesc setInitialState(ResourceStates value) mut { initialState = value; return ref this; }
-		public readonly ref BufferDesc setKeepInitialState(bool value) mut { keepInitialState = value; return ref this; }
-		public readonly ref BufferDesc setCpuAccess(CpuAccessMode value) mut { cpuAccess = value; return ref this; }
+		public ref BufferDesc setByteSize(uint64 value) mut { byteSize = value; return ref this; }
+		public ref BufferDesc setStructStride(uint32 value) mut { structStride = value; return ref this; }
+		public ref BufferDesc setMaxVersions(uint32 value) mut { maxVersions = value; return ref this; }
+		public ref BufferDesc setDebugName(String value) mut { debugName = value; return ref this; }
+		public ref BufferDesc setFormat(Format value) mut { format = value; return ref this; }
+		public ref BufferDesc setCanHaveUAVs(bool value) mut { canHaveUAVs = value; return ref this; }
+		public ref BufferDesc setCanHaveTypedViews(bool value) mut { canHaveTypedViews = value; return ref this; }
+		public ref BufferDesc setCanHaveRawViews(bool value) mut { canHaveRawViews = value; return ref this; }
+		public ref BufferDesc setIsVertexBuffer(bool value) mut { isVertexBuffer = value; return ref this; }
+		public ref BufferDesc setIsIndexBuffer(bool value) mut { isIndexBuffer = value; return ref this; }
+		public ref BufferDesc setIsConstantBuffer(bool value) mut { isConstantBuffer = value; return ref this; }
+		public ref BufferDesc setIsDrawIndirectArgs(bool value) mut { isDrawIndirectArgs = value; return ref this; }
+		public ref BufferDesc setIsAccelStructBuildInput(bool value) mut { isAccelStructBuildInput = value; return ref this; }
+		public ref BufferDesc setIsAccelStructStorage(bool value) mut { isAccelStructStorage = value; return ref this; }
+		public ref BufferDesc setIsVolatile(bool value) mut { isVolatile = value; return ref this; }
+		public ref BufferDesc setIsVirtual(bool value) mut { isVirtual = value; return ref this; }
+		public ref BufferDesc setInitialState(ResourceStates value) mut { initialState = value; return ref this; }
+		public ref BufferDesc setKeepInitialState(bool value) mut { keepInitialState = value; return ref this; }
+		public ref BufferDesc setCpuAccess(CpuAccessMode value) mut { cpuAccess = value; return ref this; }
 	}
 
 	struct BufferRange : IHashable
@@ -849,8 +849,8 @@ namespace nvrhi
 		[NoDiscard] public bool isEntireBuffer(BufferDesc desc) { return (byteOffset == 0) && (byteSize == ~0uL || byteSize == desc.byteSize); }
 		public static bool operator ==(BufferRange a, BufferRange other) { return a.byteOffset == other.byteOffset && a.byteSize == other.byteSize; }
 
-		public readonly ref BufferRange setByteOffset(uint64 value) mut { byteOffset = value; return ref this; }
-		public readonly ref BufferRange setByteSize(uint64 value) mut { byteSize = value; return ref this; }
+		public ref BufferRange setByteOffset(uint64 value) mut { byteOffset = value; return ref this; }
+		public ref BufferRange setByteSize(uint64 value) mut { byteSize = value; return ref this; }
 		public int GetHashCode()
 		{
 			int hash = 0;
@@ -1046,16 +1046,16 @@ namespace nvrhi
 			public BlendOp     blendOpAlpha = BlendOp.Add;
 			public ColorMask   colorWriteMask = ColorMask.All;
 
-			public readonly ref RenderTarget setBlendEnable(bool enable) mut { blendEnable = enable; return ref this; }
-			public readonly ref RenderTarget enableBlend() mut { blendEnable = true; return ref this; }
-			public readonly ref RenderTarget disableBlend() mut { blendEnable = false; return ref this; }
-			public readonly ref RenderTarget setSrcBlend(BlendFactor value) mut { srcBlend = value; return ref this; }
-			public readonly ref RenderTarget setDestBlend(BlendFactor value) mut { destBlend = value; return ref this; }
-			public readonly ref RenderTarget setBlendOp(BlendOp value) mut { blendOp = value; return ref this; }
-			public readonly ref RenderTarget setSrcBlendAlpha(BlendFactor value) mut { srcBlendAlpha = value; return ref this; }
-			public readonly ref RenderTarget setDestBlendAlpha(BlendFactor value) mut { destBlendAlpha = value; return ref this; }
-			public readonly ref RenderTarget setBlendOpAlpha(BlendOp value) mut { blendOpAlpha = value; return ref this; }
-			public readonly ref RenderTarget setColorWriteMask(ColorMask value) mut { colorWriteMask = value; return ref this; }
+			public ref RenderTarget setBlendEnable(bool enable) mut { blendEnable = enable; return ref this; }
+			public ref RenderTarget enableBlend() mut { blendEnable = true; return ref this; }
+			public ref RenderTarget disableBlend() mut { blendEnable = false; return ref this; }
+			public ref RenderTarget setSrcBlend(BlendFactor value) mut { srcBlend = value; return ref this; }
+			public ref RenderTarget setDestBlend(BlendFactor value) mut { destBlend = value; return ref this; }
+			public ref RenderTarget setBlendOp(BlendOp value) mut { blendOp = value; return ref this; }
+			public ref RenderTarget setSrcBlendAlpha(BlendFactor value) mut { srcBlendAlpha = value; return ref this; }
+			public ref RenderTarget setDestBlendAlpha(BlendFactor value) mut { destBlendAlpha = value; return ref this; }
+			public ref RenderTarget setBlendOpAlpha(BlendOp value) mut { blendOpAlpha = value; return ref this; }
+			public ref RenderTarget setColorWriteMask(ColorMask value) mut { colorWriteMask = value; return ref this; }
 
 			[NoDiscard] public bool usesConstantColor()
 			{
@@ -1099,10 +1099,10 @@ namespace nvrhi
 		public RenderTarget[c_MaxRenderTargets] targets = .InitAll;
 		public bool alphaToCoverageEnable = false;
 
-		public readonly ref BlendState setRenderTarget(uint32 index, RenderTarget target) mut { targets[index] = target; return ref this; }
-		public readonly ref BlendState setAlphaToCoverageEnable(bool enable) mut { alphaToCoverageEnable = enable; return ref this; }
-		public readonly ref BlendState enableAlphaToCoverage() mut { alphaToCoverageEnable = true; return ref this; }
-		public readonly ref BlendState disableAlphaToCoverage() mut { alphaToCoverageEnable = false; return ref this; }
+		public ref BlendState setRenderTarget(uint32 index, RenderTarget target) mut { targets[index] = target; return ref this; }
+		public ref BlendState setAlphaToCoverageEnable(bool enable) mut { alphaToCoverageEnable = enable; return ref this; }
+		public ref BlendState enableAlphaToCoverage() mut { alphaToCoverageEnable = true; return ref this; }
+		public ref BlendState disableAlphaToCoverage() mut { alphaToCoverageEnable = false; return ref this; }
 
 		[NoDiscard] public bool usesConstantColor(uint32 numTargets)
 		{

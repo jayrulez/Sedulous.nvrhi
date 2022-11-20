@@ -1,18 +1,16 @@
 using System;
-namespace nvrhi
+namespace nvrhi.rt
 {
-	namespace rt{
-		//////////////////////////////////////////////////////////////////////////
-		// nvrhi.rt.AccelStruct
-		//////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////
+	// nvrhi.rt.AccelStruct
+	//////////////////////////////////////////////////////////////////////////
 
-		abstract class IAccelStruct :  IResource
-		{
-		    [NoDiscard] public abstract readonly ref AccelStructDesc getDesc();
-		    [NoDiscard] public abstract bool isCompacted();
-		    [NoDiscard] public abstract uint64 getDeviceAddress();
-		}
-
-		typealias AccelStructHandle = RefCountPtr<IAccelStruct> ;
+	abstract class IAccelStruct :  IResource
+	{
+		[NoDiscard] public abstract readonly ref AccelStructDesc getDesc();
+		[NoDiscard] public abstract bool isCompacted();
+		[NoDiscard] public abstract uint64 getDeviceAddress();
 	}
+
+	typealias AccelStructHandle = RefCountPtr<IAccelStruct>;
 }

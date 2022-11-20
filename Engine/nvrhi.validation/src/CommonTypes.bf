@@ -11,21 +11,23 @@ namespace nvrhi.validation
 			min = Math.Min(min, item);
 			max = Math.Max(max, item);
 		}
+
 		[NoDiscard] public bool empty()
 		{
 			return min > max;
 		}
+
 		[NoDiscard] public bool overlapsWith(nvrhi.validation.Range other)
 		{
 			return !empty() && !other.empty() && max >= other.min && min <= other.max;
 		}
 	}
 
-	struct BitSet<TBits> where TBits : const int
+	struct BitSet<TCount> where TCount : const int
 	{
-		public int Count => TBits;
+		public int Count => TCount;
 
-		private uint8[TBits] mValues = .();
+		private uint8[TCount] mValues = .();
 
 		public bool this[int index]
 		{
@@ -36,9 +38,9 @@ namespace nvrhi.validation
 			}
 		};
 
-		public bool any()
+		public bool Any()
 		{
-			for (int i = 0; i < TBits; i++)
+			for (int i = 0; i < this.Count; i++)
 			{
 				if (this[i])
 					return true;
@@ -46,13 +48,13 @@ namespace nvrhi.validation
 			return false;
 		}
 
-		public Self and(Self other)
+		public static Self operator &(Self lhs, Self rhs)
 		{
-			Self value = this;
+			Self value = lhs;
 
 			for (int i = 0; i < value.Count; i++)
 			{
-				if (value[i] && other[i])
+				if (value[i] && rhs[i])
 					value[i] = true;
 				else
 					value[i] = false;
@@ -61,40 +63,36 @@ namespace nvrhi.validation
 			return value;
 		}
 
-		public ref Self andEqual(Self other) mut
+		public void operator &=(Self rhs) mut
 		{
-			this = this.and(other);
-
-			return ref this;
+			this = this & rhs;
 		}
 
-		public Self or(Self other)
+		public static Self operator |(Self lhs, Self rhs)
 		{
-			Self value = this;
+			Self value = lhs;
 
 			for (int i = 0; i < value.Count; i++)
 			{
-				if (other[i])
+				if (rhs[i])
 					value[i] = true;
 			}
 
 			return value;
 		}
 
-		public ref Self orEqual(Self other) mut
+		public void operator |=(Self rhs) mut
 		{
-			this = this.or(other);
-
-			return ref this;
+			this = this | rhs;
 		}
 
-		public Self xor(Self other)
+		public static Self operator ^(Self lhs, Self rhs)
 		{
-			Self value = this;
+			Self value = lhs;
 
 			for (int i = 0; i < value.Count; i++)
 			{
-				if (value[i] == other[i])
+				if (value[i] == rhs[i])
 					value[i] = false;
 				else
 					value[i] = true;
@@ -103,23 +101,30 @@ namespace nvrhi.validation
 			return value;
 		}
 
-		public ref Self xorEqual(Self other) mut
+		public void operator ^=(Self rhs) mut
 		{
-			this = this.xor(other);
-
-			return ref this;
+			this = this ^ rhs;
 		}
 
-		public Self complement()
+		public static Self operator ~(Self bitSet)
 		{
-			Self value = this;
-
-			for (int i = 0; i < value.Count; i++)
+			Self value = bitSet;
+			for (int i = 0; i < bitSet.Count; i++)
 			{
-				value[i] = !this[i];
+				value[i] = !bitSet[i];
 			}
 
 			return value;
+		}
+
+		public static bool operator ==(Self lhs, Self rhs)
+		{
+			return lhs.mValues == rhs.mValues;
+		}
+
+		public static bool operator !=(Self lhs, Self rhs)
+		{
+			return !(lhs == rhs);
 		}
 	}
 
@@ -137,7 +142,7 @@ namespace nvrhi.validation
 
 		[NoDiscard] public bool any()
 		{
-			return SRV.any() || Sampler.any() || UAV.any() || CB.any();
+			return SRV.Any() || Sampler.Any() || UAV.Any() || CB.Any();
 		}
 
 		[NoDiscard] public bool overlapsWith(ShaderBindingSet other)
@@ -184,7 +189,7 @@ namespace nvrhi.validation
 
 		public static void BitsetToStream<N>(BitSet<N> bits, String os, char8* prefix, ref bool first) where N : const int
 		{
-			if (bits.any())
+			if (bits.Any())
 			{
 				for (uint32 slot = 0; slot < bits.Count; slot++)
 				{

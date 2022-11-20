@@ -160,7 +160,7 @@ namespace nvrhi.d3d12
 			if (desc.isUAV)
 			{
 				m_ClearMipLevelUAVs.Resize(desc.mipLevels);
-				m_ClearMipLevelUAVs.Fill(c_InvalidDescriptorIndex);
+				m_ClearMipLevelUAVs.SetAll(c_InvalidDescriptorIndex);
 			}
 
 			planeCount = m_Resources.getFormatPlaneCount(resourceDesc.Format);
